@@ -1,0 +1,37 @@
+
+
+\documentclass[a4paper,11pt]{book}
+\usepackage{import}
+\usepackage{example}
+ 
+\usepackage{makeidx}
+\makeindex
+ 
+\begin{document}
+ 
+\frontmatter
+%\import{./}{title.tex}
+
+ 
+%\clearpage
+\thispagestyle{empty}
+ 
+\tableofcontents
+ 
+\mainmatter
+\chapter{Introduction}
+\import{chap0.tex}{chap0.tex}
+%\import{sections/}{section1-2.tex}
+
+\end{document}
+
+\chapter{Additional chapter}
+\import{sections/}{section2-1.tex}
+ 
+\chapter{Last chapter}
+\import{sections/}{section3-1.tex}
+ 
+\import{./}{bibliography.tex}
+ 
+\end{document}
+

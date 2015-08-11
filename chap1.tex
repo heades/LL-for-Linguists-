@@ -1,0 +1,2649 @@
+\chapter{Basic Proof Theory}\label{CH1}\label{Ch1}
+
+This chapter reviews some basic aspects of proof theory, but does not
+touch on linear logic.  It is here to set the scene for the next
+chapter, which gives a more formal introduction to linear logic, along
+with some of its proof theoretic motivations.
+
+There are three main ways of formulating proof systems for logics:
+axiomatic, natural deduction, and sequent calculus.  We will have
+little to say about axiomatic systems.  We will focus mostly on
+proof systems for propositional logic, and will distinguish between
+classical and intuitionistic logics.  We will also talk about the
+ways in which proofs can be normalized to canonical forms, and the
+Curry-Howard isomorphism.
+
+
+\section{Natural Deduction}
+
+Natural deduction proof systems are characterised by giving paired
+inference rules for logical connectives: an {\it introduction} rule
+showing how to introduce an instance of the connective into a
+derivation, and an {\it elimination} rule showing how to remove an
+instance of the connective from a derivation.  Natural deduction was 
+originally devised to try and reflect typical practice in carrying
+out logical proofs.  Moreover, the introduction and elimination rules
+lend themselves to an intuitive understanding of the meaning and
+use of the connectives they define.
+
+\subsection{ND for Classical Propositional Logic}
+
+\paragraph{Conjunction}
+
+As a first illustration of natural deduction proof rules, let us
+consider the case of conjunction.  Intuitively, the introduction rule
+should behave as follows.  Suppose, in the course of a proof, you have
+derived $A$ and you have also derived $B$. Then you should be able
+to put these two sub-derivations together to derive $A\lland B$.
+
+We can represent this pattern as
+\begin{center}
+\begin{prooftree}
+\[\resultsin A\] \hspace*{3em} \[\resultsin B\]
+\justifies A\lland B
+\end{prooftree}
+\end{center}
+The dots above $A$ and $B$ represent derivations resulting in $A$ and
+$B$.  We will generally omit these dots in what follows, giving
+the rule of ``And-Introduction'', $\landI$
+\begin{center}
+\begin{prooftree}
+ A \hspace*{3em}  B
+\justifies A\lland B
+\using \landI
+\end{prooftree}
+\end{center}
+
+To eliminate a conjunction $A\lland B$, we can choose to drop either
+one of the conjuncts.  This gives rise to two mirror image elimination
+rules
+\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}
+A\lland B
+\justifies 
+A
+\using \landE
+\end{prooftree}
+\hspace*{5em}
+\begin{prooftree}
+A\land B
+\justifies 
+B
+\using \landE
+\end{prooftree}
+\end{tabular}
+\end{center}
+  
+%All natural deduction derivations are trees of the form
+%\begin{center}
+%$A_1 \ldots A_n$\\
+%$\vdots$\\
+%$B$
+%\end{center}
+%which is to be interpreted as saying that ``from assumptions/premises
+%$A_1,\ldots, A_n$, we can conclude $B$.''
+
+\paragraph{Implication}
+
+The elimination rule for implication is familiar as {\it modus ponens}
+\begin{center}
+\begin{prooftree}
+A \hspace*{3em} A\imp B
+\justifies B
+\using \impE
+\end{prooftree}
+\end{center}
+The rule for introducing an implication $A\imp B$ is slightly
+more involved.  Intuitively, it works as follows.  Assume, for the
+sake of argument, that $A$ holds.  Suppose that from this assumption,
+plus whatever other premises you have, that you can conclude $B$.
+Then you can {\em discharge} the assumption $A$ to conclude that 
+``if A were to hold, then B would hold.''  The formal rule is:
+\begin{center}
+\begin{prooftree}
+\[[A]^i\resultsin B\]
+\justifies
+A\imp B
+\using \impIi{i}
+\end{prooftree}
+\end{center}
+There are a few things to note about this rule.  First, we use
+\begin{center}
+$A$\\$\vdots$\\$B$
+\end{center}
+to represent a derivation of $B$ starting from $A$ plus any other
+premises available.  Second, we use an (arbitrary) index $i$ to
+identify the assumption of $A$.  This is shown as a superscript on
+the assumption, and also alongside the $\impI$ rule that discharges
+the assumption.  Finally, the assumption is enclosed in square
+brackets to show that it has been discharged by the $\impIi{i}$ rule 
+(an alternative is to draw a slash through the discharged assumption).
+
+Here is an example derivation to illustrate how these rules work
+\begin{center}
+\begin{prooftree}
+\[
+  \[ (A\lland B)\imp C
+     \hspace*{2em}
+     \[ [A]^1 \hspace*{1em} [B]^2 \justifies A\lland B \using \landI\]
+     \justifies C
+     \using \impE
+  \]
+  \justifies B\imp C
+  \using \impIi{2}
+\]
+\justifies  A\imp(B\imp C)
+\using \impIi{1}
+\end{prooftree}
+\end{center}
+This derivation shows that $A\imp(B\imp C)$ can be derived from 
+$(A\lland B)\imp C$.
+
+\paragraph{Notes on Discharging Assumptions:}  
+\begin{enumerate}
+\item A premise,
+like $(A\lland B)\imp C$ in the derivation above, is simply an
+assumption that is not discharged.  To avoid clutter, we do not index
+such undischarged assumptions.
+\item  Multiple assumptions (of the same formula) are allowed to have
+the same index.  The elimination rule for the index discharges {\em
+all} of these assumptions.  Here is an example of a derivation with
+multiple occurrences of an assumption
+\begin{center}
+\begin{prooftree}
+  \[
+    \[ A\imp(B\imp C) \hspace*{2em} 
+       \[[A\lland B]^1 \justifies A \using \landE\]
+       \justifies B\imp C
+       \using \impE
+    \]
+    \[[A\lland B]^1 \justifies B \using \landE\]
+    \justifies C
+    \using \impE
+  \]
+  \justifies (A\land B)\imp C
+  \using \impIi{1}
+\end{prooftree}
+\end{center}
+\item It is also possible to discharge {\em non-existent} assumptions.
+For example
+\begin{center}
+\begin{prooftree}
+ \[ [A]^1
+    \justifies B \imp A
+    \using \impIi{2}
+ \]
+ \justifies A\imp(B\imp A)
+ \using \impIi{1}
+\end{prooftree}
+\end{center}
+Note that this is also a derivation with no premises / undischarged
+assumptions.  The conclusion, $A\imp(B\imp A)$ is therefore a {\it
+theorem} of the logic
+\end{enumerate}
+
+
+\paragraph{Disjunction}
+There are two mirror image rules for introducing a disjunction (just
+as there are for eliminating a conjunction)
+\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}
+A
+\justifies 
+A\llor B
+\using \lorI
+\end{prooftree}
+\hspace*{5em}
+\begin{prooftree}
+A
+\justifies 
+B\llor A
+\using \lorI
+\end{prooftree}
+\end{tabular}
+\end{center}
+This allows us to introduce an arbitrary disjunct, $B$, so long as we
+know that $A$ holds.
+
+The elimination rule is cumbersome (Girard sometimes describes it as
+the ``shame of natural deduction'').  To eliminate $A\llor B$, we
+know that one or other of $A$ and $B$ hold (and possibly both), but
+we don't know which.  We can replace $A\llor B$ by $C$ if $C$ follows
+from $A$ and $C$ also follows from $B$.  That is, whichever one
+of $A$ or $B$ turns out to be the one that holds, we can be sure that
+$C$ is derivable. This is sometimes known as `proof-by-cases'. The rule is:
+\begin{center}
+\begin{prooftree}
+A\llor B \hspace*{3em}
+\[ [A]^i \resultsin C\] \hspace*{3em}
+\[ [B]^j \resultsin C\] 
+\justifies C
+\using \lorEij{i}{j}
+\end{prooftree}
+\end{center}
+Another unpleasant feature of this rule that the conclusion, $C$, is a
+formula that has nothing to do with the formula being eliminated
+$A\llor B$. The conclusion is sometimes referred to as a {\it
+parasitic} formula.
+
+\paragraph{Negation}
+
+There are a number of different ways of handling negation.  In fact,
+the difference between classical and intuitionistic logic can be
+captured through the treatment of negation.
+
+The most compact treatment of negation is to introduce a constant
+$\bot$ (pronounced {\it falsum}), which represents falsity.  We can
+then define negation as implication into falsity:
+\[\neg A \stackrel{df}{=} A\imp\bot\] 
+We then have just {\em one} inference rule, known as {\it reductio ad
+absurdum}
+\begin{center}
+\begin{prooftree}
+\[ [A\imp\bot]^i \resultsin \bot \]
+\justifies A
+\using \mbox{\small RAA$_i$}
+\end{prooftree}
+\end{center}
+A notational alternative to introduce negation as a primitive
+connective, whose introduction and elimination rules are simply
+instances of $\impE$ and $\impI$ for $A\imp\bot$
+\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}
+\[ [A]^i \resultsin \bot\]
+\justifies \neg A
+\using \negIi{i}
+\end{prooftree}
+\hspace*{5em}
+\begin{prooftree}
+A \hspace*{2em} \neg A
+\justifies \bot
+\using \negE
+\end{prooftree}
+\end{tabular}
+\end{center}
+The rule of {\it reductio ad absurdum} could then be reformulated as
+\begin{center}
+\begin{prooftree}
+\[ [\neg A]^i \resultsin \bot \]
+\justifies A
+\using \mbox{\small RAA$_i$}
+\end{prooftree}
+\end{center}
+
+\subparagraph{A Note on $\bot$}  The constant $\bot$ is a {\it unit}
+for disjunction.  That is
+\[A\llor\bot \equiv A\]
+There is also another unit, $\top$ (or {\it verum}) for conjunction,
+such that 
+\[A\lland\top \equiv A\]
+These units can be likened to zero and one in arithmetic, where
+$N+0 = N$ and $N\times 1 = N$.
+
+\paragraph{Summary} The natural deduction system for classical
+propositional logic is summarised in figure~\ref{figCPND}.
+\begin{figure} 
+\begin{center}
+\fbox{
+\begin{tabular}{cc}
+\underline{Introduction} & \underline{Elimination}\\[3ex]
+\begin{prooftree}
+\[[A]^i\resultsin B\]
+\justifies
+A\imp B
+\using \impIi{i}
+\end{prooftree}
+
+&
+\begin{prooftree}
+A \hspace*{3em} A\imp B
+\justifies B
+\using \impE
+\end{prooftree} \\[10ex]
+
+\begin{prooftree}
+ A \hspace*{3em}  B
+\justifies A\lland B
+\using \landI
+\end{prooftree}
+&
+\begin{tabular}{ll}
+\begin{prooftree}
+A\lland B
+\justifies 
+A
+\using \landE
+\end{prooftree}
+\hspace*{2em}
+\begin{prooftree}
+A\land B
+\justifies 
+B
+\using \landE
+\end{prooftree}
+\end{tabular} \\[6ex]
+
+\begin{tabular}{ll}
+\begin{prooftree}
+A
+\justifies 
+A\llor B
+\using \lorI
+\end{prooftree}
+\hspace*{2em}
+\begin{prooftree}
+A
+\justifies 
+B\llor A
+\using \lorI
+\end{prooftree}
+\end{tabular}
+\hspace*{4em}
+&
+\begin{prooftree}
+A\llor B \hspace*{2em}
+\[ [A]^i \resultsin C\] \hspace*{2em}
+\[ [B]^j \resultsin C\] 
+\justifies C
+\using \lorEij{i}{j}
+\end{prooftree}\\[6ex]
+\begin{prooftree}
+\[ [A]^i \resultsin \bot\]
+\justifies \neg A
+\using \negIi{i}
+\end{prooftree}
+&
+\begin{prooftree}
+A \hspace*{2em} \neg A
+\justifies \bot
+\using \negE
+\end{prooftree}\\[10ex]
+\multicolumn{2}{c}{
+\begin{prooftree}
+\[ [\neg A]^i \resultsin \bot \]
+\justifies A
+\using \mbox{\small RAA$_i$}
+\end{prooftree}
+}\\[1ex]
+\end{tabular}
+}
+\caption{Natural Deduction for Classical Propositional Logic\label{figCPND}}
+\end{center}
+\end{figure}
+
+
+\subsection{ND for Intuitionistic Propositional Logic}
+The natural deduction system for intuitionistic propositional logic
+may be obtained by a slight variation on the system for classical
+logic. Remove the rule of {\it reductio ad absurdum}, and replace it
+by:
+\begin{center}
+\begin{prooftree}
+\bot \justifies A \using \botE
+\end{prooftree}
+\end{center}
+(an instance of RAA where a null assumption is discharged).
+The full system is shown in figure~\ref{figIPND}.
+\begin{figure}
+\begin{center}
+\fbox{
+\begin{tabular}{cc}
+\underline{Introduction} & \underline{Elimination}\\[3ex]
+\begin{prooftree}
+\[[A]^i\resultsin B\]
+\justifies
+A\imp B
+\using \impIi{i}
+\end{prooftree}
+
+&
+\begin{prooftree}
+A \hspace*{3em} A\imp B
+\justifies B
+\using \impE
+\end{prooftree} \\[10ex]
+
+\begin{prooftree}
+ A \hspace*{3em}  B
+\justifies A\lland B
+\using \landI
+\end{prooftree}
+&
+\begin{tabular}{ll}
+\begin{prooftree}
+A\lland B
+\justifies 
+A
+\using \landE
+\end{prooftree}
+\hspace*{2em}
+\begin{prooftree}
+A\land B
+\justifies 
+B
+\using \landE
+\end{prooftree}
+\end{tabular} \\[6ex]
+
+\begin{tabular}{ll}
+\begin{prooftree}
+A
+\justifies 
+A\llor B
+\using \lorI
+\end{prooftree}
+\hspace*{2em}
+\begin{prooftree}
+A
+\justifies 
+B\llor A
+\using \lorI
+\end{prooftree}
+\end{tabular}
+\hspace*{4em}
+&
+\begin{prooftree}
+A\llor B \hspace*{2em}
+\[ [A]^i \resultsin C\] \hspace*{2em}
+\[ [B]^j \resultsin C\] 
+\justifies C
+\using \lorEij{i}{j}
+\end{prooftree}\\[6ex]
+\begin{prooftree}
+\[ [A]^i \resultsin \bot\]
+\justifies \neg A
+\using \negIi{i}
+\end{prooftree}
+&
+\begin{prooftree}
+A \hspace*{2em} \neg A
+\justifies \bot
+\using \negE
+\end{prooftree}\\[10ex]
+\multicolumn{2}{c}{
+\begin{prooftree}
+ \bot
+\justifies A
+\using \botE
+\end{prooftree}
+}\\[1ex]
+\end{tabular}
+}
+\caption{Natural Deduction for Intuitionistic Propositional Logic \label{figIPND}}
+\end{center}
+\end{figure}
+Behind this apparently small change lies a wealth of difference.
+
+\paragraph{Double Negation and the Excluded Middle}
+
+First, note that the rule $\botE$ is in fact a special case of
+the {\it reductio ad absurdum} rule for classical logic, where only a null
+assumption may be discharged.  This means that intuitionistic logic
+proves fewer theorems than classical logic.  In particular, the
+following two classical proofs rely on RAA and are not
+intuitionistically valid:
+
+Proof of $\neg\neg A\imp A$
+\begin{center}
+\begin{prooftree}
+\[
+  \[[\neg\neg A]^1 \hspace*{2em} [\neg A]^2
+    \justifies \bot \using \negE
+   \]
+   \justifies A \using \mbox{\small RAA}_2
+\]
+\justifies \neg\neg A\imp A \using \impIi{1}
+\end{prooftree}
+\end{center}
+
+Proof of $A\llor\neg A$
+\begin{center}
+\begin{prooftree}
+\[
+ \[
+  \[
+    \[[(A\llor\neg A)\imp\bot]^1  \hspace*{2em}
+      \[[A]^2 \justifies A\llor\neg A \using \lorI\]
+      \justifies \bot \using \impE
+     \]
+     \justifies \neg A \using \negIi{2}
+   \]
+   \justifies A\llor\neg A \using \lorI
+ \]
+ [(A\llor\neg A)\imp\bot]^1
+ \justifies \bot \using \impE
+\]
+\justifies A\llor\neg A \using \mbox{\small RAA}_1
+\end{prooftree}
+\end{center}
+The non-equivalence of $A$ and $\neg\neg A$\footnote{Note that
+$A\imp\neg\neg A$ {\em is} intuitionistically valid, even though
+$\neg\neg A\imp A$ is not.} and the non-validity of $A\llor\neg A$
+are two of the hallmarks of intuitionistic logic, and illustrate
+its {\em constructive} nature.
+
+Constructivism demands that whenever we show that something holds, we
+give an example.  Thus, to show that there are prime numbers below 10,
+we should provide an example (e.g. 3) alongside a proof that the
+example is prime.
+
+The entailment $\neg\neg A\imp A$ does not lend itself to constructive
+examples.  The fact that we have a proof that we cannot prove $\neg A$
+does not immediately tell us what a positive proof of $A$ would look
+like.  This is even more apparent with the `law of the excluded
+middle' $A\llor\neg A$.  Since this can apply to any $A$ whatsoever,
+it can tell us nothing about what a proof of a particular $A$ (or
+$\neg A$) would look like.
+
+As an example \mycite{Dalen} consider whether the decimal expansion
+of $\pi$ contains nine 9s in a sequence.  Classically, either it
+does or it doesn't.  But this classically true statement gives us
+no clue as to how to begin establishing the matter one way or the other.
+
+
+
+\paragraph{The Brouwer-Heyting-Kolmogorov (BHK) Interpretation}
+Intuitionistic propositional logic cannot be given a truth table
+semantics in the way that classical logic can.  However, it can
+be given a (constructive) semantics in terms of proofs that is
+not readily open to classical logic.  This is the
+Brouwer-Heyting-Kolmogorov (BHK) Interpretation.
+
+Suppose that each atomic formula $q$ is paired with the proof $Q$ that it
+holds (this might just be the bare fact that $q$).  The proof $Q$ gives
+the meaning of $q$.  We now construct the proofs / meanings of complex
+formulas as follows
+\begin{itemize}
+\item $P$ is a proof of $\phi\lland\psi$ iff $P = \langle
+P_1,P_2\rangle$ where $P_1$ is a proof of $\phi$ and $P_2$ is a proof
+of $\psi$
+\item $P$ is a proof of $\phi\llor\psi$ iff $P = \langle
+LR,P_1\rangle$ such that either $LR=0$ and $P_1$ is a proof of $\phi$ 
+or $LR=1$ and $P_1$ is a proof of $\psi$.\\
+(That is $P$ is a proof either of $\phi$ or $\psi$, plus an indication
+of which one it is a proof of.)
+\item $P$ is a proof of $\phi\imp\psi$ iff $P$ is a construction /
+function that converts each proof $P_1$ of $\phi$ into a proof
+$P(P_1)$ of $\psi$.
+\item Nothing is a proof of $\bot$.
+\end{itemize}
+
+It is natural to ask why a similar interpretation cannot be given for 
+classical logic.  To see why not, we should consider the differences
+between the classical rule of RAA, and the intuitionistic rule of
+$\botE$
+\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}
+\[ [\neg A]^i \resultsin \bot \]
+\justifies A
+\using \mbox{\small RAA$_i$}
+\end{prooftree}
+\hspace*{3em}&
+\begin{prooftree}
+ \bot
+\justifies A
+\using \botE
+\end{prooftree}
+\end{tabular}
+\end{center}
+The rule of $\bot$ elimination is in some sense an inferential
+dead-end\footnote{Indeed, minimal logic does without the inference
+rule altogether; it is just the classical/intuitionsitic rules for
+$\lland, \llor, \imp$ and $\neg$, but without either RAA or $\botE$.}.  
+As soon as one derives $\bot$, one should give up that part
+of the derivation. If you're feeling perverse, you can extend the
+non-proof of $\bot$ into the same non-proof of $A$.  But if you use
+this derivation of $A$ any further, it will turn anything else it
+touches into a non-proof.
+
+The situation is very different with {\it reductio ad absurdum}.  The
+whole point there is to transform the non-proof of $\bot$ from $\neg
+A$ into a proof of $A$ that can safely be used elsewhere.  A
+difficulty that must be overcome in providing a BHK-style
+interpretation for classical logic is what the proof of $A$
+should look like.  At the very least, it needs to take a non-proof and
+transform it into a proof.  But we are in trouble if we take the
+(fairly reasonable) stance of identifying all non-proofs, in the same
+way that all empty sets, or all instances of the truth value false are
+identified.  For then, we cannot distinguish between a RAA proof of
+$A$ and $B$.
+
+As we will see when discussing the Curry-Howard Isomorphism, the BHK
+interpretation is closely related to the fact that one can naturally
+associate lambda-terms with intuitionistic formulas, but not with
+classical formulas.\footnote{There has been recent work on
+attempting to give a Curry-Howard Isomorphism for classical logic
+\mycite{[Parigot]}.  The point is that it is much harder to do this for
+classical logic than intuitionistic logic.}
+
+
+\paragraph{Symmetry in Natural Deduction}
+Intuitionistic logic also leads to a more symmetric natural deduction
+system.  Recall that we said that natural deduction is characterised
+by paired introduction and elimination rules for connectives.  The
+observent reader will have notice that the rule for RAA is not paired
+with anything other rule.  And depending on the notational convention
+used, it either eliminates a negation ($\neg$) or implication
+($\imp$).  That is, classical logic breaks the symmetry of natural
+deduction.
+
+The symmetry is not broken by the rule $\botE$.  Rather than define
+a connective, this rule defines a constant.  For constants, one
+expects to see either an elimination rule, or an introduction rule,
+but not both.  (In fact, the constant $\bot$ has a dual $\top$ with the
+introduction rule
+\begin{center}
+\begin{prooftree}
+\justifies \top \using \topI
+\end{prooftree}
+\end{center} 
+Adding this rule does nothing to extend the power of intuitionistic
+(or classical) logic).  As a consequence, the introduction and
+elimination rules for the connectives in intuitionistic logic are
+exactly and symmetrically paired.
+
+\paragraph{Constructivism and Linear Logic}
+We have mentioned the differences between classical and intuitionistic
+logic here because the issue is of relevance to linear logic.
+One of the aims of linear logic is to give a classical logic, 
+where $\neg\neg A \equiv A$, but which is nonetheless constructive.  
+Discussion of this will be deferred to the next chapter, however.
+
+\subsection{ND for Quantifiers}
+For the sake of completeness, we will give the natural deduction rules
+for quantifiers.  These are the same rules for both classical and
+intuitionistic logic, though their different settings lend the
+quantifiers subtly different meanings.
+\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}
+A\justifies \forall x. A[x/a] \using \forallI
+\end{prooftree}
+&
+\begin{prooftree}
+\forall x. A \justifies A[a/x] \using \forallE
+\end{prooftree} \\[1ex]
+{\small Provided $a$ does not occur in} & \\
+{\small any assumptions $A$ depends on} &\\[3ex]
+\begin{prooftree}
+A \justifies \exists x. A[x/a] \using \existsI
+\end{prooftree}
+&
+
+\begin{prooftree}
+\exists x. A \hspace*{2em} \[ [ A[x/a] ]^i \resultsin B \]
+ \justifies B \using \existsEi{i}
+\end{prooftree}
+\\[1ex]
+& {\small Provided $a$ does not occur in $\exists x. A$}\\
+& {\small $B$ or any assumption on which $B$ depends}\\
+& {\small (except for $A[x/a]$)}
+\end{tabular}
+\end{center}
+The notation $A[x/a]$ denotes a uniform substitution of the term $x$
+for $a$ throught $A$.
+
+The intuitionistic quantifiers can be thought of as follows, under the
+BHK interpretation
+\begin{itemize}
+\item $P$ is a proof of $\exists x. \phi$ iff $P$ is a pair $\langle a,
+P_1\rangle$ such that $P_1$ is a proof of $\phi[a/x]$.
+\item $P$ is a proof of $\forall x. \phi$ iff $P$ is a construction
+that will take any object $a$ and convert it into a proof $P(a)$ of
+$\phi[a/x]$.
+\end{itemize}
+
+\subsection{Sequent Representations of Natural Deduction}
+
+Natural deduction derivations are trees of the form
+\begin{center}
+\begin{prooftree}
+ A_1 \hspace*{1em} \ldots \hspace*{1em} A_n
+\resultsin B
+\end{prooftree}
+\end{center}
+We can abbreviate this as a sequent
+\[A_1,\ldots,A_n \vdash B\]
+More generally, we can write
+\[\Gamma \vdash B\]
+where $\Gamma$ stands for a set of assumptions / premises.
+
+Given this abbreviation, we can rewrite the natural deduction rules
+as shown in figure~\ref{figSeqND}
+\begin{figure}
+\begin{center}
+\fbox{
+\begin{tabular}{cc}
+\begin{prooftree}
+\Gamma, A^i\vdash B
+\justifies
+A\imp B
+\using \impIi{i}
+\end{prooftree}
+
+&
+\begin{prooftree}
+\Gamma\vdash A \hspace*{3em} \Gamma\vdash A\imp B
+\justifies \Gamma\vdash B
+\using \impE
+\end{prooftree} \\[10ex]
+
+\begin{prooftree}
+\Gamma\vdash  A \hspace*{3em}  \Gamma\vdash B
+\justifies \Gamma\vdash A\lland B
+\using \landI
+\end{prooftree}
+&
+\begin{tabular}{ll}
+\begin{prooftree}
+\Gamma\vdash A\lland B
+\justifies 
+\Gamma\vdash A
+\using \landE
+\end{prooftree}
+\hspace*{2em}
+\begin{prooftree}
+\Gamma\vdash A\land B
+\justifies 
+\Gamma\vdash B
+\using \landE
+\end{prooftree}
+\end{tabular} \\[6ex]
+
+\begin{tabular}{ll}
+\begin{prooftree}
+\Gamma\vdash A
+\justifies 
+\Gamma\vdash A\llor B
+\using \lorI
+\end{prooftree}
+\hspace*{2em}
+\begin{prooftree}
+\Gamma\vdash A
+\justifies 
+\Gamma\vdash B\llor A
+\using \lorI
+\end{prooftree}
+\end{tabular}
+\hspace*{2em}
+&
+\begin{prooftree}
+\Gamma\vdash A\llor B \hspace*{2em}
+\Gamma,A^i \vdash C \hspace*{2em}
+\Gamma, B^j \vdash C 
+\justifies \Gamma\vdash C
+\using \lorEij{i}{j}
+\end{prooftree}\\[6ex]
+
+
+\begin{prooftree}
+\Gamma,A^i \vdash \bot
+\justifies \Gamma\vdash \neg A
+\using \negIi{i}
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em} \Gamma\vdash \neg A
+\justifies \Gamma\vdash \bot
+\using \negE
+\end{prooftree}\\[10ex]
+
+
+\begin{prooftree}
+\Gamma\vdash \bot
+\justifies \Gamma\vdash A
+\using \botE
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma, \neg A^i \vdash \bot
+\justifies \Gamma\vdash A
+\using \mbox{\small RAA}_{i}
+\end{prooftree}\\[6ex]
+
+\multicolumn{2}{c}{
+\begin{prooftree}
+\justifies \Gamma,A\vdash A \using \mbox{\small\it axiom}
+\end{prooftree}}
+\end{tabular}
+}
+\caption{Sequent style ND Rules (Classical \& Intuitionistic)\label{figSeqND}}
+\end{center}
+\end{figure}
+
+\section{Sequent Calculus}
+A somewhat different proof system using sequent notation is the 
+{\em sequent calculus}.  We generalise the notion of sequent slightly,
+so that sequents are of the form
+\[\Gamma \vdash \Delta\]
+where both $\Gamma$ and $\Delta$ are multisets of formulas.  (Note
+that the sequent version of natural deduction used sequents where
+$\Delta$ was a single formula).  A sequent 
+\[ \gamma_1,\ldots,\gamma_i \vdash \delta_1,\ldots,\delta_j\]
+means that ``if the {\em conjunction} of $\gamma_1,\ldots,\gamma_i$
+holds, then the {\em disjunction} of $\delta_1,\ldots,\delta_j$
+holds.''  That is, the commas have different meanings dedending on
+which side of the turnstile ($\vdash$) they occur on.  On the left
+hand side they correspond to conjunctions, and on the right side to
+disjunctions.  Or put another way, a sequent $\Gamma \vdash \Delta$
+means that if all of $\Gamma$ holds, then at least one of $\Delta$
+holds.
+
+As with natural deduction, sequent rules for the connectives come in
+pairs.  But here the pairs are to introduce the connectives on
+either the {\em left} or the {\em right} of the turnstile.  There
+is a rough correlation between left-rules and elimination-rules, and
+right-rules and introduction-rules.  However, this connection should
+not be pushed too far.
+There are also structural rules to ensure that the $\Gamma$s and
+$\Delta$s really do behave as multi-sets.
+
+For people who are familiar only with natural deduction proof systems,
+sequent calculus can be confusing at first.  There is a tendency to
+try and read sequent proofs like natural deductions proofs.  In some
+cases this can work, but more often it leads one astray.  We will
+therefore spend a little while explaining how one should do proofs in
+sequent calculus --- a piece of folklore not often explicitly
+described in textbooks.  But first, we will present an actual proof
+system.
+
+\subsection{SC for Classical Propositional Logic}
+The sequent calculus proof system for classical propositional logic is
+shown in figure~\ref{figCPSC}.
+\begin{figure}
+\begin{center}
+\fbox{
+\begin{tabular}{cc}
+\multicolumn{2}{l}{\it Structural Rules}\\[2ex]
+
+\begin{prooftree}
+\Gamma\vdash\Delta \justifies \Gamma,A\vdash\Delta
+\using \WeakL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash\Delta \justifies \Gamma\vdash\Delta,A
+\using \WeakR
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\Gamma,A,A\vdash\Delta \justifies \Gamma,A\vdash\Delta
+\using \ContrL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash\Delta,A,A \justifies \Gamma\vdash\Delta,A
+\using \ContrR
+\end{prooftree} \\[6ex]
+
+\multicolumn{2}{l}{\it Left-Right Rules}\\[2ex]
+\begin{tabular}{cc}
+\begin{prooftree}
+\Gamma,A\vdash\Delta \justifies \Gamma,A\lland B\vdash\Delta
+\using \landL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma,B\vdash\Delta \justifies \Gamma,A\lland B\vdash\Delta
+\using \landL
+\end{prooftree}
+\end{tabular}
+
+&
+\begin{prooftree}
+\Gamma\vdash\Delta,A \hspace*{2em}\Gamma\vdash\Delta,B
+\justifies \Gamma\vdash\Delta,A\lland B \using \landR
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\Gamma,A\vdash\Delta \hspace*{2em}\Gamma,B\vdash\Delta
+\justifies \Gamma,A\llor B\vdash\Delta, \using \lorL
+\end{prooftree}
+&
+\begin{tabular}{cc}
+\begin{prooftree}
+\Gamma\vdash\Delta,A \justifies \Gamma\vdash\Delta, A\llor B
+\using \lorR
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash\Delta,B \justifies \Gamma\vdash\Delta, A\llor B
+\using \lorR
+\end{prooftree}
+\end{tabular}\\[6ex]
+
+\begin{prooftree}
+\Gamma\vdash\Delta,A \hspace*{2em} \Gamma,B\vdash\Delta
+\justifies \Gamma,A\imp B\vdash\Delta \using\impL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma,A\vdash\Delta,B \justifies \Gamma\vdash\Delta,A\imp B
+\using\impR
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\Gamma\vdash\Delta,A \justifies \Gamma,\neg A\vdash\Delta
+\using\negL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma,A\vdash\Delta\justifies \Gamma\vdash\Delta,\neg A
+\using\negR
+\end{prooftree}\\[6ex]
+
+
+\multicolumn{2}{l}{\it Axiom and Cut}\\[2ex]
+\multicolumn{2}{c}{
+\begin{prooftree} \justifies A\vdash A \using axiom
+\end{prooftree}}\\[6ex]
+\multicolumn{2}{c}{
+\begin{prooftree}
+\Gamma\vdash \Delta,A \hspace*{2em} \Gamma',A\vdash\Delta'
+\justifies \Gamma,\Gamma'\vdash\Delta,\Delta'
+\using cut
+\end{prooftree}}
+\end{tabular}
+}
+\end{center}
+\caption{Sequent Calculus for Classical Propositional Logic
+\label{figCPSC}}
+\end{figure}
+Let us consider the rules in more detail.
+
+\paragraph{Structural Rules}
+The weakening rules allow one to add more formulas either to the left
+or to the right
+\begin{center}
+\begin{tabular}{cc}
+\begin{prooftree}
+\Gamma\vdash\Delta \justifies \Gamma,A\vdash\Delta
+\using \WeakL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash\Delta \justifies \Gamma\vdash\Delta,A
+\using \WeakR
+\end{prooftree}
+\end{tabular}
+\end{center}
+Weakening on the left means that if $\Gamma$ proves $\Delta$, then
+$\Gamma$ and $A$ still proves $\Delta$.  On the right, if $\Gamma$
+proves $\Delta$, then $\Gamma$ also proves $\Delta$ or $A$.
+
+Contraction allows one to remove duplicated formulas on either the
+left or the right.
+\begin{center}
+\begin{tabular}{cc}
+\begin{prooftree}
+\Gamma,A,A\vdash\Delta \justifies \Gamma,A\vdash\Delta
+\using \ContrL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash\Delta,A,A \justifies \Gamma\vdash\Delta,A
+\using \ContrR
+\end{prooftree}\end{tabular}
+\end{center}
+On the left, if $\Gamma$ plus two $A$s proves $\Delta$, then so does
+$\Gamma$ plus one $A$.  On the right, if $\Gamma$ proves $\Delta$ or
+$A$ or $A$, then it also proves $\Delta$ or $A$.
+
+Gentzen's original formulation of the sequent calculus treated the
+$\Gamma$s and $\Delta$s are sequences (ordered lists).  He therefore
+included additional structural rules to allow all permutations of
+of the sequences
+\begin{center}
+\begin{tabular}{cc}
+\begin{prooftree}
+\Gamma_1,A,B,\Gamma_2\vdash\Delta \justifies \Gamma_1,B,A,\Gamma_2\vdash\Delta
+\using \ExchL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash\Delta_1,A,B,\Delta_2 \justifies \Gamma\vdash\Delta,B,A,\Delta_2
+\using \ExchR
+\end{prooftree}\end{tabular}
+\end{center}
+These rules are unnecessary if $\Gamma$ and $\Delta$ are already taken
+to be multisets.
+
+\paragraph{Conjunction} The left rule for conjunction is reminiscent
+of an elimination rule:
+\begin{center}
+\begin{prooftree}
+\Gamma,A\vdash\Delta \justifies \Gamma,A\lland B\vdash\Delta
+\using \landL
+\end{prooftree}
+\end{center}
+If $\Gamma$ and $A$ proves $\Delta$, then so will $\Gamma$ and
+$A\lland B$ --- just ignore/eliminate the $B$ conjunct.  
+The right rule is even more reminiscent of an introduction:
+\begin{center}
+\begin{prooftree}
+\Gamma\vdash\Delta,A \hspace*{2em}\Gamma\vdash\Delta,B
+\justifies \Gamma\vdash\Delta,A\lland B \using \landR
+\end{prooftree}\end{center}
+If $\Gamma$ proves $\Delta$ or $A$, and it also proves $\Delta$ or
+$B$, then we can combine the $A$ and $B$ to conclude that 
+$\Gamma$ proves $\Delta$ or $A\lland B$.
+
+Note that while setting $\Delta = \emptyset$ in $\landR$ gives us
+exactly the sequent version of $\landI$, the connection between
+$\landL$ and $\landE$ is considerably more indirect.  It probably
+hinders as much as it helps to read sequent rules as natural deduction
+rules.
+
+\paragraph{Disjunction}  The left rule for disjunction carries much
+the same import as the convoluted rule for $\lorE$:
+\begin{center}
+\begin{prooftree}
+\Gamma,A\vdash\Delta \hspace*{2em}\Gamma,A\vdash\Delta
+\justifies \Gamma,A\llor B\vdash\Delta, \using \lorL
+\end{prooftree}
+\end{center}
+If $\Gamma$ and $A$ proves $\Delta$, and $\Gamma$ and $B$ also proves
+$\Delta$, then $\Gamma$ and $A\llor B$  will prove $\Delta$ ---
+whichever disjunct, $A$ or $B$, we pick, we can still derive $\Delta$.
+The right rule $\lorR$ is identical to $\lorI$ when $\Delta = \emptyset$.
+
+\paragraph{Implication}  The rules for implication are a little hard
+to decipher in the classical case (though they look a lot more
+familiar for intuitionistic logic). The left rule captures the
+effect of {\it modus ponens}, albeit in a very roundabout way
+\begin{center}
+\begin{prooftree}
+\Gamma\vdash\Delta,A \hspace*{2em} \Gamma,B\vdash\Delta
+\justifies \Gamma,A\imp B\vdash\Delta \using\impL
+\end{prooftree}
+\end{center}
+Consider $\Gamma\vdash\Delta,A$, which says that $\Gamma$ either
+proves $\Delta$ or it proves $A$.  If $\Gamma$ proves $\Delta$, then
+by weakening it will be the case that  $\Gamma$ and $A\imp B$ proves
+$\Delta$.  This is the uninteresting case.  Now consider the case
+where $\Gamma$ does not prove $\Delta$, but only $A$.   The second
+sequent, $\Gamma,B\vdash\Delta$ says that even if $\Gamma$ does not
+prove $\Delta$, $\Gamma$ plus $B$ will.  And we also know that
+$\Gamma$ proves $A$.  Therefore, if we add $A\imp B$ to $\Gamma$, we
+will in then be able to prove $B$, which will then allow us to prove 
+$\Delta$.
+
+The right rule for implicationis very similar to $\impI$, except
+without the use of assumptions and associated book-keeping
+\begin{center}
+\begin{prooftree}
+\Gamma,A\vdash\Delta,B \justifies \Gamma\vdash\Delta,A\imp B
+\using\impR
+\end{prooftree}
+\end{center}
+If we set $\Delta$ to $\emptyset$, the rules says that if $\Gamma$ and
+(assumption) $A$ prove $B$, then $\Gamma$ on its own will prove
+$A\imp B$.
+
+
+
+\paragraph{Negation} The two negation rules allow a formula to move
+across the turnstile, negating it as it goes.
+\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}
+\Gamma\vdash\Delta,A \justifies \Gamma,\neg A\vdash\Delta
+\using\negL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma,A\vdash\Delta\justifies \Gamma\vdash\Delta,\neg A
+\using\negR
+\end{prooftree}
+\end{tabular}
+\end{center}
+It is worth noting that it is only the $\negR$ and $\WeakR$ rules that
+can increase the number of formulas on the right hand side of
+sequents. This is significant when considering intuitionistic logic.
+
+The negation rules also lie behind the use of {\it one-sided} sequents.  Any
+two sided sequent
+\[ \gamma_1,\ldots,\gamma_i \vdash \delta_1,\ldots,\delta_j\]
+is equivalent to a one-sided sequent
+\[ \vdash \neg\gamma_1,\ldots,\neg\gamma_i, \delta_1,\ldots,\delta_j\]
+One sided sequents are sometimes used as an alternative notation for
+the sequent calculus.
+
+
+\paragraph{Cut}  The cut rule is one that is eliminable in
+all well-behaved sequent calculi (i.e. systems satisfying `cut-elimination')
+\begin{center}
+\begin{prooftree}
+\Gamma\vdash \Delta,A \hspace*{2em} \Gamma',A\vdash\Delta'
+\justifies \Gamma,\Gamma'\vdash\Delta,\Delta'
+\using cut
+\end{prooftree}
+\end{center}
+It gives us as way of sticking or cutting together spearate
+sub-derivations.  As with implication, the rule is easier to
+understand in the intuitionistic case.  Here, we can understand it
+as follows: Case (i) suppose $\Gamma\vdash \Delta$.  Then by weakening
+on both left and right $ \Gamma,\Gamma'\vdash\Delta,\Delta'$. Case
+(ii) is the interesting one.  Suppose $\Gamma\vdash A$.  Then given
+that $\Gamma',A\vdash\Delta'$, we can cut the $\Gamma$ in in place of
+$A$ to give  $\Gamma',\Gamma\vdash\Delta'$.  This can be weakened to
+give $\Gamma,\Gamma'\vdash\Delta,\Delta'$.
+
+In systems
+satisfying cut-elimination, proofs employing cut can be replaced
+by shorter proofs not using the cut rule.  This is discussed in
+section~\ref{Ch1Norm}.
+
+\paragraph{Symmetry}  The sequent calculus formulation of classical logic
+is more symmetric than the natural deduction formulation.
+
+\subsection{SC for Intuitionistic Propositional Logic}
+The sequent calculus for intuitionistic logic may be obtained by restricting
+right hand sides of  sequents to multisets of zero or one formulas.  Sequents
+with an empty right hand side
+\[\Gamma\vdash\]
+can be thought of as
+\[\Gamma\vdash\bot\]
+The restriction on right hand sides necessitates 
+reformulations of some of the rules, as shown in figure~\ref{figIPSC}.
+\begin{figure}
+\begin{center}
+\fbox{
+\begin{tabular}{cc}
+\multicolumn{2}{l}{\it Structural Rules}\\[2ex]
+
+\begin{prooftree}
+\Gamma\vdash B \justifies \Gamma,A\vdash B
+\using \WeakL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash \justifies \Gamma\vdash B
+\using \WeakR
+\end{prooftree}\\[4ex]
+
+\multicolumn{2}{c}{
+\begin{prooftree}
+\Gamma,A,A\vdash B \justifies \Gamma,A\vdash B
+\using \Contr
+\end{prooftree}}\\[6ex]
+
+\multicolumn{2}{l}{\it Left-Right Rules}\\[2ex]
+\begin{tabular}{cc}
+\begin{prooftree}
+\Gamma,A\vdash C \justifies \Gamma,A\lland B\vdash C
+\using \landL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma,B\vdash C \justifies \Gamma,A\lland B\vdash C
+\using \landL
+\end{prooftree}
+\end{tabular}
+
+&
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em}\Gamma\vdash B
+\justifies \Gamma\vdash A\lland B \using \landR
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\Gamma,A\vdash C \hspace*{2em}\Gamma,B\vdash C
+\justifies \Gamma,A\llor B\vdash C \using \lorL
+\end{prooftree}
+&
+\begin{tabular}{cc}
+\begin{prooftree}
+\Gamma\vdash A \justifies \Gamma\vdash A\llor B
+\using \lorR
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash B \justifies \Gamma\vdash A\llor B
+\using \lorR
+\end{prooftree}
+\end{tabular}\\[6ex]
+
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em} \Gamma,B\vdash C
+\justifies \Gamma,A\imp B\vdash C \using\impL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma,A\vdash B \justifies \Gamma\vdash A\imp B
+\using\impR
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\Gamma\vdash A \justifies \Gamma,\neg A \vdash
+\using \negL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma,A\vdash \justifies \Gamma\vdash\neg A 
+\using \negR
+\end{prooftree}\\[6ex]
+
+
+\multicolumn{2}{l}{\it Cut and Axiom}\\[2ex]
+\multicolumn{2}{c}{
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em} \Delta,A\vdash B
+\justifies \Gamma,\Delta\vdash B
+\using cut
+\end{prooftree}}\\[6ex]
+\multicolumn{2}{c}{
+\begin{prooftree} \justifies A\vdash A \using axiom
+\end{prooftree}}\\[2ex]
+
+\end{tabular}
+}
+\end{center}
+\caption{Sequent Calculus for Intuitionistic Propositional Logic
+\label{figIPSC}}
+\end{figure}
+
+The restriction to single conclusion sequents substantially modifies
+the rule for negation on the right (and weakening on the right).  This
+blocks the classical derivations of the following two
+central non-theorems of intuitionistic logic:\footnote{A third
+non-intuitionistic
+classical theorem, Pierce's Law $((A\imp B)\imp A)\imp A$, relies
+on the multiple conclusion version of $\WeakR$.  So it is not just
+$\negR$ that makes the substantial difference between classical 
+and intuitionistic logic.}
+
+Classical proof of $\neg\neg A\imp A$:
+\begin{center}
+\begin{prooftree}
+  \[
+    \[A\vdash A \justifies \vdash \neg A, A
+      \using \negR_C
+    \]
+    \justifies \neg\neg A \vdash A \using \negL
+  \]
+  \justifies \neg\neg A \imp A \using \impR
+\end{prooftree}
+\end{center}
+
+Classical proof of $A\llor\neg A$:
+\begin{center}
+\begin{prooftree}
+ \[
+  \[
+   \[A\vdash A \justifies \vdash \neg A, A \using \negR_C\]
+   \justifies A\vdash \llor\neg A,A \using \lorR
+  \] 
+  \justifies \vdash A\llor\neg A,A\llor\neg A \using \lorR
+ \]
+ \justifies \vdash A\llor\neg A \using \ContrR
+\end{prooftree}
+\end{center}
+
+\paragraph{Single and Multiple Conclusion Sequents}
+Why does the restriction to single conclusion sequents furnish
+intuitionistic logic?\footnote{An immediate caveat is to note that there
+can be multiple conclusion formulations of intuitionistic logic
+\mycite{[Dummett,Paiva]}, though these require modifications elsewehere.}
+We will defer proper discussion of this question until later.
+
+\subsection{How to do Proofs in Sequent Calculus}
+A problem that many newcomers face is how to do proofs in the sequent
+calculus.\footnote{It is not necessary to know how to do sequent
+proofs to understand the rest of these notes.  This subsection is
+included because it is nonetheless a useful skill that is rarely
+described explicitly in text books.}  Sequent calculus is well suited 
+for systematic, bottom up searches for derivations. This is often expressed
+as saying that sequent rules {\em should be read ``upwards''}.  The stanard
+pattern of application is to begin with the sequent you want to prove,
+and use the rules to work upwards to axioms.  This is the reverse of the
+more top-down approach in natural deduction. 
+
+
+As an example, let us consider how to
+go about proving the sequent
+\[A\imp(B\imp C) \vdash (A\lland B)\imp C\]
+At each step, we need to pick a formula on either the left or the
+right of the turnstile, and `split' on its topmost connective.
+Splitting on the connective means using the appropriate left or right
+rule (depending on whether the chosen formula was to the left or the
+right of the turnstile), to produce one or more new sequents.
+
+In this case, let's choose the single formula on the right, whose main
+connective is implication. The implication-right rule is, recall
+\begin{center}
+\begin{prooftree}
+\Gamma,\phi\vdash \psi \justifies \Gamma\vdash \phi\imp \psi
+\using\impR
+\end{prooftree}
+\end{center}
+Setting $\Gamma = A\imp(B\imp C)$, $\phi = A\lland B$ and $\psi = C$,
+we can begin our search for the proof as follows:
+\begin{center}
+\begin{prooftree}
+A\lland B, A\imp(B\imp C) \vdash C
+\justifies A\imp(B\imp C) \vdash (A\lland B)\imp C \using \impR
+\end{prooftree}
+\end{center}
+Since the newly introduced sequent is not in the form of axiom, we
+must find a formula in it to split, in an attempt to reduce all the
+leaves of the derivation tree to axioms.  Let us split on the left
+hand formula, $A\imp(B\imp C)$.  Recall that the implication-left rule
+is
+\begin{center}
+\begin{prooftree}
+\Gamma\vdash \phi \hspace*{2em} \Gamma,\psi\vdash \theta
+\justifies \Gamma,\phi\imp \psi\vdash \theta \using\impL
+\end{prooftree}
+\end{center}
+Setting $\Gamma = A\lland B$, $\phi = A$, $\psi = B\imp C$, and 
+$\theta = C$, we introduce two new sequents
+\begin{center}
+\begin{prooftree}
+ \[ A\lland B \vdash A \hspace*{2em} A\lland B,B\imp C \vdash C
+    \justifies A\lland B, A\imp(B\imp C) \vdash C
+    \using \impL
+ \]
+ \justifies A\imp(B\imp C) \vdash (A\lland B)\imp C \using \impR
+\end{prooftree}
+\end{center}
+This now gives us two leaves on the derivation tree, neither of which
+are yet axioms.  Taking the first of these, there is only
+one formula with a connective, and conjunction-left applies to give
+\begin{center}
+\begin{prooftree}
+ \[ \[A\vdash A \justifies A\lland B \vdash A \using \landL\]
+    \hspace*{2em} A\lland B,B\imp C \vdash C
+    \justifies A\lland B, A\imp(B\imp C) \vdash C
+    \using \impL
+ \]
+ \justifies A\imp(B\imp C) \vdash (A\lland B)\imp C \using \impR
+\end{prooftree}
+\end{center}
+Since $A\vdash A$ is an axiom, we do not need to split any further
+on this branch of the tree.  We can now split on $A\lland B$ in
+the second leaf to give
+\begin{center}
+\begin{prooftree}
+ \[ \[A\vdash A \justifies A\lland B \vdash A \using \landL\]
+    \hspace*{2em} 
+    \[ B,B\imp C \vdash C
+       \justifies A\lland B,B\imp C \vdash C \using \landL
+    \]
+    \justifies A\lland B, A\imp(B\imp C) \vdash C
+    \using \impL
+ \]
+ \justifies A\imp(B\imp C) \vdash (A\lland B)\imp C \using \impR
+\end{prooftree}
+\end{center}
+Now we split on $B\imp C$ using $\impL$ to give
+\begin{center}
+\begin{prooftree}
+ \[ \[A\vdash A \justifies A\lland B \vdash A \using \landL\]
+    \hspace*{2em} 
+    \[ \[B\vdash B \hspace*{2em} B,C\vdash C
+         \justifies B,B\imp C \vdash C \using \impL
+       \]
+       \justifies A\lland B,B\imp C \vdash C \using \landL
+    \]
+    \justifies A\lland B, A\imp(B\imp C) \vdash C
+    \using \impL
+ \]
+ \justifies A\imp(B\imp C) \vdash (A\lland B)\imp C \using \impR
+\end{prooftree}
+\end{center}
+Finally, we have to use weakening on the left to get
+\begin{center}
+\begin{prooftree}
+ \[ \[A\vdash A \justifies A\lland B \vdash A \using \landL\]
+    \hspace*{2em} 
+    \[ \[B\vdash B \hspace*{2em} 
+         \[C\vdash C \justifies B,C\vdash C \using \WeakL\]
+         \justifies B,B\imp C \vdash C \using \impL
+       \]
+       \justifies A\lland B,B\imp C \vdash C \using \landL
+    \]
+    \justifies A\lland B, A\imp(B\imp C) \vdash C
+    \using \impL
+ \]
+ \justifies A\imp(B\imp C) \vdash (A\lland B)\imp C \using \impR
+\end{prooftree}
+\end{center}
+We have now reached a point where all the leaves on the derivation
+tree are axioms: we have completed the proof.
+
+\subsubsection{Problems with Cut}
+
+The bottom up procedure just outlined is non-deterministic in that at
+most stages one has a choice about which formula to split on.  This
+non-determinism is greatly increased by the presence of the cut rule.
+The difficulyt with the cut rule is that it can be applied to any formula,
+and split the sequents up in any way.  This is unlike the other rules, that
+single out formulas with a particular main connective, or at least clearly
+indicate just one way in which the sequents should be split.
+
+The advantage of cut is that if you are clever, you can find proofs
+by cutting in known lemmas.  The disadvantage is that if you are applying
+the rules systematically and blindly to search for a proof (e.g. like
+a computer program), the search may not terminate.  It is therefore important
+to know that, in the case of intuitionistic and classical propositional logic,
+the cut rule can be eliminated without affecting the range of theorems
+provable. 
+
+\subsection{Quantifier in Sequent Calculus}
+For the sake of completeness, we list the left and right rules for the
+universal and existential quantifiers.  The rules for classical logic are:
+\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}
+\Gamma,A[x/t]\vdash\Delta \justifies \Gamma,\forall x.A \vdash\Delta
+\using \forallL
+\end{prooftree}
+\hspace*{5em} &
+\begin{prooftree}
+\Gamma\vdash A[x/y],\Delta \justifies \Gamma\vdash \forall x.A, \Delta
+\using \forallR
+\end{prooftree}\\[4ex]
+
+\begin{prooftree}
+\Gamma,A[x/y]\vdash\Delta \justifies \Gamma,\exists x.A \vdash\Delta
+\using \existsL
+\end{prooftree}
+ &
+\begin{prooftree}
+\Gamma\vdash A[x/t],\Delta \justifies \Gamma\vdash \exists x.A, \Delta
+\using \existsR
+\end{prooftree}
+\end{tabular}
+\end{center}
+(where $y$ must not occur free in $\Gamma$ or $\Delta$).  The rules for
+intuitionistic logic are just the single conclusion versions of the
+above.
+
+\subsection{Sequent Calculus and Natural Deduction}
+We now describe how to convert a sequent calculus proof into a natural
+deduction proof for the implication-conjunction fragment of
+ intuitionistic logic.
+This technique is taken from \mycite{GirardLafontTaylor}.  Some notes of
+caution, however.  First, the mapping is many-one: several quite
+distinct sequent proofs can sometimes map onto the same natural 
+deduction proof.  Second, the mapping does not hold for all logical
+systems. In general there is a kind of subsumption ordering amongst
+proof styles:
+\begin{itemize}
+\item Axiomatic systems cover the widest range of logical systems
+\item Sequent calculi can be given for only a somewhat narrower range
+of logics
+\item Natural deduction systems can only be given for a relatively few
+logics
+\end{itemize}
+Classical and intuitionistic logic are fortunate in having all three
+kinds of proof system available. Propositional modal logics cover the
+full range: some like S5 have a natural deduction system; some like K
+have sequent calculi but no natural deduction; and others only have
+axiomatic systems.
+
+\begin{enumerate}
+\item Axioms translate as simple one step ND derivations
+\begin{center}
+\begin{tabular}{ccc}
+$A\vdash A$ & \hspace*{1em} $\Longrightarrow$ \hspace*{1em} & $A$
+\end{tabular}
+\end{center}
+We descend down the sequent derivation from its axiom leaves,
+translating the other steps as follows:
+\item Right rules translate into introductions
+\begin{center}
+\begin{tabular}{ccc}
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em}\Gamma'\vdash B
+\justifies \Gamma,\Gamma'\vdash A\lland B \using \landR
+\end{prooftree}
+& \hspace*{1em} $\Longrightarrow$ \hspace*{1em} &
+\begin{prooftree}
+\[\Gamma\resultsin A\]\hspace*{2em} \[\Gamma'\resultsin B\]
+\justifies A\lland B \using \landI
+\end{prooftree}\\[8ex]
+
+\begin{prooftree}
+\Gamma,A\vdash B \justifies \Gamma\vdash A\imp B
+\using\impR
+\end{prooftree}
+& \hspace*{1em} $\Longrightarrow$ \hspace*{1em} &
+\begin{prooftree}
+\[\Gamma,[A]^i \resultsin B\]
+\justifies A\imp B
+\using\impIi{i}
+\end{prooftree}
+\end{tabular}
+\end{center}
+Here, the vertical dots indicate ND derivations that have already been 
+constructed using the mapping rules.
+
+\item Left rules translate into eliminations (but written backwards!)
+\begin{center}
+\begin{tabular}{ccc}
+\begin{prooftree}
+\Gamma,A\vdash C \justifies \Gamma,A\lland B\vdash C
+\using \landL
+\end{prooftree}
+& \hspace*{1em} $\Longrightarrow$ \hspace*{1em} &
+\begin{prooftree}
+ \Gamma \hspace*{2em} 
+   \[ A\lland B \justifies A \using \landE\]
+  \justifies
+  \[\resultsin C\]
+\end{prooftree}\\[8ex]
+
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em} \Gamma',B\vdash C
+\justifies \Gamma,\Gamma',A\imp B\vdash C \using\impL
+\end{prooftree}
+& \hspace*{1em} $\Longrightarrow$ \hspace*{1em} &
+\begin{prooftree}
+\Gamma' \hspace*{2em} 
+\[ \[\Gamma\resultsin A\] \hspace*{2em} A\imp B
+   \justifies B \using \impE
+\]
+\justifies
+\[\resultsin C\]
+\end{prooftree}
+\end{tabular}
+\end{center}
+
+\item The structural rules translate into management of hypotheses.
+\begin{center}
+\begin{tabular}{ccc}
+\begin{prooftree}
+\Gamma,A,A\vdash B \justifies \Gamma,A\vdash B
+\using \Contr
+\end{prooftree}
+& \hspace*{6em} &
+\begin{prooftree}
+\Gamma\vdash B \justifies \Gamma,A\vdash B
+\using \WeakL
+\end{prooftree}
+\end{tabular}
+\end{center}
+Contraction corresponds to giving two assumptions of $A$ the same
+index. Weakening corresponds to a null assumption of $A$
+
+\item  Finally, the cut rule corresponds to putting two derivations
+together.
+\begin{center}
+\begin{tabular}{ccc}
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em} \Delta,A\vdash B
+\justifies \Gamma,\Delta\vdash B
+\using cut
+\end{prooftree}
+& \hspace*{1em} $\Longrightarrow$ \hspace*{1em} &
+\begin{prooftree}
+\Delta,\[\Gamma\resultsin A\]
+\justifies \[\resultsin B \]
+\end{prooftree}
+\end{tabular}
+\end{center}
+
+\end{enumerate}
+To illustrate the fact that multiple sequent derivations can map onto
+a single natural deduction derivation, here is a simple example.  Both
+of the sequent derivations
+\begin{center}
+\begin{tabular}{ccc}
+\begin{prooftree}
+ \[
+  \[A\vdash A \hspace*{2em} B\vdash B
+    \justifies A,B\vdash A\lland B \using \landR
+  \]
+  \justifies A\lland A',B \vdash A\land B \using \landL
+ \]
+ \justifies A\lland A',B\lland B' \vdash A\land B \using \landL
+\end{prooftree}
+& \hspace*{6em} &
+\begin{prooftree}
+ \[
+  \[A\vdash A \hspace*{2em} B\vdash B
+    \justifies A,B\vdash A\lland B \using \landR
+  \]
+  \justifies A, B\lland B' \vdash A\lland B \using \landL
+ \]
+ \justifies A\lland A',B\lland B' \vdash A\land B \using \landL
+\end{prooftree}
+\end{tabular}
+\end{center}
+correspond to the same natural deduction derivation
+\begin{center}
+\begin{prooftree}
+\[ A\lland A' \justifies A \using \landE\]
+\hspace*{2em}
+\[ B\lland B' \justifies B \using \landE\]
+\justifies A\lland B \using \landI
+\end{prooftree}
+\end{center}
+The two sequent proofs linearize the two parallel $\landE$ natural deduction
+steps as different orders of applying $\landL$.  
+
+In general, the rules of the sequent calculus can be seen as more or
+less complex combinations of natural deduction rules, and sequent
+proofs as linearizations of natural deduction proofs.
+
+
+
+
+
+\section{Proof Normalization}\label{Ch1Norm}
+When are two proofs the same?  This section discusses techniques for converting
+alternate forms of proofs to (minimal) canonical versions of the proof.
+In natural deduction, this technique is known as proof normalization.
+In sequent calculus it corresponds to cut elimination.  As mentioned
+in Chapter~\ref{Ch1}, proof normalization in natural reduction is closely
+related to lambda-reduction on proof terms produced by the Curry-Howard
+isomorphism.  This is the topic of the section after this.
+
+\subsection{Normalization in Natural Deduction}
+
+\subsubsection{$\beta$- and $\eta$-Reduction}
+
+Consider the derivation
+\begin{center}
+\begin{prooftree}
+\[ 
+  \[{\cal D}_1 \resultsin A\] \hspace*{2em} \[{\cal D}_2 \resultsin B\]
+  \justifies A\lland B \using \landI
+\]
+\justifies A \using \landE
+\end{prooftree}
+\end{center}
+Clearly the introduction of the conjunction followed by its immediate
+elimination is an unnecessary detour in the proof.  We could get the same
+result more simply as
+\begin{center}
+\begin{prooftree}
+{\cal D}_1 \resultsin A
+\end{prooftree}
+\end{center}
+More generally, any step in a derivation that introduces a connective only
+to immediately eliminate it again at the next step gives rise to a detour.
+These can be eliminated by the following rules of $\beta$-reduction.
+\begin{center}
+\begin{tabular}{ccc}
+\multicolumn{3}{l}{Conjunction}\\[1ex]
+\begin{prooftree}
+\[ 
+  \[{\cal D}_1 \resultsin A\] \hspace*{2em} \[{\cal D}_2 \resultsin B\]
+  \justifies A\lland B \using \landI
+\]
+\justifies A \using \landE
+\end{prooftree}
+& \hspace*{1em} $\Longrightarrow_{\beta}$ \hspace*{1em} &
+\begin{prooftree} {\cal D}_1 \resultsin A \end{prooftree}\\[10ex]
+
+\multicolumn{3}{l}{Implication}\\[1ex]
+\begin{prooftree}
+ \[
+   \[ [A]^i \resultsin B \]
+   \justifies
+     A\imp B
+   \using \impIi{i}
+ \] \hspace*{2em}
+ \[{\cal D}_1\resultsin A\]
+ \justifies B
+  \using \impE
+\end{prooftree}
+& \hspace*{1em} $\Longrightarrow_{\beta}$ \hspace*{1em} &
+\begin{prooftree}
+ \[{\cal D}_1 \resultsin A\]
+   \resultsin B
+\end{prooftree}\\[10ex]
+
+\multicolumn{3}{l}{Disjunction}\\[1ex]
+\begin{prooftree}
+\[\[{\cal D}_1 \resultsin A\] \justifies A\llor B \using \lorI\]
+\hspace*{2em} \[[A]^i\resultsin C\]
+\hspace*{2em} \[[B]^j\resultsin C\]
+\justifies C \using \lorEij{i}{j}
+\end{prooftree}
+& \hspace*{1em} $\Longrightarrow_{\beta}$ \hspace*{1em} &
+\begin{prooftree}
+ \[{\cal D}_1 \resultsin A\]
+   \resultsin C
+\end{prooftree}
+\end{tabular}
+\end{center}
+There are also some lesser known rules of $\eta$-reduction that apply
+when an elimination is immediately by an introduction.  For example
+\begin{center}
+\begin{tabular}{ccc}
+
+\multicolumn{3}{l}{Implication}\\[1ex]
+\begin{prooftree}
+ \[
+   [A]^i \hspace*{2em} \[{\cal D}_1\resultsin A\imp B \]
+   \justifies
+      B
+   \using \impE
+ \] 
+ \justifies A\imp B
+  \using \impIi{i}
+\end{prooftree}
+& \hspace*{1em} $\Longrightarrow_{\eta}$ \hspace*{1em} &
+\begin{prooftree}
+ {\cal D}_1 \resultsin A\imp B
+\end{prooftree}\\[8ex]
+
+\multicolumn{3}{l}{Conjunction}\\[1ex]
+\begin{prooftree}
+  \[
+    \[{\cal D}_1 \resultsin A\lland B\] 
+    \justifies A \using \landI
+  \]
+  \hspace*{2em} \[{\cal D}_2 \resultsin B\]
+  \justifies A\lland B \using \landI
+\end{prooftree}
+& \hspace*{1em} $\Longrightarrow_{\eta}$ \hspace*{1em} &
+\begin{prooftree} {\cal D}_1 \resultsin A\land B \end{prooftree}
+\end{tabular}
+\end{center}
+A derivation to which none of these reductions can be applied is
+said to be in $\beta\eta$-normal form.
+
+\subsubsection{Commuting Conversions}
+Recall the rule for disjunction elimination, with its parasitic
+formula $C$ that bears no relation to the disjunction  $A\llor B$ being
+eliminated
+\begin{center}
+\begin{prooftree}
+\Gamma\vdash A\llor B \hspace*{2em}
+\Gamma,A^i \vdash C \hspace*{2em}
+\Gamma, B^j \vdash C 
+\justifies \Gamma\vdash C
+\using \lorEij{i}{j}
+\end{prooftree}
+\end{center}
+This parasitic formula can cause problems.  Consider the derivation
+\begin{center}
+\begin{prooftree}
+\[
+    \[\resultsin A\llor B\]
+    \hspace*{2em}
+    \[ 
+      \[[A],[D]\resultsin E\]
+      \justifies D\imp E \using \impI
+    \]
+    \hspace*{2em}
+    \[ 
+      \[[B],[D]\resultsin E\]
+      \justifies D\imp E \using \impI
+    \]
+  \justifies
+    D\imp E \using \lorE
+\]
+\hspace*{2em} \[{\cal D}\resultsin D\]
+\justifies E \using \impE
+\end{prooftree}
+\end{center}
+This derivation is in $\beta$-normal form, but nonetheless it contains a
+detour.  We could get the same result by replacing the assumption of $D$
+on the two branches of the disjunction by the actual derivation $\cal D$
+of $D$, and remove some unnecessary $\impI$ and $\impE$ steps:
+\begin{center}
+\begin{prooftree}
+    \[\resultsin A\llor B\]
+    \hspace*{2em}
+      \[[A],\[{\cal D}\resultsin D\]\resultsin E\]
+     \hspace*{2em}
+      \[[B],\[{\cal D}\resultsin D\]\resultsin E\]
+   \justifies
+    D\imp E \using \lorE
+\justifies E \using \lorE
+\end{prooftree}
+\end{center}
+Whenever an elimination follows a parasitic rule, we would like
+to push (or commute) the elimination upwards one level, so that it
+stands some chance of being adjacent to an introduction rule that actually
+mentions the parasitic formula.  This gives rise for the following
+commuting conversions for the two rules introducing parasitic formulas.
+\begin{center}
+\begin{tabular}{ccc}
+\begin{prooftree}
+\[ \[\resultsin A\lor B\]
+   \hspace*{0.5em} \[[A]\resultsin C\]
+   \hspace*{0.5em} \[[B]\resultsin C\]
+  \justifies C \using \lorE
+\]
+\hspace*{0.5em} \[{\cal D} \resultsin\]
+\justifies D \using R_{\cal E}
+\end{prooftree}
+& \hspace*{1em} $\Longrightarrow_{c}$ \hspace*{1em} &
+\begin{prooftree}
+   \[\resultsin A\lor B\]
+   \hspace*{0.5em} \[ \[[A]\resultsin C\] \hspace*{0.5em} \[{\cal D} \resultsin\]
+                    \justifies D \using R_{\cal E}
+                 \]
+   \hspace*{0.5em} \[ \[[B]\resultsin C\] \hspace*{0.5em} \[{\cal D} \resultsin\]
+                    \justifies D \using R_{\cal E}
+                 \]
+  \justifies D \using \lorE
+\end{prooftree}\\[8ex]
+
+\begin{prooftree}
+ \[ \[{\cal D}_1 \resultsin \bot\] \justifies A \using \botE\]
+ \hspace*{2em} \[{\cal D}_2 \resultsin\]
+ \justifies B \using R_{\cal E}
+\end{prooftree}
+& \hspace*{1em} $\Longrightarrow_{c}$ \hspace*{1em} &
+\begin{prooftree}
+\[{\cal D}_1\resultsin \bot\]\justifies B \using \botE
+\end{prooftree}
+\end{tabular}
+\end{center}
+where $R_{\cal E}$ stands for any of the elimination rules.
+
+\subsubsection{Properties of Normalization}
+Two important properties of proof normalization in natural deduction
+are
+\begin{itemize}
+\item Church-Rosser property:\\
+This says that any proof has a unique normal form.
+
+Put another way, the order in which the various normalizing conversions
+are applied to a derivation does not affect the final result.
+
+\item Strong Normalization:\\
+This says that the application of normalizing conversions will eventually
+terminate to give a normal form proof
+\end{itemize}
+
+
+
+
+
+
+\subsection{Cut-Elimination in Sequent Calculus}
+
+Corresponding to normalization in natural deduction is cut elimination
+in the sequent calculus.  The cut rule
+\begin{center}
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em} \Delta,A\vdash B
+\justifies \Gamma,\Delta\vdash B
+\using cut
+\end{prooftree}
+\end{center}
+allows us to combine two derivations.  In practice the rule is very
+useful, since it allows us the possibility of proving various lemmas
+(or useful patterns of inference), and then cutting them into proofs
+whenever we need them.  Cut-elimination says that whenever we cut
+lemmas in in this way, there is always an equivalent proof that does
+not use the lemmas, but derives everything from scratch.
+
+Eliminating cuts is a process of moving them up the derivation tree
+until we cut against an axiom, where it is clear that the cut
+can be eliminated as follows:
+\begin{center}
+\begin{tabular}{ccc}
+\begin{prooftree}
+\[{\cal D}\resultsin \Gamma\vdash A\] 
+\hspace*{2em} A\vdash A
+\justifies
+A\vdash A \using cut
+\end{prooftree}
+& \hspace*{1em} $\Longrightarrow$ \hspace*{1em} &
+\begin{prooftree}
+{\cal D}\resultsin \Gamma\vdash A
+\end{prooftree}
+\end{tabular}
+\end{center}
+We will not go into all the details of how to float cuts up through a
+derivation. The following examples will give some idea of what is 
+involved.
+\begin{itemize}
+\item Conjunction:\\
+Replace
+\begin{center}
+\begin{prooftree}
+  \[ \Gamma\vdash A \hspace*{2em} \Gamma\vdash B
+     \justifies \Gamma\vdash A\lland B \using \landR
+  \] \hspace*{2em}
+  \[ \Delta,A\vdash C \justifies \Delta,A\lland B \vdash C \using \landL
+  \]
+  \justifies \Gamma,\Delta \vdash C \using cut
+\end{prooftree}
+\end{center}
+by the derivation
+\begin{center}
+\begin{prooftree}
+\Gamma \vdash A \hspace*{2em} \Delta,A\vdash C 
+\justifies \Gamma \Delta \vdash C
+\end{prooftree}
+\end{center}
+\item Implication:
+\begin{center}
+\begin{prooftree}
+ \[ \Gamma,A\vdash B \justifies \Gamma \vdash A\imp B \using \impR\]
+ \hspace*{2em}
+ \[\Delta \vdash A \hspace*{2em} \Delta,B\vdash C
+   \justifies \Delta,A\imp B \vdash C \using \impL\]
+ \justifies \Gamma,\Delta \vdash C \using cut
+\end{prooftree}
+\end{center}
+is replaced by
+\begin{center}
+\begin{prooftree}
+\[ \Delta \vdash A \hspace*{2em} \Gamma,A\vdash B
+   \justifies \Delta,\Gamma\vdash B \using cut\]
+\hspace*{2em}
+\[ \Delta,B\vdash C \justifies \Delta,\Gamma,B\vdash C \using \WeakR\]
+\justifies
+ \justifies \Gamma,\Delta \vdash C \using cut
+\end{prooftree}
+\end{center}
+
+\item Disjunction
+\begin{center}
+\begin{prooftree}
+ \[\Gamma\vdash A \justifies \Gamma\vdash A\llor B \using \lorR\]
+ \hspace*{2em}
+ \[\Delta,A\vdash C \hspace*{2em} \Delta,B\vdash C
+   \justifies \Delta,A\llor B\vdash C \using \lorL
+ \]
+\justifies \Gamma,\Delta \vdash C \using cut
+\end{prooftree}
+\end{center}
+is replaced by
+\begin{center}
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em} \Delta,A\vdash C
+\justifies \Gamma,\Delta \vdash C \using cut
+\end{prooftree}
+\end{center}
+\end{itemize}
+Note how pushing the cut upwards has the effect of reducing the number of
+connectives in the proof.  The same is true for the other rules
+we have not shown for pushing cut upwards.  Because of this
+reduction in complexity, the elimination procedure terminates.
+
+\subsubsection{Consequences of Cut Elimination}
+
+Gentzen's proof of cut elimination for classical and intuitionistic logic
+in 1934 was a major step, allowing a number of important logical results
+to be proved.  Amongst them were the consistency and decidability of
+the sequent calculus.  Two other properties of cut-free proofs worth noting
+are
+\begin{itemize}
+\item Subformula property:\\
+In a cut free proof of $\Gamma\vdash \phi$, all the formula occuring in the
+proof are subformulas of either $\Gamma$ or $\phi$.
+
+By insepection, one can see that all the sequent calculus rules except
+cut are sub-formula preserving.  The absence of the sub-formula property
+for cut means that it is a highly non-deterministic rule for use in
+proof search --- the formulas in a sequent give us no clues about whether
+or not to apply it at any stage.
+
+\item Disjunction property:\\
+If $\vdash A\llor B$, either $\vdash A$ or $\vdash B$
+\end{itemize}
+
+One reminder: although cut elimination can convert sequent proofs to
+canonical cut-free proofs, the equivalence classes of proofs defined
+by cut elimination are broader than the equivalence classes defined
+by normalization in natural deduction.  Essentially, alternate
+linearizations of a normal form ND proof will still count as alternate
+sequent proofs.
+
+
+%\subsubsection{Cuts and Constructivity}
+
+\section{Curry-Howard Isomorphism}
+
+The Curry-Howard Isomorphism (CHI) connects (constructive) logics with type
+theory and the lambda-calculus.  As we saw briefly in
+Chapter~\ref{Ch0},  natural deduction rules can be paired with
+operations in the lambda-calculus.  These operations combine terms
+representing proofs of propositions to build more complex terms
+representing proofs of propositions.  
+
+For example, suppose $P$ represents 
+a proof of the proposition $A\imp B$, and $x$ represents some arbitrary
+proof of $A$.  That is, $P$ and $x$ are {\it proof terms} for the two
+propositions.  We pair a proposition with its proof term by means of a
+colon, e.g.
+\[P: A\imp B\]
+with the term ($P$) conventionally written on the left.
+Here is  a simple natural deduction proof showing how 
+more complex proof terms can be constructed:
+\begin{center}
+\begin{prooftree}
+\[ [x:A]^1 \hspace*{2em} P:A\imp B
+   \justifies P(x):B \using \impE
+\]
+\justifies \lambda x.P(x):A\imp B \using \impIi{1}
+\end{prooftree}
+\end{center}
+Here, the rule of $\impE$ gives rise to {\em application} of proof
+terms, and $\impI$ to lambda abstraction.  In this section we will
+extend this pairing of ND rules with term operators to cover
+conjunction, disjunction and negation.
+
+Recalling the discussion of $\eta$-normalization from the last
+section, note that the proof is not on $\beta$-normal form.  The rule
+for $\eta$-reduction says that we can eliminate a detour to give a
+simpler proof:
+\[P:A\imp B\]
+The proof normalization step of $\eta$-reduction is so-called because
+it really does correspond to doing a $\eta$-reduction on the
+corresponding proof terms
+\[ \lambda x.P(x) \Longrightarrow_{\eta} P\]
+Likewise, the normalization step of $\beta$-reduction really does
+correspond to  doing a $\beta$-reduction on the
+corresponding proof terms.
+
+
+We can think about the CHI under various slogans following slogans
+\begin{itemize}
+\item {\em Terms as Proofs}\\
+The expression
+\[ \lambda x.P(x):A\imp B\]
+can be read one way as saying that $\lambda x.P(x)$ is a proof of
+$A\imp B$. Given that the term is an abstraction, we can tell that
+the last step of the proof introduced an implication into the proof
+$P(x)$.  Moreover, this step must have discharged an assumption $x:A$.
+We can also tell that $P(x)$ must be a proof of $B$, and that its last
+step was an implication elimination, applying something whose proof
+was $P$ to something whose proof was $x$.  Since we know that it was
+$A$'s proof that was $x$, we can therefore tell that $P$ was a proof
+of $A\imp B$.  Since the term $P$ has no internal structure, we can
+tell that $A\imp B$ was a premise.
+
+In other words, one can look at the proof term decorating a formula in
+a natural deduction proof, and reconstruct the proof from the term.
+\item {\em Propositions as Types}\\
+We have just seen how the expression
+\[ \lambda x.P(x):A\imp B\]
+can be read one way as saying that $\lambda x.P(x)$ is a proof of
+the proposition $A\imp B$. We can also read it as saying that the {\em
+type} of the proof $\lambda x.P(x)$ is $A\imp B$.  In fact, we can
+view implication, $\imp$, as type forming operator familiar from type
+theory.
+
+It is important to note that there can usually be several proofs of
+the same type (i.e. several ways of proving the same proposition).
+For example, consider
+\begin{center}
+\begin{tabular}{lll}
+\begin{prooftree}
+\[ [x:A]^1 \hspace*{1em} P:A\imp B
+   \justifies P(x):B \using \impE
+\]
+\justifies \lambda x.P(x):A\imp B \using \impIi{1}
+\end{prooftree}
+\hspace*{1em} &
+$P:A\imp B$
+\hspace*{1em} &
+\begin{prooftree}
+Q:C\imp(A\imp B) \hspace*{1em} R:C
+\justifies Q(R):A\imp B \using \impE
+\end{prooftree}
+\end{tabular}
+\end{center}
+That is, the proofs $\lambda x.P(x)$, $P$ and $Q(R)$ all have the type
+$A\imp B$.  And although $\lambda x.P(x)$ and $P$ are equivalent by
+$\eta$-conversion, and so in some sense represent the same proof, the
+proof $Q(R)$ is not equivalent to either of these.
+
+
+We can look on a type / proposition, therefore, as being a set of
+proofs.
+
+
+
+\item {\em Proofs as Programs}\\
+Here is another example of different proofs of the same type:  we
+let the proposition $N$ also stand for the type Number.  We can look
+at the integers, 1, 2, 3,\ldots, as being different atomic proofs of
+the fact that there are numbers.  We can also look on multiplication
+and addition as being things which when given two numbers will prove
+that you can form a third number.  Two possible proofs $N$ (that there
+is at least one number) are
+\begin{center}
+\begin{prooftree}
+\[\times:N\imp(N\imp N) \hspace*{2em} 2:N
+  \justifies \times(2):N\imp N\]
+\[ \[+:N\imp(N\imp N) \hspace*{2em} 3:N
+     \justifies +(3):N\imp N\]
+    \hspace*{2em} 4:N
+   \justifies +(3)(4):N\]
+\justifies \times(2)(+(3)(4)): N
+\end{prooftree}
+
+\bigskip
+
+\begin{prooftree}
+\[+:N\imp(N\imp N) \hspace*{2em} 3:N
+  \justifies \times(3):N\imp N\]
+\[ \[\times:N\imp(N\imp N) \hspace*{2em} 2:N
+     \justifies \times(2):N\imp N\]
+    \hspace*{2em} 4:N
+   \justifies \times(2)(4):N\]
+\justifies +(3)(\times(2)(4)): N
+\end{prooftree}
+\end{center}
+Note how very different these proofs are.  One constructs the number
+$2\times(3+4) = 14$ as a proof of $N$, and the other constructs
+$3+(2\times 4) = 11$.
+
+We can look on these proofs as being two different programs for
+computing numbers.  The correspondence between programs and proofs
+lies at the heart of functional programming in computer science.
+It turns out that normalization corresponds to performing
+computations in a functional language.   To give another example,
+suppose that we do not take all numbers as primitive, but instead
+start with just 0 and the successor function $s$ that adds one to
+zero.  Thus we could represent the number 3 as the term $s(s(s(0)))$.
+We can also represent a function for adding 2 to $x$ as a term
+$\lambda x. s(s(x))$ of type $N\imp N$. Now
+consider a proof 
+\begin{center}
+\begin{prooftree}
+\lambda x. s(s(x)):N\imp N \hspace*{2em} s(s(s(0))):N
+\justifies \lambda x. s(s(x))[s(s(s(0)))]: N
+\end{prooftree}
+\end{center}
+Lambda reduction of the final proofterm, $\lambda
+x. s(s(x))[s(s(s(0)))]$
+yields $s(s(s(s(s(0)))))$, which is our internal representation for
+5, the result of adding 2 to 3.
+
+Note: this discussion of programs as proofs is not required for
+anything that follows.  However, some of the applications of linear
+logic to computer science have revolved around the design of linear
+functional programming languages.
+
+
+\end{itemize}
+
+\subsection{CHI for Intuitionistic ND}
+
+Let us introduce some operations on proof terms besides application
+and abstraction.  These further operations will be paired with
+the introduction and elimination rules for other connectives.
+
+\paragraph{Conjunction}
+We have pairing and projection to deal with conjunction.
+Given two terms, $P$ and $Q$, we represent the conjunction of them
+as the ordered pair $\opair{P,Q}$.  We then have two projection
+functions $\fst$ and $\snd$ to get at the first and second elements
+of an ordered pair.  Note that $\fst(\opair{P,Q}) = P$ and
+$\snd(\opair{P,Q}) = Q$
+
+We have the following introduction and
+elimination rules for conjunction
+\begin{center}
+\begin{tabular}{lll}
+\begin{prooftree}
+P:A \hspace*{2em} Q:B \justifies \opair{P,Q}:A\lland B
+\using \landI
+\end{prooftree}
+\hspace*{5em} &
+\begin{prooftree}
+M:A\lland B \justifies \fst(M):A \using \landE_1
+\end{prooftree} &
+\begin{prooftree}
+M:A\lland B \justifies \snd(M):B \using \landE_2
+\end{prooftree}
+\end{tabular}
+\end{center}
+Notice how we have to be careful about distinguishing two versions
+of the elimination rules, since one projects onto the first term in
+the pair, and the other projects onto the second.
+
+
+\paragraph{Disjunction}
+For disjunction, we want to represent a disjunctive proof of $P$ or
+$Q$ as a kind of `atrophied pair', along with an indication of which of
+$P$ or $Q$ is the one that makes the disjunction true.  We can
+represent this atrophied pair of terms as a single term, plus an
+indication of whether it is the term for the left or right disjunct.
+Using $\inl$ and $\inr$ to signal left and right, we have the
+introduction rules for disjunction:
+\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}
+P:A \justifies \inl(P):A\llor B \using \lorI_1
+\end{prooftree}
+\hspace*{5em}
+\begin{prooftree}
+P:B \justifies \inr(P):A\llor B \using \lorI_2
+\end{prooftree}
+\end{tabular}
+\end{center}
+Note once again how we have to be careful to distinguish two versions
+of the introduction rule, depending on whether it is the left or right
+disjunct that makes the disjunction true.
+
+The term operation corresponding to disjunction elimination is rather
+more complex.  It resembles a ``case'' statement in programming.  
+The term
+\[ [\case M \;\; (\inl(x)\; P)\;\; (\inr(y)\; Q)]\]
+is to be read as saying that if term $M$ is of the form $\inl(x)$,
+then the resulting term is $P$, and if it is of the form $\inr(y)$
+the resulting term is $Q$.  The elimination rule is thus
+\begin{center}
+\begin{prooftree}
+M:A\llor B \hspace*{2em}
+\[[x:A]^i\resultsin P:C\] \hspace*{2em}
+\[[y:B]^j\resultsin Q:C\]
+\justifies
+[\case M\;\; (\inl(x)\; P)\;\; (\inr(y)\; Q)]:C
+\using \lorEij{i}{j}
+\end{prooftree}
+\end{center}
+Note how the $x$ and $y$ in the case construction unify with the terms
+labelling the assumptions of $A$ and $B$.  This is to ensure that the
+appropriate proof term for either $A$ or $B$ gets plugged in to
+either $P$ or $Q$ respectively.
+
+\paragraph{Falsum}
+Rather than treat negation as primitive, we will define it as
+implication into falsum, i.e.
+\[\neg A \; = \; A\imp\bot\]
+We then associate an ``abort'' term with the $\botE$ rule
+\begin{center}
+\begin{prooftree}
+M:\bot \justifies \aabort{A} : A \using \botE
+\end{prooftree}
+\end{center}
+Note how this rule just throws away the proof term $M$. The `abort'
+means that if we prove $A$ by means of proving falsum, we would be
+well-advised to abort that particular proof.
+
+
+\subsubsection{Term Assignment System}
+
+Putting these rules together, we obtain the  natural
+deduction plus term assignment system for propositional intuitionistic
+logic shown in figure~\ref{figNDIPLCHI}
+\begin{figure}
+\begin{center}
+\fbox{
+\begin{tabular}{cc}
+\underline{Introduction} & \underline{Elimination}\\[3ex]
+\begin{prooftree}
+\[[x:A]^i\resultsin P:B\]
+\justifies
+\lambda x.P:A\imp B
+\using \impIi{i}
+\end{prooftree}
+
+&
+\begin{prooftree}
+Q:A \hspace*{3em} P:A\imp B
+\justifies P(Q):B
+\using \impE
+\end{prooftree} \\[10ex]
+
+\begin{prooftree}
+ P:A \hspace*{1em}  Q:B
+\justifies \opair{P,Q}:A\lland B
+\using \landI
+\end{prooftree}
+&
+\begin{tabular}{ll}
+\begin{prooftree}
+P:A\lland B
+\justifies 
+\fst(P):A
+\using \landE_1
+\end{prooftree}
+&
+\begin{prooftree}
+P:A\land B
+\justifies 
+\snd(P):B
+\using \landE_2
+\end{prooftree}
+\end{tabular} \\[6ex]
+
+\begin{tabular}{ll}
+\begin{prooftree}
+P:A
+\justifies 
+\inl(P): A\llor B
+\using \lorI_1
+\end{prooftree}
+&
+\begin{prooftree}
+P:B
+\justifies 
+\inr(P):A\llor B
+\using \lorI_2
+\end{prooftree}
+\end{tabular}
+\hspace*{2em}
+&
+\begin{prooftree}
+M:A\llor B \hspace*{0.5em}
+\[ [x:A]^i \resultsin P:C\] \hspace*{0.5em}
+\[ [y:B]^j \resultsin Q:C\] 
+\justifies [\case M \;\;(\inl(x)\;P)\;\;(\inr(y)\;Q)]:C
+\using \lorEij{i}{j}
+\end{prooftree}\\[6ex]
+\multicolumn{2}{c}{
+\begin{prooftree}
+ P:\bot
+\justifies \aabort{A}:A
+\using \botE
+\end{prooftree}
+}\\[1ex]
+\end{tabular}
+}
+\caption{Term Assignment for  Intuitionistic Propositional Logic 
+         \label{figNDIPLCHI}}
+\end{center}
+\end{figure}
+We should note that (1) premises are just assigned arbitrary (unique)
+constants as the proof terms, and (2) proof terms for assumptions
+should be unique, with the exception of multiple occurrences of the
+same assumption (i.e. assumptions that are co-indexed).
+
+\subsubsection{Proof and Term Reduction}
+
+The proof reduction rules described in section~\ref{Ch1Norm} all lead to 
+corresponding reductions of proof terms. The consequences of
+$\beta$-reduction are shown in figure~\ref{figBR}
+\begin{figure}
+\begin{center}
+\fbox{
+\begin{tabular}{ccc}
+\multicolumn{3}{l}{Conjunction}\\[1ex]
+\begin{prooftree}
+\[ 
+  \[{\cal D}_1 \resultsin P:A\] \hspace*{2em} \[{\cal D}_2 \resultsin Q:B\]
+  \justifies \opair{P,Q}:A\lland B \using \landI
+\]
+\justifies \fst(\opair{P,Q}):A \using \landE
+\end{prooftree}
+& \hspace*{1em} $\Longrightarrow_{\beta}$ \hspace*{1em} &
+\begin{prooftree} {\cal D}_1 \resultsin P:A \end{prooftree}\\[10ex]
+\begin{prooftree}
+\[ 
+  \[{\cal D}_1 \resultsin P:A\] \hspace*{2em} \[{\cal D}_2 \resultsin Q:B\]
+  \justifies \opair{P,Q}:A\lland B \using \landI
+\]
+\justifies \snd(\opair{P,Q}):B \using \landE
+\end{prooftree}
+& \hspace*{1em} $\Longrightarrow_{\beta}$ \hspace*{1em} &
+\begin{prooftree} {\cal D}_2 \resultsin Q:B \end{prooftree}\\[10ex]
+
+\multicolumn{3}{l}{Implication}\\[1ex]
+\begin{prooftree}
+ \[
+   \[ [x:A]^i \resultsin P:B \]
+   \justifies
+     \lambda x.P:A\imp B
+   \using \impIi{i}
+ \] \hspace*{2em}
+ \[{\cal D}_1\resultsin Q:A\]
+ \justifies (\lambda x.P)(Q):B
+  \using \impE
+\end{prooftree}
+& \hspace*{1em} $\Longrightarrow_{\beta}$ \hspace*{1em} &
+\begin{prooftree}
+ \[{\cal D}_1 \resultsin Q:A\]
+   \resultsin P[x/Q]:B
+\end{prooftree}\\[10ex]
+
+\multicolumn{3}{l}{Disjunction}\\[1ex]
+\begin{prooftree}
+\[\[{\cal D}_1 \resultsin M:A\] \justifies \inl(M):A\llor B \using \lorI\]
+\hspace*{2em} \[[x:A]^i\resultsin P:C\]
+\hspace*{2em} \[[y:B]^j\resultsin Q:C\]
+\justifies [\case \inl(M)\;\; (\inl(x)\;P)\;\;(\inr(y)\;Q)]:C 
+\using \lorEij{i}{j}
+\end{prooftree}
+& \hspace*{1em} $\Longrightarrow_{\beta}$ \hspace*{1em} &
+\begin{prooftree}
+ \[{\cal D}_1 \resultsin M:A\]
+   \resultsin P[M/x]:C
+\end{prooftree}\\[10ex]
+\begin{prooftree}
+\[\[{\cal D}_1 \resultsin M:B\] \justifies \inr(M):A\llor B \using \lorI\]
+\hspace*{2em} \[[x:A]^i\resultsin P:C\]
+\hspace*{2em} \[[y:B]^j\resultsin Q:C\]
+\justifies [\case \inl(M)\;\; (\inl(x)\;P)\;\;(\inr(y)\;Q)]:C 
+\using \lorEij{i}{j}
+\end{prooftree}
+& \hspace*{1em} $\Longrightarrow_{\beta}$ \hspace*{1em} &
+\begin{prooftree}
+ \[{\cal D}_1 \resultsin M:A\]
+   \resultsin Q[M/y]:C
+\end{prooftree}
+\end{tabular}
+}
+\end{center}
+\caption{Beta Reduction \label{figBR}}
+\end{figure}
+(we use the notation $P[M/x]$ to mean term $P$ with all
+occurrences of $x$ replaced by $M$).  If we look just at the terms,
+these reductions amount to the following
+\begin{itemize}
+\item $\fst(\opair{P,Q}) = P$\\
+      $\snd(\opair{P,Q}) = Q$
+
+\item $(\lambda x.P)(Q) = P[Q/x]$
+
+\item $[\case \inl(M)\;\; (\inl(x)\;P)\;\;(\inr(y)\;Q)] = P[M/x]$\\
+      $[\case \inr(M)\;\; (\inl(x)\;P)\;\;(\inr(y)\;Q)] = Q[M/y]$
+\end{itemize}
+The commuting conversions also give rise to term reducitons, including
+the following
+\begin{itemize}
+\item $[\case M\;\;(\inl(x)\;P)\;\;(\inr(y)\;Q)](R)$\\
+= $[\case M\;\;(\inl(x)\;P(R))\;\;(\inr(y)\;Q(R))]$
+\item $\fst([\case M\;\;(\inl(x)\;P)\;\;(\inr(y)\;Q)])$\\
+= $[\case M\;\;(\inl(x)\;\fst(R))\;\;(\inr(y)\;\fst(R))]$
+\item $\snd([\case M\;\;(\inl(x)\;P)\;\;(\inr(y)\;Q)])$\\
+= $[\case M\;\;(\inl(x)\;\snd(R))\;\;(\inr(y)\;\snd(R))]$
+\item $(\aabort{A}(M))(N) = \aabort{B}(M)$\\
+      $\fst(\aabort{\opair{A,B}(M)}) = \aabort{A}(M)$\\
+      $\snd(\aabort{\opair{A,B}(M)}) = \aabort{B}(M)$
+\end{itemize}
+
+\subsection{CHI and Constructivity}
+
+The proof terms assigned by the Curry-Howard isomorphism bear
+a close and non-accidental resemblance to the constructive, proof-based
+semantics lying behind the Brouwer-Heyting-Kolmogorov (BHK)
+interpretation for intuitionistic logic (see p.~\pageref{BHK}). 
+
+We noted that a BHK style interpretation was not readily available
+for classical logic.  For similar reasons, a Curry-Howard isomorphism
+is not readily available either.\footnote{The $\lambda\mu$-calculus
+represents a recent attempt at providing a CHI for classical logic
+\mycite{Parigot}.  However, this relies on finding ways of looking at
+classical logic in a more constructive light.}  The culprit can once
+again be seen as the classical rule of {\it reductio ad absurdum}
+\begin{center}
+\begin{prooftree}
+\[ [x:A\imp\bot]\resultsin P:\bot\] \justifies ??:A \using RAA
+\end{prooftree}
+\end{center}
+Bearing in mind the rule $\botE$, to derive $A$ we throw away the
+proof of $\bot$ from $A\imp\bot$.  If we do not throw this proof away,
+its {\sf abort} type will cause the rest of the proof to be aborted.
+This then leaves the question of what would be a sensible proof term
+to put in place of ``??''.  There is no obvious answer.
+
+
+It is thus important to realize that the Curry-Howard Isomorphism does
+not apply to all logics.  As we will see in a moment, it only applies
+to logics that have a natural deduction formulation.  And as we have
+just seen, it does not even apply to all logics that do have a natural 
+deduction formulation.  Nonetheless, there is something of a cottage
+industry in constructing term assignment systems for various
+logics, since these can (amongst other things) be useful for designing
+new forms of functional programming langauge.
+
+
+\subsection{Term Assignments for Sequents and Axioms}
+
+The section on converting sequent proofs to natural deduction proofs
+showed that there is not a 1-1 mapping.  Distinct sequent proofs can
+map onto the same natural deduction proof.  Because of this, there
+is no real Curry-Howard Isomorphism for the sequent calculus.  One
+can nevertheless design term assignment systems for the sequent
+calculus.
+But there will not be the same close parallels between term reduction
+and proof normalization as there are for natural deduction.
+
+One term assignment scheme in effect just gives each sequent calculus
+rule a unique label.  This certainly allows one to uncover the
+structure of a proof from a proof term. But it does nothing to ensure
+that alternate versions of the same (natural deduction) proof will
+have terms that can be reduced to a common expression.
+
+Another scheme for term assignment makes use of the mapping from sequent proofs
+to natural deduction proofs. As a result, it assigns terms that do
+reduce to common expressions for equivalent sequent proofs.  However,
+this behaviour is inherited from the natural deduction system, and
+is not inherent to the sequent calculus.  The term assignment system
+obtained in shown in figure~\ref{figSCTA}.
+\begin{figure}
+\begin{center}
+\fbox{ 
+\begin{tabular}{lr}
+
+\begin{prooftree}
+\Gamma\vdash P:B \justifies \Gamma,x:A\vdash P:B
+\using \WeakL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash \justifies \Gamma\vdash \aabort{B}:B
+\using \WeakR
+\end{prooftree}\\[4ex]
+
+\multicolumn{2}{c}{
+\begin{prooftree}
+\Gamma,x:A,y:A\vdash P:B \justifies \Gamma,z:A\vdash P[z/x,z/y]:B
+\using \Contr
+\end{prooftree}}\\[6ex]
+
+\begin{prooftree}
+\Gamma,x:A\vdash P:C \justifies \Gamma,y:A\lland B\vdash P[\fst(y)/x]:C
+\using \landL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash P:A \hspace*{2em}\Gamma\vdash Q:B
+\justifies \Gamma\vdash \opair{P,Q}:A\lland B \using \landR
+\end{prooftree} \\[4ex]
+
+\begin{prooftree}
+\Gamma,x:B\vdash P:C \justifies \Gamma,y:A\lland B\vdash P[\snd(y)/x]:C
+\using \landL
+\end{prooftree}&\\[6ex]
+
+
+\begin{prooftree}
+\Gamma,x:A\vdash C \hspace*{2em}\Gamma,y:B\vdash C
+\justifies \Gamma,z:A\llor B\vdash 
+         [\case z\;\;(\inl(x)\;P)\;\;(\inr(y)\;Q)]:C \using \lorL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash P:A \justifies \Gamma\vdash \inl(P):A\llor B
+\using \lorR
+\end{prooftree}\\[6ex]
+&
+\begin{prooftree}
+\Gamma\vdash P:B \justifies \Gamma\vdash \inr(P):A\llor B
+\using \lorR
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\Gamma\vdash Q:A \hspace*{2em} \Gamma,x:B\vdash P:C
+\justifies \Gamma,y:A\imp B\vdash P[y(M)/x]:C \using\impL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma,x:A\vdash P:B \justifies \Gamma\vdash \lambda x.P:A\imp B
+\using\impR
+\end{prooftree}\\[6ex]
+
+\multicolumn{2}{c}{
+\begin{prooftree}
+\Gamma\vdash Q:A \hspace*{2em} \Delta,x:A\vdash P:B
+\justifies \Gamma,\Delta\vdash P[Q/x]:B
+\using cut
+\end{prooftree}}\\[6ex]
+\multicolumn{2}{c}{
+\begin{prooftree} \justifies x:A\vdash x:A \using axiom
+\end{prooftree}}\\[2ex]
+
+\end{tabular}
+}
+\end{center}
+\caption{Term Assignment for Sequent Calculus for IPL
+\label{figSCTA}}
+\end{figure}
+
+It is also possible to give term assignments for axiomatic systems.
+In the case of propositional logic, this gives rise to combinatory
+logic.
+
+\section{Summary}
+
+One arrives at linear logic by looking at the proof theory of
+traditional logics.  This is why we have spent so long reviewing
+the basics of proof theory (such material is not usually covered
+in introductory logic texts for linguists).  So how might we sum
+matters up to set the scene for the development of linear logic?
+
+First recall that our general aim is to gain access to the actual
+proof objects underlying the (syntactic) representations of proofs
+as derivations in systems like natural deduction or sequent calculus.
+Given that we can only access proofs via their surface forms as
+derivations, natural deduction looks very promising.
+
+For intuitionistic logic, the Curry-Howard Isomorphism provides us with
+access to terms representing proofs.  Moreover, these terms have non-trivial
+identity criteria, which allow us (in conjunction with proof normalization)
+to say when two syntactically distinct derivations correspond to the
+same proof.
+
+However, natural deduction retains some embarrassing features.  
+\begin{itemize}
+\item A Curry-Howard Isomporphism cannot be given for classical
+logic. Dyed-in-the-wool constructivists might well retort `so much the
+worse for classical logic.'  But for the less ideologically motivated, the
+failure to find interesting proof objects for classical logic casts doubt
+on the general aim of elevating the status of proofs in logic.  
+\item The natural deduction formulation of classical logic is not
+completely symmetrical.  Although most of the connectives have their
+meanings defined by introduction and elimination rules, negation requires
+three rules: introduction, elimination, and {\it reductio ad absurdum}.
+This smears the meaning of negation across a number of rules, that makes
+a simple characterisation of its proof-theoretic meaning impossible.
+\item For both classical and intuitionistic logic, the parastitic rules
+of or-elimination and $\bot$-elimination, are ugly.  The commuting conversions
+these gives rise to considerably complicates the identity criteria of
+proofs, as defined by proof normalization.
+\end{itemize}
+
+With respect to classical logic, the sequent calculus fares much better.
+First, the complete symmetry lost in the ND formulation is regained
+in the sequent formulation of classical logic.  In fact it is intuitionistic
+logic that comes out asymmetric, in that it allows only single
+conclusion sequents.  This is tantamount to dropping the rules
+of right contraction and weakening, leaving only the left versions.
+Unfortunately, for both intuitionistic and classical logic the sequent calculus
+individuates too finely between proofs; derivations that should be
+identified remain distinct.
+

@@ -1,0 +1,1172 @@
+\pagestyle{plain}
+
+\begin{slide}{}
+\begin{center}{\large
+Glue Semantics\\
+Linear Logic for Meaning Assembly in Natural Language}\\[2ex]
+Dick Crouch, Xerox PARC
+\end{center}
+
+Linguistics:
+{\small\begin{items}
+\item Basic ideas
+\item Modifiers
+\item Quantifier scope
+\item Context update
+\item VP conjunction
+\item Old and New glue
+\end{items}}
+
+
+
+Computational Linguistics:
+{\small\begin{items}
+\item Ambiguity management
+\item Structure sharing with charts 
+\item Skeletons and modifiers (Lamping \& Gupta)
+\end{items}}
+\end{slide}
+\begin{hslide}{Glue Semantics}
+
+Distinguish two separate logics in semantic interpretation\\
+\hspace*{1em} 1. Meaning logic: {\small target logical representation}\\
+\hspace*{1em} 2. Glue logic: {\small logical specification of how chunks of meaning are assembled}
+
+\bigskip
+
+Variety of choices for meaning logics (modularity)
+
+\bigskip
+
+Linear Logic as the glue logic
+{\small\begin{items}
+\item Resource accounting: each meaning used exactly once
+\item Proofs as formal objects:
+Gives useful tools for managing ambiguity
+\item Resource accounting $\Rightarrow$ logic of update\\
+ Gives tools for handling contextual update and dependency in
+NL?
+\end{items}}
+
+\end{hslide}
+ 
+\begin{hslide}{Resource Counting}
+
+\begin{items}
+\item $ \$ 1\linimp \lf{gauloises}$\\
+{\small If I have a dollar, I can get a pack of Gauloises}
+
+\item $ \$ 1\linimp \lf{gitanes}$\\
+{\small If I have a dollar, I can get a pack of Gitanes}
+
+\item $ \$ 1$\\
+{\small I have a dollar}
+\end{items}
+
+Can conclude:\\
+{\small \hspace*{1em} --- Either:} $\lf{gauloises}$\\
+{\small \hspace*{1em} --- Or:} $\lf{gitanes}$\\
+{\small \hspace*{1em} --- But not:} $\lf{gauloises} \tensor \lf{gitanes}$\\
+{\small \hspace*{2em} I can't get Gauloise {\em and} Gitanes with \$1}
+
+\end{hslide}
+
+\begin{hslide}{Linear Implication and (Multiplicative) Conjunction}
+
+\begin{tabbing}
+Traditional implication: \=
+             $A, A\rightarrow B \; \vdash \; B$\\
+          \> $A, A\rightarrow B \; \vdash \; A\wedge B$
+ \hspace*{1em}\= {\small Re-use $A$}\\[1ex]
+ 
+Linear implication: \>
+                     $A, A\linimp B \; \vdash B$\\
+                    \> $A, A\linimp B \; \not\vdash A\tensor B$ 
+                      \> {\small Cannot re-use $A$}
+\end{tabbing}
+
+\bigskip
+
+\begin{tabbing}
+Traditional conjunction: \= $A\wedge B \; \vdash \;
+A$ \hspace*{4em}\={\small Discard $B$}\\[1ex]
+Linear conjunction:\> $A\tensor B \; \not\vdash A$
+                     \>{\small Cannot discard $B$}
+\end{tabbing}
+
+
+\bigskip
+
+\begin{tabbing}
+Of course: \= $!A \; \vdash \; A\tensor !A$ \hspace*{9em}\={\small Re-use}\\
+           \> $!(A)\tensor B \; \vdash \; B$ \>{\small Discard}
+\end{tabbing}
+\end{hslide}
+
+\begin{hslide}{Semantics of Proofs:\\
+ {\it Implication Elimination as Functional Application}}
+
+Natural deduction rule for (intuitionistic) implication elimination:
+\begin{center}
+\small
+\begin{prooftree}
+A\imp B \hspace*{3em} A
+\justifies B
+\using \impE
+\end{prooftree}
+\end{center}
+$A\imp B$: {\small 
+function $f$ that takes a proof $a$ of $A$ to give a proof $f(a)$ of $B$}\\
+
+\bigskip
+
+\begin{center}
+\small
+\begin{prooftree}
+f:A\imp B \hspace*{3em} a:A
+\justifies f(a):B
+\using \impE
+\end{prooftree}
+\end{center}
+
+{\small (Also works for linear implication, $\linimp$)}
+
+\end{hslide}
+
+\begin{hslide}{Implication Introduction as Lambda Abstraction}
+
+Natural deduction rule for implication introduction
+\begin{center}
+\small
+\begin{prooftree}
+\[[A]^i\resultsin B\]
+\justifies  A\imp B
+\using \impI,i
+\end{prooftree}
+\end{center}
+{\small Assuming $A$ allows one to prove $B$.\\
+Therefore, discharging the assumption, $[A]^i$, one proves $A\imp B$}
+
+With proof terms
+\begin{center}
+\small
+\begin{prooftree}
+\[[x:A]^i\resultsin P:B\]
+\justifies  \lambda x.P:A\imp B
+\using \impI,i
+\end{prooftree}
+\end{center}
+\end{hslide}
+
+\begin{hslide}{Identity Criteria for Proofs}
+
+Two proofs of $A,A\imp B\vdash B$:
+\begin{center}
+\small
+\begin{tabular}{ll}
+\begin{prooftree}
+A\imp B \hspace*{3em} A
+\justifies B
+\using \impE
+\end{prooftree}
+\hspace*{2em} &
+\begin{prooftree}
+\[ \[[A]^1 \hspace*{3em} A\imp B \justifies B \using \impE\]
+   \justifies A\imp B \using \impI,1
+\]
+\hspace*{3em} A
+\justifies   B
+\using \impE
+\end{prooftree}
+\end{tabular}
+\end{center}
+
+These are not really distinct proofs:
+
+\end{hslide}
+
+\begin{hslide}{Lambda-Equivalence of Proof Terms}
+
+Include proof terms in previous derivations:
+
+\begin{center}
+\small
+\begin{tabular}{ll}
+\begin{prooftree}
+f:A\imp B \hspace*{3em} a:A
+\justifies f(a):B
+\using \impE
+\end{prooftree}
+\hspace*{2em} &
+\begin{prooftree}
+\[ \[[x:A]^1 \hspace*{3em} f:A\imp B \justifies f(x):B \using \impE\]
+   \justifies \lambda x.f(x):A\imp B \using \impI,1
+\]
+\hspace*{3em} a:A 
+\justifies   (\lambda x.f(x))(a):B
+\using \impE
+\end{prooftree}
+\end{tabular}
+\end{center}
+
+Note: $f(a) \; = \; (\lambda x.f(x))(a) $
+
+$\lambda$-equivalence of proof terms: semantic identity of derivations.
+
+\end{hslide}
+
+\begin{hslide}{Curry-Howard Isomorphism (CHI)}
+
+CHI = Pairing of proof rules with operations on proof terms\\
+{\small \hspace*{1em} But doesn't work for all logics, or proof
+systems}
+
+Defines interesting identity criteria for proofs\\
+{\small \hspace*{1em} Syntactically distinct derivations corresponding
+to same proof}
+
+Intimate relation between logic and type-theory.
+
+Varied applications, e.g.\\
+{\small \hspace*{1em} --- Proofs as programs}\\
+{\small \hspace*{1em} --- Semantic construction for natural language}
+\end{hslide}
+
+
+\begin{hslide}{Example: Input to Semantic Interpretation}
+{\small
+\begin{tabular}{cc}
+ 
+\begin{tabular}{cccc} 
+                 & \node{a}{S}    &   &\\[2ex]
+\node{b}{NP} &                    &\node{c}{VP} & \\[2ex]
+\node{d}{\bf John}   &\node{e}{V}  &   &\node{f}{NP} \\[2ex]
+                 &\node{g}{\bf saw}       &   &\node{h}{\bf Fred}
+\end{tabular}
+\nodeconnect{a}{b}
+\nodeconnect{a}{c}
+\nodeconnect{b}{d}
+\nodeconnect{c}{e}
+\nodeconnect{c}{f}
+\nodeconnect{e}{g}
+\nodeconnect{f}{h}
+
+\hspace*{3em}
+&
+
+\begin{tabular}{l}
+\node{fn}{$f$}$:\begin{avm} 
+PRED  ~~~~\mbox{`saw'} 
+\\[1ex]
+SUBJ ~~~$\node{gn}{$g$}$:\begin{avm} 
+                    PRED ~~\mbox{`John'} \\
+            \end{avm}
+\\[1ex]
+OBJ ~~~~$\node{hn}{$h$}$:\begin{avm} 
+                    PRED ~~\mbox{`Fred'} \\
+          \end{avm} \\
+\end{avm}$
+\end{tabular}
+
+{\makedash{4pt}
+\anodecurve[tr]{d}[l]{gn}{200pt}
+\anodecurve[tr]{g}[l]{fn}{100pt}
+\anodecurve[tr]{h}[l]{hn}{100pt}
+}
+\nodeoval{d}
+\nodeoval{g}
+\nodeoval{h}              
+\end{tabular}
+}
+
+Lexicon\\[1ex]
+\begin{tabular}{lll}
+{\it Word} & {\it Meaning} & {\it Glue}\\ \hline
+{\bf John} & \lf{john} & $\uparrow$ \hspace*{2em}
+                      {\small where $\uparrow = g$}\\[1ex]
+{\bf Fred} & \lf{fred} & $\uparrow$ \hspace*{2em}
+                     {\small where $\uparrow = h$}\\[1ex]
+{\bf saw}  & $\lambda y.\lambda x.\;\lf{see}(x,y)$
+              & $\uparrow.OBJ\linimp(\uparrow.SUBJ\linimp \uparrow)$\\
+           &  & 
+                \hspace*{2.5em} {\small where $\uparrow = f$, $f.OBJ = h$, $f.SUBJ = g$}
+\end{tabular}
+
+{\small Constituents $g, h, f$: semantic resources, consuming \& producing  meanings}
+\end{hslide}
+
+
+\begin{hslide}{Lexical Premises: Their nature}
+\begin{center}
+{\small
+\begin{tabular}{ccc}
+  & \bf saw &\\[2ex]
+ \node{a}{$\lambda y.\lambda x.\;\mbox{see}(x,y)$}&:&
+  \node{b}{$h\linimp(g\linimp f)$}\\[3ex]
+\node{c}{Meaning Term} & & \node{d}{Glue Formula}\\
+                       & & (Propositional LL)
+\end{tabular}
+
+\anodecurve[tl]{c}[l]{a}{10pt}
+\anodecurve[tr]{d}[r]{b}{10pt}
+
+\nodeoval{a}
+\nodeoval{b}
+}
+\end{center}
+Atomic propositions ($f,g,h$):\\
+$\bullet$
+ Correspond to syntactic constituents found in parsing\\
+$\bullet$
+ Denote resources used in semantic interpretation\\
+\hspace*{0.5em} (Match production \& consumption of constituent meanings)
+
+Meaning terms:\\
+$\bullet$ Expressions in some chosen meaning language\\
+$\bullet$ Language must support abstraction and application\\
+$\bullet$ \ldots but otherwise relatively free choice
+
+\end{hslide}
+
+\begin{hslide}{Example: Glue Derivation}
+{\it Lexical premises:}
+\hspace*{4em}\begin{tabular}{rcl}
+$\mbox{john}$&:&$g$\\
+$\mbox{fred}$&:&$h$\\
+$\lambda y.\lambda x.\;\mbox{see}(x,y)$&:&$ h\linimp(g\linimp f)$
+\end{tabular}\\
+{\tiny\hspace*{1em} --- lexical entries instantiated by parse tree}\\
+
+\bigskip
+
+{\it Derivation from premises:}
+
+{\small
+\begin{tabular}{ll}
+Without Meanings & With Meanings\\[2ex]
+
+\begin{prooftree}
+   \[  h\linimp(g\linimp f)
+     \hspace*{2em}
+       h
+     \justifies
+       g\linimp f
+    \]
+     \hspace*{1em} g
+   \justifies
+     f
+\end{prooftree}
+\hspace*{2em}
+&
+\begin{prooftree}
+   \[  \lambda y.\lambda x.\;\mbox{see}(x,y): h\linimp(g\linimp f)
+     \hspace*{1.5em}
+       \mbox{fred}:h
+     \justifies
+       \lambda x.\;\mbox{see}(x,\mbox{fred}):g\linimp f
+    \]
+     \mbox{john}:g
+   \justifies
+     \mbox{see}(\mbox{john},\mbox{fred}):f
+\end{prooftree}
+\end{tabular}
+}
+
+\end{hslide}
+\begin{hslide}{The Form of Glue Derivations}
+\[\Gamma \vdash {\cal M}:f\]
+where\\
+$\bullet$ $\Gamma$ is set of lexical premises (instantiated by parse)\\
+$\bullet$ $f$ is (LL atom corresponding to) sentential constituent\\
+$\bullet$ ${\cal M}$ is meaning term produced by derivation
+
+\underline{(Semantic) Ambiguity}
+\begin{items}
+\item Often (many) 
+      alternative derivations $\Gamma\vdash {\cal M}_i:f$\\
+      each producing a different meaning term ${\cal M}_i$ for $f$
+\item Need to find {\em all} alternative derivations (efficiently!)\\
+\end{items}
+\end{hslide}
+
+\begin{hslide}{Alternative Derivations: Modifier Scope}
+Consider phrase ``{\em alleged criminal from London}''
+
+
+\begin{tabular}{l}
+$ f:\begin{avm} 
+PRED  ~~~~\mbox{`criminal'} 
+\\[1ex]
+MODS ~~~\{\begin{avm} 
+                 \mbox{`alleged'}
+            \end{avm}, 
+           \begin{avm} 
+                  \mbox{`from London'}
+          \end{avm} \}\\
+\end{avm}$
+\end{tabular}
+
+\begin{tabular}{lll}
+$\lambda x.\; \mbox{criminal}(x)$ &:& $f$\\
+$\lambda P.\; \mbox{alleged}(P)$ &:& $f\linimp f$\\
+$\lambda P \lambda x.\; \mbox{from}(l,x)\wedge P(x)$ &:& $f\linimp f$
+\end{tabular}
+
+Two derivations, resulting in:\\[1ex]
+1. $\lambda x.\;
+     \mbox{from}(l,x)\wedge\mbox{alleged}(\mbox{criminal})(x) : f$\\
+2. $\mbox{alleged}(\lambda x.\; \mbox{from}(l,x)\wedge
+       \mbox{criminal}(x)) : f$
+
+\end{hslide}
+
+
+\begin{hslide}{Quantifier Scope: {\it Everyone saw something}}
+Premises \hspace*{2em}
+\begin{tabular}{ll}
+everyone: & $(g\linimp f)\linimp f$\\
+saw: & $h\linimp(g\linimp f)$\\
+something: & $(h\linimp f)\linimp f$
+\end{tabular}
+
+Derivations:\\[2ex]
+{\tiny
+\addtolength{\proofrulebaseline}{-1ex}
+\begin{tabular}{ccc}
+{\normalsize $\exists\forall$} & & {\normalsize $\forall\exists$} \\[3ex]
+\begin{prooftree}
+ \[
+  \[
+   \[h\linimp(g\linimp f) \hspace*{1em} [h]\justifies g\linimp f\]
+   (g\linimp f)\linimp f \justifies f
+  \]
+  \justifies h\linimp f
+ \]
+  (h\linimp f)\linimp f
+ \justifies f
+\end{prooftree}
+& &
+\begin{prooftree}
+\[
+ \[
+  \[
+   \[
+     \[ h\linimp(g\linimp f) \hspace*{1em} [h]\justifies g\linimp f\]
+     [g] \justifies f
+   \]
+    \justifies h\linimp f
+  \]
+   (h\linimp f) \linimp f \justifies f
+ \]
+  \justifies g\linimp f
+\]
+ (g\linimp f)\linimp f \justifies f
+\end{prooftree}
+\end{tabular}
+\addtolength{\proofrulebaseline}{1ex}
+}
+
+\end{hslide}
+
+\begin{hslide}{With Meaning Terms}
+\begin{center}\small
+\begin{prooftree}
+\[
+ \[
+  \[
+   \[
+     \[ saw:h\linimp(g\linimp f) \hspace*{1em} [y:h]\justifies saw(y):g\linimp f\]
+     [x:g] \justifies saw(y)(x):f
+   \]
+    \justifies \lambda y.saw(y)(x):h\linimp f
+  \]
+   everyone:(h\linimp f) \linimp f \justifies everyone(\lambda y.saw(y)(x)):f
+ \]
+  \justifies \lambda x. everyone(\lambda y.saw(y)(x)):g\linimp f
+\]
+ something:(g\linimp f)\linimp f \justifies 
+ something(\lambda x.everyone(\lambda y.saw(y)(x))):f
+\end{prooftree}
+\end{center}
+
+\end{hslide}
+
+\begin{hslide}{Floating Quantifiers}
+
+\begin{items}
+\item Quantified NPs can take scope over different clausal constituents
+
+\item Variable type for quantified NPs\\
+\hspace*{2em}$\forall S_t.\;  (np_e \linimp S_t) \linimp S_t$
+
+\item Universal quantification over atomic propositions\\
+{\small\hspace*{1em}--- Recall that $\forall$ means ``any'', not ``all''}
+
+\item Place sorts on atoms:\\
+{\small\hspace*{1em}--- $np_e$: entity }\\
+{\small\hspace*{1em}--- $S_t$: truth value}
+
+\item Quantifier $np_e$ can scope over any sort $t$ constituent, $S_t$\\
+{\it Provided that $S$ depends on $np_e$}
+\end{items}
+\end{hslide}
+\begin{hslide}{``Everyone saw someone leave''}
+\begin{center}\small
+\begin{tabular}{ll}
+everyone: & $(a_e\linimp S_t)\linimp S_t$\\
+saw: & $a_e\linimp (g_t \linimp f_t)$\\
+someone: & $(b_e\linimp T_t)\linimp T_t$\\
+leave: & $b_e\linimp g_t$
+\end{tabular}
+\hspace*{4em}
+\begin{prooftree}
+ \[
+  \[
+   \[[b_e] \hspace*{1em} b_e\linimp g_t \justifies g_t\] \hspace*{1em}
+   \[[a_e] \hspace*{1em} a_e\linimp (g_t\linimp f_t)
+     \justifies (g_t\linimp f_t)\]
+   \justifies f_t
+  \]
+  \justifies b_e\linimp f_t
+ \]
+\justifies a_e\linimp (b_e \linimp f_t)
+\end{prooftree}
+\end{center}
+\hspace*{3em}Can make $f_t$ depend on $b_e$.\\
+\hspace*{3em}But not $g_t$ depend on $a_e$
+
+Derivations rule out unbound or vacuous variables in meanings\\
+{\small\hspace*{1em}--- {\it Every representative of a company saw a sample}: 5, not 6 derivations.}
+\end{hslide}
+
+\begin{hslide}{What is it with scope?}
+\begin{items}
+\item Scope ambiguity challenges strict compositionality\\
+{\small\hspace*{1em}---Meaning completely determined by syntax \& lexicon}
+
+\item Weaker form of compositionality via glue semantics\\
+{\small Meaning of whole determined by\\
+\hspace*{1em} (a) meanings of parts, and\\
+\hspace*{1em} (b) their
+mode of combination}
+
+{\small Syntax \& lexicon do not always fully determine \\
+(a) e.g. scope ambiguity, or\\
+(b) e.g. pronouns and contextual dependency}
+\end{items}
+\end{hslide}
+
+\begin{hslide}{Context and Interpretation}
+\begin{center}\small
+\begin{tabular}{ccccc}
+           & {\small\it composition} & & {\small\it evaluation} & \\[1ex]
+\node{a}{Sentence} & \node{a1}{}& \node{b}{Meaning} &
+\node{a2}{}&  \node{c}{Semantic Value}\\[2ex]
+           & (1) &                       & (2) &\\[2ex]
+  & & \node{d}{Context} & &
+\end{tabular}
+\nodeoval{a}
+\nodeoval{b}
+\nodeoval{c}
+\nodeoval{d}
+
+\anodeconnect[r]{a}[l]{b}
+\anodeconnect[r]{b}[l]{c}
+{\makedash{4pt}
+\anodeconnect[tl]{d}[b]{a1}
+\anodeconnect[tr]{d}[b]{a2}
+}
+\end{center}
+\begin{items}
+\item[(2)]  Context-dependent evaluation\\
+{\small Evaluation of meaning depends on and updates context}\\
+{\small\hspace*{1em}--- e.g. dynamic semantics: meaning an update
+function on context}
+
+
+\item[(1)] Context-dependent composition {\tiny (Crouch \& van Genabith 99, Crouch LLC-00)}\\
+{\small Construction of meaning depends on and updates context}
+\[\Gamma,\Delta_{in}\vdash 
+{\cal M}:f \tensor \Delta_{out}\]
+{\small \hspace*{1em} $\Gamma$: lexical premises}\\
+{\small \hspace*{1em} $\Delta_{in/out}$: contextual resources, e.g. possible pronoun antecedents}\\
+
+
+Requires tensor and quantification over conjunctions of atomic
+propositions (contextual resources).
+
+\end{items}
+\end{hslide}
+
+\begin{hslide}{Duplication without Exponentials}
+
+{\it ``John ate, drank and slept''}
+{\small\hspace*{1em}--- Meaning of John used 3 times?}
+
+\begin{center}\small
+\begin{tabular}{lrl}
+John  & j: &$a$\\
+ate   & eat: &$a\linimp f_1$\\
+drank & drink: & $a\linimp f_2$\\
+slept & sleep: &$a\linimp f_3$\\
+,     & $\lambda P,Q,x.\; P(x)\lland Q(x)$:
+        & $(a\linimp f_1)\linimp((a\linimp f)\linimp(a\linimp f))$\\
+and   & $\lambda P,Q,x.\; P(x)\lland Q(x)$:
+        & $(a\linimp f_2)\linimp((a\linimp f_3)\linimp(a\linimp f))$
+\end{tabular}
+\end{center}
+
+\bigskip
+
+
+\begin{center}\tiny
+\begin{prooftree}
+\[
+drink:a\linimp f_2 \hspace*{2em}
+\lambda P,Q,x.\; P(x)\lland Q(x): (a\linimp f_2)\linimp((a\linimp f_3)\linimp(a\linimp f))
+\justifies 
+\lambda Q,x.\; drink(x)\lland Q(x): (a\linimp f_3)\linimp(a\linimp f)
+\]
+sleep: a\linimp f_3
+\justifies
+\lambda x.\; drink(x)\lland sleep(x): a\linimp f
+\end{prooftree}
+\end{center}
+Don't consume $a$, but dependency on $a$
+
+Non-linearity of internal (meaning language) $\lambda$-terms
+\end{hslide}
+
+\begin{hslide}{Fragments, Expressivity and Tractability}
+
+\begin{itemize}
+\item Without context dependency\\
+Implication only  LL (with variables over atoms) hasn't failed yet\\
+{\small\hspace*{1em}--- But still extending coverage\ldots}
+
+Two linguistically natural restrictions give good performance
+
+\item With context dependency\\
+Appears to need $\tensor$ and mild form of higher-order quantification\\
+{\small\hspace*{1em}--- Nothing implemented yet: exploring computational
+consequences}
+
+\item Move from old-style to Curry-Howard style glue crucial
+\end{itemize}
+\end{hslide}
+
+\begin{hslide}{Independence of Glue and Meaning}
+
+\begin{center}
+{\small
+\begin{tabular}{|c|c|}\hline
+Original Glue (93)
+& ``Curry-Howard'' Glue (97)\\ 
+mixes meanings \& glue & separates meanings \& glue\\\hline  
+$g\means \lf{john}$
+& $\lf{john}:g$\\  
+$h\means \lf{fred}$
+& $\lf{fred}:h$\\  
+%$ \forall P.\; (\forall x. h\means x \linimp f\means P(x))\linimp
+% f\means \sf{\exists}X. \lf{man}(X)\mand P(X)$
+%& $\lambda P.\sf{\exists}X. \lf{man}(X)\mand P(X):(h\linimp f)\linimp f)$\\
+$\forall y. \; h\means y \linimp \forall x.\; (g\means x
+                     \linimp f\means\lf{see}(x,y))$ \hspace*{1em}
+ &$\lambda y\lambda x.\;\lf{see}(x,y):h\linimp(g\linimp f)$ \\ \hline
+\end{tabular}
+}
+\end{center}
+Some meaning separation rules:\\
+{\small\hspace*{2em}$\bullet$ $
+ [[\forall  M. \; (r\means  M \linimp \phi)]]_m =
+   \lambda M. \;[[\phi]]_m $}\\
+{\small\hspace*{2em}$\bullet$ $
+ [[r\means {\cal M}]]_m = {\cal M}$} 
+
+%{\small\hspace*{1em}$\bullet$ $
+% [[r\means{\cal M}_1 \otimes s\means{\cal M}_2]]_m =
+%    \langle {\cal M}_1, {\cal M}_2 \rangle$}
+
+Some expressions  can't be separated: {\small
+$g\means\lf{john}\linimp f\means \lf{sleep}(\lf{john})$}\\
+{\small\hspace*{1em} --- Avoid these: derivations dependent on
+meanings,\\
+\hspace*{2.5em} and higher order unification needed to match meanings}
+
+Curry-Howard: good for understanding derivations\\
+Original: good for understanding premises
+\end{hslide}
+\begin{hslide}{Relation Between Glue Semantics \& Categorial Grammar}
+Glue $\approx$ categorial grammar + semantics, without the grammar
+
+
+\underline{Engineering benefit:}\\
+Add categorial semantics to a variety of grammatical theories\\[1ex]
+%
+\underline{Theoretical Benefits(?):} ``Autonomy of syntax''\\ \vspace*{-4ex}
+\begin{items}
+\item Weak claim: CG increases number of syntactic derivations
+to (compositionally) account for semantic ambiguities, e.g.
+quantifier scope.
+
+(Claim may be undercut by ability to do skeleton proofs and modifier
+insertion)
+
+\item No requirements for non-commutative LL, multi-modal systems,
+etc.
+\end{items}
+
+\end{hslide}
+
+
+
+\begin{hslide}{Ambiguity Management}
+
+{\small\it ``Most politicians can fool all of the people some of the time, 
+some politicians can fool some of the people all of the time, but no
+politician can fool all of the people all of the time''}
+
+In the order of 9! (360,000) scopings.\\
+Is generate-and-test hopeless? How to manage ambiguity?
+
+\begin{items}
+\item Pruning: prune out unlikely analyses early\\
+{\small Problem of local minima: pruning to early and wrongly}
+
+\item Procrastination: don't explore choice points until they are resolved\\
+{\small Also known as ``underspecification''}
+
+\item Packing: alternative analyses share a lot of common structure\\
+Compute shared structure just once, then re-use it.\\
+{\small Could also be known as (non-naive) generate-and-test}
+\end{items}
+
+Polemic: ``generate-and-test works just fine!''
+\end{hslide}
+ 
+\begin{hslide}{Sharing \& Packing For Glue Derivations}
+\underline{Sharing}
+\begin{center}
+\begin{tabular}{llcl}
+{\small
+\begin{tabular}{ccc}
+ & \node{a0}{$\Gamma_1$} &\\
+\node{a}{} & & \node{b}{}\\
+ & $\pi_1$ & \\[2ex]
+ & \node{c}{} &\\
+ & $\phi$ &
+\end{tabular}
+\nodeconnect[tl]{a}[tr]{b}
+\nodeconnect[tl]{a}[b]{c}
+\nodeconnect[tr]{b}[b]{c}
+}
+
+&
+{\small
+\begin{tabular}{ccccc}
+ & & $\Gamma - \Gamma_1$ & &\\
+\node{a1}{} & \node{a2}{} & \node{a01}{} & \node{a3}{} & \node{a4}{}\\[2ex]
+ & & \node{b1}{} & & \\
+ & & $\phi$ & & \\[2ex]
+ & & \node{c1}{} & &\\ 
+ & & $M_1:c$ & &
+\end{tabular}
+\nodeconnect[tl]{a1}[tr]{a2}
+\nodeconnect[tl]{a3}[tr]{a4}
+\nodeconnect[tl]{a1}[b]{c1}
+\nodeconnect[tr]{a4}[b]{c1}
+{\makedash{4pt}
+\nodeconnect[tr]{a2}[b]{b1}
+\nodeconnect[tl]{a3}[b]{b1}
+}}
+&
+\&
+&
+{\small
+\begin{tabular}{ccccc}
+ & & $\Gamma - \Gamma_1$ & &\\
+\node{a1}{} & \node{a2}{} & \node{a02}{} & \node{a3}{} & \node{a4}{}\\[2ex]
+ & & \node{b1}{} & & \\
+ & & $\phi$ & & \\[2ex]
+ & & \node{c1}{} & &\\ 
+ & & $M_2:c$ & &
+\end{tabular}
+\nodeconnect[tl]{a1}[tr]{a2}
+\nodeconnect[tl]{a3}[tr]{a4}
+\nodeconnect[tl]{a1}[b]{c1}
+\nodeconnect[tr]{a4}[b]{c1}
+{\makedash{4pt}
+\nodeconnect[tr]{a2}[b]{b1}
+\nodeconnect[tl]{a3}[b]{b1}
+}
+}
+{\makedash{4pt}
+\anodecurve[t]{a0}[b]{a01}{10pt}[-20pt]
+\anodecurve[t]{a0}[b]{a02}{10pt}[-50pt]
+}
+\end{tabular}
+\end{center}
+
+\underline{Packing}
+\begin{center}
+\begin{tabular}{lcll}
+{\small
+\begin{tabular}{ccc}
+ & \node{a00}{$\Gamma_1$} &\\
+\node{a}{} & & \node{b}{}\\
+ & $\pi_1$ & \\[2ex]
+ & \node{c}{} &\\
+ & $M_1:\phi$ &
+\end{tabular}
+\nodeconnect[tl]{a}[tr]{b}
+\nodeconnect[tl]{a}[b]{c}
+\nodeconnect[tr]{b}[b]{c}
+}
+&
+\&
+&
+{\small
+\begin{tabular}{ccc}
+ & \node{a01}{$\Gamma_1$} &\\
+\node{a}{} & & \node{b}{}\\
+ & $\pi_2$ & \\[2ex]
+ & \node{c}{} &\\
+ & $M_2:\phi$ &
+\end{tabular}
+\nodeconnect[tl]{a}[tr]{b}
+\nodeconnect[tl]{a}[b]{c}
+\nodeconnect[tr]{b}[b]{c}
+}
+
+&
+{\small
+\begin{tabular}{ccccc}
+ & & $\Gamma - \Gamma_1$ & &\\
+\node{a1}{} & \node{a2}{} & \node{a02}{} & \node{a3}{} & \node{a4}{}\\[2ex]
+ & & \node{b1}{} & & \\
+ & & $\phi$ & & \\[2ex]
+ & & \node{c1}{} & &\\ 
+ & & $c$ & &
+\end{tabular}
+\nodeconnect[tl]{a1}[tr]{a2}
+\nodeconnect[tl]{a3}[tr]{a4}
+\nodeconnect[tl]{a1}[b]{c1}
+\nodeconnect[tr]{a4}[b]{c1}
+{\makedash{4pt}
+\nodeconnect[tr]{a2}[b]{b1}
+\nodeconnect[tl]{a3}[b]{b1}
+}}
+
+{\makedash{4pt}
+\anodecurve[t]{a01}[b]{a02}{10pt}[-20pt]
+\anodecurve[t]{a00}[b]{a02}{10pt}[-50pt]
+}
+\end{tabular}
+\end{center}
+
+\end{hslide}
+
+\begin{hslide}{Charts for Glue}
+\begin{items}
+\item Charts for context free grammars: $2^N \Rightarrow N^3$\\
+      For (order free) glue: $N! \Rightarrow 2^N$\\
+
+\item Charts require span disjointness\\
+      For CFGs, combine disjoint (but adjacent) word spans
+
+For glue, combine disjoint sets of premises\\
+{\small Hepple: number each initial premise, and use bit vector to encode
+spans}
+
+\item For CFGs, only one method for combining sub-trees/derivations
+
+For (implicational) glue there are two, $\linimpE$ and $\linimpI$\\
+{\small Hepple: Horn clause compilation of implications}
+\end{items}
+\end{hslide}
+
+
+\begin{hslide}{Benefits of Charts}
+
+\begin{itemize}
+\item Derivations of $g$ from premises: 
+{\small $g, \; g\linimp g, \; g\linimp g, \ldots , g\linimp g$} 
+
+\item Chart can find $N!$ derivations in $2^N$ time and space\\
+{\small\hspace*{1em}---Huge saving, but still exponential}
+
+\item Do better by exploiting prevalence of modifiers in natural language\\
+{\small\hspace*{1em}--- Modifiers: glue types (equivalent to) $\phi\linimp\phi$}
+\end{itemize}
+\end{hslide}
+
+
+
+\begin{hslide}{Skeleton-Modifier Derivations I}
+
+\begin{itemize}
+\item
+Modifier: any formula equivalent to $\phi\linimp\phi$\\
+%\hspace*{1em} {\small --- e.g. $f\linimp f$, $(g\linimp f)\linimp
+%(g\linimp f)$, $g\linimp((g\linimp f)\linimp f$}
+
+\item Initial derivation separating modifiers from skeleton
+
+{\tiny
+\addtolength{\proofrulebaseline}{-1.5ex}
+\begin{tabular}{lcl}
+\begin{tabular}{l}
+$g\linimp h\linimp f$\\
+$a\linimp (f\linimp f)$\\
+$b\linimp (h\linimp f)\linimp (h\linimp f)$\\
+$g, \; h, \; a, \; b$
+\end{tabular}
+&
+$\Rightarrow$
+&
+\begin{tabular}{cl}
+\begin{prooftree}
+h \hspace*{1em} \[ g\hspace*{1em} g\linimp h\linimp f  
+  \justifies h\linimp f\]
+ \justifies f
+\end{prooftree}
+& skeleton
+
+\bigskip\bigskip\\
+
+\begin{prooftree}
+a \hspace*{1em} a\linimp (f\linimp f) 
+\justifies f\linimp f
+\end{prooftree}
+& modifier
+
+\bigskip\bigskip\\
+
+\begin{prooftree}
+b \hspace*{1em} b\linimp ((h\linimp f)\linimp (h\linimp f)) 
+\justifies (h\linimp f)\linimp (h\linimp f)
+\end{prooftree}
+& modifier
+\end{tabular}
+\end{tabular}
+\addtolength{\proofrulebaseline}{1.5ex}
+}
+
+\item Final derivation inserts modifiers\\
+{\small\hspace*{1em}--- All scope ambiguities due to modifier insertion}
+\end{itemize}
+
+\end{hslide}
+
+\begin{hslide}{Sharing Structures that Charts Miss}
+
+\begin{center}
+\small
+\begin{tabular}{cccccccc}
+            & \node{a}{S} & & & & & & \\[2ex]
+\node{b}{NP} &   & \node{c}{VP} & & & & & \\[2ex]
+\node{d}{John} & \node{e}{V} & & \node{f}{SComp} & & & & \\[2ex]
+  & \node{g}{said} & \node{h}{that}& & \node{i}{S} & & & \\[2ex]
+  & & & \node{j}{NP} & & \node{k}{VP} & &\node{l}{VP$\linimp$VP} \\[2ex]
+  & & & \node{m}{Bill} & & \node{n}{left} & \hspace*{2em} &\node{o}{yesterday}
+\end{tabular} 
+\nodeconnect{a}{b}
+\nodeconnect{a}{c}
+\nodeconnect{b}{d}
+\nodeconnect{c}{e}
+\nodeconnect{c}{f}
+\nodeconnect{e}{g}
+\nodeconnect{f}{h}
+\nodeconnect{f}{i}
+\nodeconnect{i}{j}
+\nodeconnect{i}{k}
+\nodeconnect{j}{m}
+\nodeconnect{k}{n}
+\nodeconnect{l}{o}
+{\makedash{4pt}
+\anodecurve[t]{l}[r]{k}{10pt}[50pt]
+\anodecurve[t]{l}[r]{c}{10pt}[50pt]
+}
+\end{center}
+\begin{items}
+\item
+Skeleton-modifier approach:\\ Skeleton structure built just once
+
+\item
+Chart approach: disjointness conditions on string spans\\
+Skeleton
+structure has to be  built twice\\ 
+{\small --- once with low modifier attachment, once without}
+\end{items}
+
+\end{hslide}
+
+\begin{hslide}{Unpacked Modifier Insertion: Base Case}
+
+
+When skeleton contains $\phi$:
+
+\begin{tabular}{ccc}
+{\small
+\begin{tabular}{ccccc}
+\node{a1}{} & \node{a2}{} & &\node{a3}{} &\node{a4}{}\\
+  & & \node{b1}{} & & \\
+  & & $\phi$ & & \\[2ex]
+  & & \node{c}{} & &\\
+  & & $c$ & &  
+\end{tabular}
+\nodeconnect[tl]{a1}[tr]{a4}
+\nodeconnect[tl]{a1}[b]{c}
+\nodeconnect[tr]{a4}[b]{c}
+\nodeconnect[tl]{a2}[b]{b1}
+\nodeconnect[tr]{a3}[b]{b1}
+}
+&
+{\small
+\begin{tabular}{ccc}
+ & $\Gamma$ &\\
+\node{a1}{} & &\node{a2}{}\\[2ex]
+ & \node{b}{}& \\
+ & $\phi\linimp\phi$ &
+\end{tabular}
+\nodeconnect[tl]{a1}[tr]{a2}
+\nodeconnect[tl]{a1}[b]{b}
+\nodeconnect[tr]{a2}[b]{b}
+}
+& 
+$\Longrightarrow$
+{\small
+\begin{tabular}{ccccccc}
+\node{a1}{} & \node{a2}{} & &\node{a3}{} & &\node{a4}{} & \node{a5}{}\\
+ & & \node{b1}{} & & \node{b2}{} & & \\
+ & & $\phi$ & & $\phi\linimp\phi$ & & \\ \cline{3-5}
+ & & & $\phi$ & & & \\[5ex]
+ & & & \node{c}{} & & &
+\end{tabular}
+\nodeconnect[tl]{a1}[tr]{a5}
+\nodeconnect[tl]{a1}[b]{c}
+\nodeconnect[tr]{a5}[b]{c}
+\nodeconnect[tl]{a2}[b]{b1}
+\nodeconnect[t]{a3}[b]{b1}
+\nodeconnect[t]{a3}[b]{b2}
+\nodeconnect[t]{a4}[b]{b2}
+}
+\end{tabular}
+
+Sound \& terminating, but incomplete.
+
+Modifier may be insertable, even if skeleton contains no $\phi$.
+
+Introduce detours to create $\phi$, and then do base insertion.
+\end{hslide}
+
+\begin{hslide}{$\beta$-Expansion Rule}
+
+\begin{center}
+\begin{tabular}{lll}
+\begin{prooftree}
+ \[ \using \delta_1 \resultsin a\]
+   \resultsin b
+   \using \delta_2 
+\end{prooftree}
+&
+$\Longrightarrow$
+&
+\begin{prooftree}
+ \[
+   \[ [a] \using \delta_2 \resultsin b \]
+   \justifies
+    $\fbox{$a\linimp b$}$
+   \using \linimp I
+ \]
+ \[\using \delta_1 \resultsin  a\]
+ \justifies
+ b
+ \using \linimp E
+\end{prooftree}
+\end{tabular}\\[1ex]
+Provided no assumptions introduced in $\delta_1$ are discharged in $\delta_2$ 
+\end{center}
+
+\end{hslide}
+
+\begin{hslide}{Example Expansion}
+
+Assume modifier {\small $(a\linimp c)\linimp(a\linimp c)$}
+
+\begin{tabular}{ccc}
+Skeleton  &  $\Longrightarrow$ & $\beta$-Expansion\\[2ex]
+{\small
+\begin{prooftree}
+   \[ \[\resultsin a\] \hspace*{1em} a\linimp(b\linimp c)
+     \justifies
+      b\linimp c
+   \]
+   \hspace*{1em} b
+   \justifies
+   c
+\end{prooftree}
+}
+&
+
+&
+{\small
+\begin{prooftree}
+ \[
+  \[
+   \[ [a] \hspace*{1em} a\linimp(b\linimp c)
+     \justifies
+      b\linimp c
+   \]
+   \hspace*{1em} b
+   \justifies
+   c
+  \]
+  \justifies
+   a\linimp c
+ \]
+ \hspace*{1em} \[\resultsin a\]
+ \justifies c
+\end{prooftree}
+}
+
+\end{tabular}
+
+
+Allows insertion of $(a\linimp c)\linimp (a\linimp c)$ modifier\\
+{\small\hspace*{1em}--- Insertion will remove detour introduced}
+
+\end{hslide}
+
+\begin{hslide}{Packed Modifier Insertion}
+
+Work in progress:\\
+Find ways of structure sharing in modifier insertion
+
+
+Implementation:\\
+But checking if algorithms are sound and complete
+\end{hslide}
+
+\begin{hslide}{Glue Sales Pitch}
+
+\begin{itemize}
+\item Linguistically powerful \& flexible approach
+
+Interesting analyses of scope, control (Asudeh), event-based semantics (Fry),
+intensional verbs (Dalrymple), context dependence, coordination.
+
+But many other phenomena still to do
+
+\item Grammar \& semantics engineering
+
+Applicable to grammars besides LFG based ones
+
+Steep learning curve for writing lexical entries\\
+But turns out to allow plentiful re-use of ``lingware''
+
+\item Can be implemented efficiently
+\end{itemize}
+
+\end{hslide}
+

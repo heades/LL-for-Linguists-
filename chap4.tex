@@ -1,0 +1,1745 @@
+\chapter{Glue Semantics}
+
+This chapter gives an overview of `glue semantics'.
+This is an approach to the
+semantic interpretation of natural language that uses a fragment of linear
+logic as a deductive glue for combining together the meanings of words
+and phrases in a syntactically analysed sentence.  For a recent collection
+of papers, see \mycite{Dalrymple99}.    
+
+In its more recent developments, glue semantics bears an affinity to categorial
+semantics.  That is, it is akin to the kind of compositional semantics
+obtained for categorial grammars by means of the Curry-Howard Isomorphism
+\mycite{Carpenter,Morrill}.  A crude characterisation would be that
+glue semantics is like categorial grammar and it semantics,
+but without the categorial grammar. 
+It provides a means for grafting a categorial style of semantics onto
+other syntactic formalisms; specifically Lexical Functional Grammar.
+
+As we will see in the next chapter, linear logic has been extensively
+applied to categorial grammar.  However, this has necessitated logical
+extensions to produce non-commutative and multi-modal versions of
+linear logics.  These extensions are required to account for word order
+phenomena, which are one of the central concerns of any syntactic theory.
+By the contrast, the fragment of linear logic employed in glue semantics
+requires no new logical developments.  Word order phenomena are assumed 
+already to be accounted for by the background syntactic theory.  The semantics
+just uses a conservative fragment of the kind of commutative linear logic 
+reviewed in Chapter~\ref{Ch2}.  
+
+This is why we are starting our survey of 
+linguistic application of linear logic with glue semantics: it requires no
+extra developments to linear logic.  However, it does raise some
+algorithmic / proof search issues that do not arise so prominently in
+standard logical investigations.  In particular, there is a problem
+of efficiently performing multiple derivations of a given conclusion
+from a set of premises.  This corresponds to efficiently calculating all
+possible interpretations of a sentence because of the wholesale
+ambiguity that characterizes natural language.
+
+\section{Basic Glue Semantics}
+
+Let us introduce glue semantics by considering a very simple example, 
+the sentence ``{\it John saw Fred}.''  Simplifying a number of syntactic
+details, we might present the syntactic analysis of the sentence as follows
+\begin{center}
+\begin{tabular}{cc}
+
+Phrase Structure & Functional Structure\\ 
+\begin{tabular}{cccc} 
+                 & \node{a}{S}    &   &\\[2ex]
+\node{b}{NP} &                    &\node{c}{VP} & \\[2ex]
+\node{d}{\bf John}   &\node{e}{V}  &   &\node{f}{NP} \\[2ex]
+                 &\node{g}{\bf saw}       &   &\node{h}{\bf Fred}
+\end{tabular}
+\nodeconnect{a}{b}
+\nodeconnect{a}{c}
+\nodeconnect{b}{d}
+\nodeconnect{c}{e}
+\nodeconnect{c}{f}
+\nodeconnect{e}{g}
+\nodeconnect{f}{h}
+
+\hspace*{1.5em}
+&
+
+\begin{tabular}{l}
+\node{fn}{$f$}$:\begin{avm} 
+PRED  ~~~~\mbox{`saw'} 
+\\[1ex]
+SUBJ ~~~$\node{gn}{$g$}$:\begin{avm} 
+                    PRED ~~\mbox{`John'} \\
+            \end{avm}
+\\[1ex]
+OBJ ~~~~$\node{hn}{$h$}$:\begin{avm} 
+                    PRED ~~\mbox{`Fred'} \\
+          \end{avm} \\
+\end{avm}$
+\end{tabular}
+
+{\makedash{4pt}
+\anodecurve[tr]{d}[l]{gn}{100pt}
+\anodecurve[tr]{g}[l]{fn}{50pt}
+\anodecurve[tr]{h}[l]{hn}{50pt}
+}
+\nodeoval{d}
+\nodeoval{g}
+\nodeoval{h}              
+\end{tabular}
+\end{center}
+The structures shown are what you would see in a Lexical Functional Grammar
+(LFG) style of analysis.  The phrase structure (known as constituent- or
+c-structure in LFG) represents the kind of parse tree familiar from e.g.
+context free grammar.  The functional structure (f-structure) is a projection
+off the c-structure that exhibits the traditional grammatical relations
+of `subject', `object', etc.  The arrows show how nodes in the c-structure
+correspond to nodes in the f-structure.  Note that that the Verb (V),
+Verb Phrase (VP) and Sentence (S) nodes in c-structure all correspond
+to the same f-structure node, here given the arbitrary label $f$.
+
+
+We will assume that f-structure is is the primary syntactic structure
+determining compositional semantic interpretation.  This assumption is
+a matter of convenience rather than necessity.  Within versions of glue 
+semantics developed for LFG, it is possible for structures besides f-structure
+to contribute to semantic interpreation (e.g. c-structure).  And
+moving outside an LFG framework it should be possible to drive
+semantics directly from phrase structure.\footnote{No work has been done
+on providing glue semantics from grammatical formalisms besides LFG.
+But in the absence of evidence to the contrary, there seems no reason
+why versions could not also be developed for other formalisms, like
+Head Driven Phrase Structure Grammar (HPSG).}
+
+F-structure drives the semantics in conjunction with semantic entries
+in a lexicon.  Let us use the meta-variable $\uparrow$ to refer to
+the f-structure node that a particular lexical leaf in c-structure
+projects onto.  (If we were running direct off phrase structure, we would
+want $\uparrow$ to refer to the node that is maximal project of the lexical
+item.  In the case of the $V$ node, this would be the $S$ node, and the
+two NP nodes are their own maximal projections.)  Entries in the semantic
+part of the lexicon look like the following: 
+\begin{center}
+\begin{tabular}{lll}
+{\it Word} & {\it Meaning} & {\it Glue}\\ \hline
+{\bf John} & \lf{john} & $\uparrow$\\
+{\bf Fred} & \lf{fred} & $\uparrow$ \\
+{\bf saw}  & $\lambda y.\lambda x.\;\lf{see}(x,y)$
+              & $\uparrow.OBJ\linimp(\uparrow.SUBJ\linimp \uparrow)$
+\end{tabular}
+\end{center}
+This says that (a) whatever f-node the word {\bf John} projects onto,
+$\uparrow$, its meaning is the constant \lf{john}, (b) the meaning
+of the node that {\bf fred} projects onto is the constant \lf{fred}, and
+(c) the meaning of {\bf saw} is a two place predicate, 
+$\lambda y.\lambda x.\;\lf{see}(x,y)$, which requires its object 
+$\uparrow.OBJ$ and subject $\uparrow.SUBJ$ meanings as arguments to return 
+the meaning of the f-node that the verb projects onto, $\uparrow$.
+
+In the lexicon, the $\uparrow$ meta-variables are uninstantiated.
+Thus a word like {\bf John} can occur as either subject or object, and
+it is only a particular parse that can tell us which.  Given the parse
+of the sentence ``{\it John saw Fred}'', we can instantiate the
+lexical meta-variables to specific values, namely
+\begin{center}
+\begin{tabular}{lll}
+{\it Word} & {\it Meaning} & {\it Glue}\\ \hline
+{\bf John} & \lf{john} & $\uparrow$
+                       := $g$\\[1ex]
+{\bf Fred} & \lf{fred} & $\uparrow$ 
+                       := $h$\\[1ex]
+{\bf saw}  & $\lambda y.\lambda x.\;\lf{see}(x,y)$
+              & $\uparrow.OBJ\linimp(\uparrow.SUBJ\linimp \uparrow)$\\
+           &  & := $f.OBJ \linimp (f.SUBJ \linimp f)$\\
+           &  & := $h\linimp (g\linimp f)$
+\end{tabular}
+\end{center}
+(To determine the value of $f.OBJ$, we have to follow the $OBJ$ path from
+the $f$ node to see which node is its value --- in this case $h$.)
+
+As a result of this instantiation of general lexical entries, we get three
+lexical premises
+\begin{center}
+\begin{tabular}{rcl}
+\lf{john} & : & $g$\\
+\lf{fred} & : & $h$\\
+$\lambda y.\lambda x.\;\lf{see}(x,y)$ & : & $h\linimp (g\linimp f)$
+\end{tabular}
+\end{center}
+The expressions on the left of the colon are {\em meaning terms}, written
+in some chosen meaning representation language.  The expressions on the right
+of the colons are linear logic formulas.  The atomic propositions,
+$f$, $g$ and $h$, corresponding to syntactic constituents, represent
+semantics resource that produce and consume meanings.
+
+Given our discussion of the Curry-Howard isomorphism in previous chapters,
+we can draw an immediate connection between meaning terms and proof terms.
+Meaning terms are simply proof terms embued with some additional internal
+structure.  In the conventional CHI, proof terms for premises / assumptions
+are just arbitrary constants or variables.  But here, the lexicon assigns
+non-arbitrary terms, sometimes with additional structure, to the lexical
+premises.  Nonetheless, the combination of the meaning terms to form larger
+terms follows exactly the same rules as for the ordinary CHI.
+
+If we ignore the meaning terms for ther moment, we have three lexical
+premises: $g$, $h$ and $h\linimp(g\linimp f)$.  What we want to do is
+find a derivation that consumes these lexical premises to construct
+a semantic output for the entire sentence, $f$.  In this case, the
+derivation is very simple:
+\begin{center}
+\begin{prooftree}
+\[h\linimp(g\linimp f) \hspace*{2em} h \justifies g\linimp f \using \linimpE\]
+\hspace*{2em} g \justifies f \using \linimpE
+\end{prooftree}
+\end{center}
+To construct the meaning term for $f$, we include the meaning terms for the
+premises, and combine them by means of the functional application that
+corresponds to the rules of implication elimination:
+\begin{center}
+\begin{prooftree}
+\[\lambda y.\lambda x.\;\lf{see}(x,y):h\linimp(g\linimp f) \hspace*{2em} 
+ \lf{fred}:h 
+\justifies \lambda x.\;\lf{see}(x,\lf{fred}):g\linimp f \using \linimpE\]
+\hspace*{2em} \lf{john}:g \justifies 
+\lf{see}(\lf{john},\lf{fred}):f \using \linimpE
+\end{prooftree}
+\end{center}
+To ease readability we have performed internal $\beta$-reductions on
+the meaning terms.  The unreduced meaning term constructed for $f$ is
+\[[\lambda y.\lambda x.\;\lf{see}(x,y)](\lf{fred})(\lf{john})\]
+The additional reductions are due solely to the extra structure of the
+initial meaning terms assigned by the lexicon.
+
+To summarise from this initial example:  syntactic analysis and lexical lookup
+provides a collection of lexical premises.  Each premise comprises
+a meaning term paired with a linear logic formula (or glue
+formulas).  Atomic propositions in the glue formulas correspond to
+syntactic constituents discovered in parsing.  A glue derivation attempts
+to establish
+\[\Gamma\vdash {\cal M}:\sigma\]
+where $\Gamma$ represents the lexical premises, $\sigma$ is the atomic
+proposition corresponding to the sentence as a whole, and $\cal M$ is the
+meaning term for the sentence constructed via the Curry-Howard isomorphism.
+
+More generally, glue semantics assumes that two levels of logical
+representation are
+at work in the semantic interpretation of natural language:
+\begin{enumerate}
+\item Meaning logic:\\
+The logic used to represent the meanings of words, phrases and sentences.
+
+Ideally, one would like to allow for some modularity in the choice
+of meaning language: e.g. first order logic, higher order internsional
+logic, discourse representation theory, situation semantics, or whatever
+one's favourite meaning representation language is. Glue analyses have
+to date been developed for a Montagovian style of higher order intensional
+logic, and for compositional DRT. 
+
+\item Glue logic:\\
+The logic used to deductively specify how meanings for words and phrases
+are to be assembled.   There are various possible choices for
+a glue logic. But some form of linear logic seems appropriate for accounting
+for the basic resource sensitivity of semantic interpretation:
+ in general the meaning of each word and phrase should be used once
+and exactly once.
+\end{enumerate} 
+
+\section{The Core Glue Logic}
+
+We now set out the core glue logic underlying glue semantics.  We do this
+by pointing out that there are  two different versions of glue
+semantics.  An early version (1993-97) that uses a more expressive
+formalism, and a recent version (from 1997) that uses the more 
+restricted formalism exemplified in the last section.  The advantages of
+the recent, restricted version are (1) increased computational tractability,
+and (2) that pretty much all the linguistic analyses originally
+developed in the exressive formalism can be reframed in the 
+restricted version. The restricted formalism also brings out more clearly
+the similarities and differences between glue semantics and the
+kind of categorial semantics outlined in \mycite{Morrill,Carpenter}.
+
+\subsection{An (Over) Expressive Glue Formalism}
+
+\subsubsection{Example Revisited}
+The restricted formalism for glue semantics enforces a sharp separation
+between the meaning logic (in which meaning terms are expressed),
+and the glue logic.  The earlier, more expressive formalism mixes them
+together more.  Let us illustrate by going over our example of 
+``{\it John saw Fred}'' in the earlier formalism.
+
+First, we give the lexical premises  the old and new styles
+\begin{center}
+\begin{tabular}{|l|l|}\hline
+New & Old \\ \hline
+$\lf{john}:g$ & $g\means\lf{john}$\\
+$\lf{fred}:h$ & $h\means\lf{fred}$\\
+$\lambda y.\lambda x.\;\lf{see}(x,y):h\linimp (g\linimp f)$
+& $\forall y,x.\; h\means y \linimp (g\means x \linimp
+f\means\lf{see}(x,y) $\\ \hline
+\end{tabular}
+\end{center}
+The older notation uses the binary predicate
+symbol, $\means$, that pairs glue atoms with meaning language
+expressions. Thus $g\means\lf{john}$ can be read as saying that
+node/resource  $g$ is assigned the meaning \lf{john}. The formula
+$\forall y,x.\; h\means y \linimp (g\means x \linimp
+f\means\lf{see}(x,y)$ says that for any meanings $y$ and $x$, if
+$h$ means $y$, then if $g$ means $x$, $f$ means $\lf{see}(x,y)$.
+
+The derivation to get a meaning
+for $f$ proceeds as follows.  First, universal instantiation gives
+\begin{center}
+\begin{prooftree}
+\mbox{\bf saw} \vdash \forall y,x.\; h\means y \linimp (g\means x \linimp f\means\lf{see}(x,y)
+\justifies \mbox{\bf saw} \vdash h\means Y \linimp \forall x.\;
+      (g\means x \linimp f\means\lf{see}(x,Y)
+\end{prooftree}
+\end{center}
+The antecedent of this, $h\means Y$ matches the premise for `Fred',
+$h\means\lf{fred}$, subject to unifying the variable $Y$ with
+the constant $\lf{fred}$.  This gives us
+\[\mbox{\bf saw, Fred} \vdash  
+\forall x.\;
+      (g\means x \linimp f\means\lf{see}(x,\lf{Fred})\]
+Universal instantiation of the variable $x$ to $X$, and the
+unification of $g\means X$ with $g\means \lf{john}$ then gives us
+\[\mbox{\bf John, saw, Fred} \vdash f\means \lf{see}(\lf{john},\lf{fred})\]
+Thus we get to the same meaning as in the previous section.
+
+Note that in this style of representation, glue inference
+depends on being able to unify meaning expressions.  This has two
+undesirable consequences.  
+\begin{enumerate}
+\item  Unification increases the complexity
+of searching for derivations.  In the example given here, first order
+unification suffices.  But for only slightly more complex examples
+higher-order unification (at the minimum, second-order matching) is
+required.  In the worst cases, higher-order unification is undecidable.
+\item Unification of meaning expressions constrains the range of
+possible derivations.  That is valid pairings of consumers and
+producers --- according to the linear logic glue --- may be ruled out
+because of unification failure.  That is, the meaning expressions
+act as labels on deductions, controlling the range of derivations.
+\end{enumerate}
+The new style of glue representation guarantees that meanings do
+not constrain valid derivations.  There is no need for higher order
+unification, either to construct meanings or to limit derivations.
+On the other hand, the older style is more expressive.
+
+\subsubsection{Defining the Mixed Glue Fragment}
+
+To be more precise, let us specify the older, mixed glue formalism.
+Mixed glue formulas, $G$, can be defined as
+\begin{center}
+\begin{tabular}{lcll}
+$G$ & ::=    & $S\means_e M$ $\mid$ $S\means_t M$ & (basic literals)\\
+    & $\mid$ & $G\tensor G$ & \\
+    & $\mid$ & $G\linimp G$ & \\
+    & $\mid$ & $\Pi\lambda M.\; G$ & (Quantification over M terms)\\
+    & $\mid$ & $\Pi\lambda S.\; G$ & (Quantification over S terms)
+\end{tabular}
+\end{center}
+There are two typed form of basic  literal. The $e$ (for `entity') type,
+$S\means_e M$ assigns a type $e$ meaning expression (M term) to a  
+structure term (S term).  Structure terms are constants referring to
+f-structure nodes,\footnote{More accurately, S terms
+refer to nodes in a semantic structure projected off f-structure --- see
+\mycite{Dalrymple} for details.} or variables over such constants.
+The M term is an expression  in the whatever
+the chosen meaning language is.  The type $t$ (for `truth value')
+literal is exactly the same, except the meaning expression is presumed
+to be of type $t$ rather than type $e$.
+
+Higher order universal quantification over meaning expressions is permitted.
+We use $\Pi$ to represent the universal quantifier to bring out the
+higher-order commitment more clearly.  Typically we abbreviate
+$\Pi\lambda X.\; G$ as $\forall X.\; P$.  Universal quantification over
+S-terms is also permitted.
+
+The language thus defined is a fragment of higher order multiplicative
+linear logic, as used by Saraswat and Lincoln for concurrent linear
+constraint programming.  Its sequent proof rules are shown
+in figure~\ref{figEGL}
+\begin{figure}
+\fbox{
+%\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}\justifies A\vdash A \using axiom\end{prooftree} &\\[6ex]
+
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em} \Delta,A \vdash B
+\justifies \Gamma,\Delta\vdash B\using cut
+\end{prooftree} & \\[6ex]
+
+\begin{prooftree}
+\Gamma,A,B\vdash C \justifies \Gamma,A\tensor B\vdash C \using l
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em} \Delta\vdash B
+\justifies \Gamma\vdash A\tensor B \using r
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em} \Delta,B\vdash C
+\justifies \Gamma,\Delta, A\linimp B\vdash C\using l
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma,A\vdash B \justifies \Gamma\vdash A\linimp B\using r
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\Gamma, Pt\vdash A 
+\justifies \Gamma,\Pi P \vdash A\using l
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash Py \justifies \Gamma\vdash \Pi P r
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\Gamma,A'\vdash B \hspace*{2em} A'\rightarrow_\lambda A
+\justifies \Gamma,A\vdash B \using \lambda l
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma,\vdash A' \hspace*{2em} A'\rightarrow_\lambda A
+\justifies \Gamma\vdash A \using \lambda r
+\end{prooftree}\\[10ex]
+\multicolumn{2}{l}{\small Where $A'\rightarrow_\lambda A$ indicates that $A'$ lambda reduces to $A$,}\\
+\multicolumn{2}{l}{\small and in the right rule for quantification $y$ is not free in $\Gamma$}\\[1ex]
+\end{tabular}
+%\end{center}
+}
+\caption{Proof Rules for higher-order linear logic \label{figEGL}}
+\end{figure}
+The rules allowing lambda reductions to be employed are what brings in
+the need for higher-order unification.
+
+\subsubsection{Core Fragment of Mixed Glue}
+
+Despite the expressive richness of the mixed glue formalism, nearly all
+the analyses framed within it turned out to fall within a more restricted
+fragment identified in \mycite{DalGupLamSar}.  Syntactically, the fragment
+is
+\begin{center}
+\begin{tabular}{rcl}
+\multicolumn{3}{l}{Syntax of Core Fragment of Mixed Glue}\\[1ex]
+\angb{S-Term} & ::= & \angb{e-term} $\mid$ \angb{t-term} 
+                      \angb{t-var}\\[1ex]
+\angb{meaning} & ::= & \angb{meaning-const}\\
+              &$\mid$&  \angb{meaning-var}\\
+              &$\mid$&  \angb{meaning}(\angb{meaning},\ldots,\angb{meaning})\\[1ex]
+
+\angb{formula} & ::= & \angb{S-Term} $\means$ \angb{meaning}\\
+              &$\mid$& $\forall$\angb{t-var}.\angb{formula}\\
+              &$\mid$& $\forall$\angb{meaning-var}.\angb{formula}$_1$
+                        $\linimp$ \angb{formula}$_2$ \\
+              & & \hspace*{1em} if $\generic$(\angb{meaning-var},\angb{formula}$_1$)
+\end{tabular}
+\end{center}
+This formulation has a number of properties.  First, it pushes the
+$e$/$t$ distinction on the structure terms.  Second, it only allows
+quantification over type $t$ structure constants.  Third, only implication
+is used. Fourth, although meaning variables can range freely over meanings,
+the form that the quantification can take is limited.
+
+The restrictions on quantification over meanings amounts to
+the following: (1) all quantification over meaning is universal; (2)
+every quantification over a meaning $X$ is associated with an implication,
+$P\linimp Q$; (3) the genericity of $P$ with respect to $X$ means that
+any meanings in $P$ can only be built from $X$ and other meaning variables.
+These restrictions ensure that any quantification over a meaning can be
+associated with a lambda abstraction, as we will shortly see.
+
+The genericity condition is defined as follows
+\begin{enumerate}
+\item $\generic(M,g\means M)$
+\item $\generic(M,\forall S.\;P)$ (where $S$ is a structure var) if\\ 
+      $\generic(M,P)$. 
+\item $\generic(M,\forall N.\;P\linimp Q)$ where ($M$ is a  meaning var) if\\
+      $\generic(N,P)$ and $\generic(M(N),Q)$
+\end{enumerate}
+The force of the genericity condition can be seen if we define
+projections onto the structures and meanings of the core mixed formulas
+as follows
+\begin{quote}
+Structure (or type) projection, $\tau$
+\begin{quote}
+$\tau(g\means {\cal M}) = g$\\
+$\tau(\forall S.\;P) = \forall S.\tau(P)$ ($S$ is structure var)\\
+$\tau(\forall M.\; P\linimp Q) = \tau(P)\linimp \tau{Q}$ 
+     ($M$ is meaning var)
+\end{quote}
+
+Meaning projection, $\mu$
+\begin{quote}
+$\mu(g\means {\cal M}) = {\cal M}$\\
+$\mu(\forall S.\;P) = \mu(P)$\\
+$\mu(\forall M. P\linimp Q) = \lambda M.\mu(Q)$\\
+\hspace*{2em} --- provided $P$ is {\em generic} for $M$
+\end{quote}
+\end{quote}
+Consider the following formula, which is generic in $M$:
+\[\forall N.\; s\means N \linimp r\means M(N)\]
+It has the meaning projection $\lambda N.M(N)$, which
+$\eta$-reduces to $M$.  In general, 
+\begin{quote}
+If $\generic(M,P)$ then $\mu(P) = M$\\
+up to $\alpha$-,$\beta$-,$\eta$-conversion
+\end{quote}
+This ensures that quantification over meanings in the core
+mixed formalism corresponds to lambda abstraction in its meaning
+projection.
+
+An important point to note about the meaning and type projections just
+defined is that they allow us to translate certain mixed glue
+formulas into the newer glue formalism. A mixed formula $\phi$
+translates to $\mu(\phi):\tau(\phi)$.  That is, we just pair the
+meaning and type projections of phi.  For example
+\begin{center}
+\begin{tabular}{|l|l|}\hline
+$\phi$ & $\mu(\phi):\tau(\phi)$ \\ \hline
+  $g\means\lf{john}$ & $\lf{john}:g$\\
+$h\means\lf{fred}$ & $\lf{fred}:h$  \\
+$\forall y,x.\; h\means y \linimp (g\means x \linimp
+f\means\lf{see}(x,y) $
+& $\lambda y.\lambda x.\;\lf{see}(x,y):h\linimp (g\linimp f)$\\ \hline
+\end{tabular}
+\end{center}
+However, not all mixed glue formulas successfully
+receive a meaning projection.  As a rather contrived example, the
+formula 
+\[\forall X. h\means X \linimp(g\means\lf{john}\linimp f\means \lf{likes}(\lf{john},X))\]
+does not get a meaninng projection, since the embedded implication is
+not generic in $X$.  But this is in any case a very perverse lexical
+premise: a verb that means ``likes'', but only if its subject means ``John''.
+
+\subsection{Core Glue Fragment}
+
+We now describe the core fragment of the unmixed glue formalism. We'll
+start by defining the language, which is essentially the implicational
+fragment of linear logic plus universal quantification over atomic
+propositions / type, along with proof/meaning terms.
+
+\begin{center}
+\begin{tabular}{rcl}
+\angb{meaning} & ::= & \angb{meaning-const}\\
+       &$\mid$&  \angb{meaning-var}\\
+       &$\mid$& \angb{meaning}(\angb{meaning},\ldots,\angb{meaning})\\
+       &$\mid$& $\lambda$\angb{meaning-var}.\angb{meaning}\\[1ex]
+
+\angb{type} & ::= & \angb{e-term} $\mid$ \angb{t-term} 
+                      \angb{t-var}\\
+       &$\mid$& \angb{type}$\linimp$\angb{type}\\
+       &$\mid$& $\forall$\angb{t-var}$_1$.\angb{type}\\[1ex]
+
+\angb{glue} & ::= & \angb{meaning}:\angb{type}
+\end{tabular}
+\end{center}
+We call the linear logic propositions `types' because of the
+underlying Curry-Howard Isomorphism (CHI).  The propositions specify the
+types of the meanings in that they indicate what other (types of)
+meaning they should combine with.
+
+Note that we are restricting quantification over types to
+quantification over atomic types of sort $t$.  Technically this makes
+the logic second-order, but it is a very mild form of quantification.
+We could also regard the types as constituting a propositional logic
+with limited propositional schema.
+
+We will represent the proof rules in natural deduction format (since
+the whole point is to combine meaning terms via the Curry-Howard
+isomorphism.  These are shown in figure~\ref{figGLND}.
+\begin{figure}
+\begin{center}
+\fbox{
+\begin{tabular}{c}
+\begin{prooftree}
+\justifies M:T \vdash \justifies M:T \using identity
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\Gamma, M:T \vdash N:S \justifies \Gamma\vdash \lambda M.N:T\linimp S
+\using \linimpI
+\end{prooftree}\\[6ex]
+ 
+ 
+\begin{prooftree}
+\Gamma\vdash M:T\linimp S \hspace*{2em} 
+\Delta \vdash N:T
+\justifies
+\Gamma,\Delta\vdash M(N):S \using \linimpE
+\end{prooftree}\\[6ex]
+ 
+\begin{prooftree}
+\Gamma \vdash M:T \justifies \Gamma\vdash M:\forall R.T
+\using \forallI \mbox{\small ($R$ new in $\Gamma$)} 
+\end{prooftree}\\[6ex]
+ 
+\begin{prooftree}
+\Gamma\vdash M:\forall R.T \justifies  \Gamma\vdash M:T[S/R]
+\using\forallE
+\end{prooftree}\\[2ex]
+\end{tabular}
+}
+\end{center}
+\caption{Proof Rules for Core Glue Fragment \label{figGLND}}
+\end{figure}
+These rules are standard, except that normally the quantification
+rules would give rise to an abstraction or application in the proof
+terms.  This is not necessary here.   
+
+{\bf [Give explanation in terms
+of limited version of system F]}
+ 
+\subsubsection{Possible Extensions}
+
+The core fragment represents a trade-off between expressive power and
+computational tractability. A large number of complex linguistic
+phenomena can be handled within the implication plus limited
+quantification fragment.  However,some phenomena appear to
+motivate expanding the core to allow
+\begin{itemize}
+\item Tensor
+\item Exponentials
+\item Less restricted quantification
+\end{itemize}
+See final section.
+
+
+
+
+\section{Ambiguity and Multiple Derivations}
+
+A crucial feature of natural language is widespread ambiguity.
+This is a design `feature' rather than a bug: without ambiguity
+communication would become impossibly verbose.  Human interpreters
+of language a very good at resolving ambiguity by exploiting
+a variety of knowledge sources.
+
+Not all ambiguity occurs at the syntactic or lexical level.
+If we assume that the principle concern of a grammar is to account
+for well-formedness judgements, then there are syntactically
+and lexically unambiguous sentences that nontheless allow multiple
+interpretations.  Quantifier scope ambiguities are a well-known
+example of this.  A sentence like ``{\it A professor interviewed
+every candidate}'' has two readings: one where the same professor
+does all the interviewing, and another where different candidates may
+have been interviewed by different professors.  But there are no good
+grounds for positing a syntactic or lexical ambiguity in the sentence
+that could give rise to these two interpretations.  Let us therefore
+call this `semantic ambiguity'
+
+Recall that a glue derivation aims to establish
+\[\Gamma \vdash {\cal M}:s\]
+where $\Gamma$ is a collection of lexical premises derived from a
+syntactically analysed sentence, $s$ is the semantic resource
+corresponding to the sentence, and $\cal M$ is a meaning term derived
+for $s$.  Semantic ambiguity arises when, from a given set of
+premises, multiple derivations are possible.
+
+\subsubsection{A Modifier Scope Ambiguity}
+As a slightly artificial example of multiple derivations, 
+consider the nominal phrase ``{\it
+alleged criminal from London}.''
+Assume the phrase has
+a syntactic structure like the following:\footnote{
+The (f-)structure presented here flattens out what would be
+a syntactic attachment ambiguity in a phrase structure tree:
+\begin{center}
+\begin{tabular}{ll}
+\begin{tabular}{cccc}
+                  & \node{az}{N} &             & \\[2ex]
+\node{bz}{Adj}     &             & \node{cz}{N} & \\[2ex]
+\node{dz}{alleged} & \node{ez}{N} &             & \node{fz}{PP}\\[2ex]
+                  & \node{gz}{criminal} & &\node{hz}{from London}
+\end{tabular}
+\nodeconnect{az}{bz}
+\nodeconnect{az}{cz}
+\nodeconnect{bz}{dz}
+\nodeconnect{cz}{ez}
+\nodeconnect{cz}{fz}
+\nodeconnect{ez}{gz}
+\nodetriangle{fz}{hz}
+
+&
+\begin{tabular}{cccc}
+                  &             & \node{ay}{N} & \\[2ex]
+                  & \node{by}{N} &             & \node{cy}{PP}\\[2ex]
+\node{dy}{Adj}     &             & \node{ey}{N} & \node{fy}{from London}\\[2ex]
+\node{gy}{alleged} &             & \node{hy}{criminal} &
+\end{tabular}
+\nodeconnect{ay}{by}
+\nodeconnect{ay}{cy}
+\nodeconnect{by}{dy}
+\nodeconnect{by}{ey}
+\nodetriangle{cy}{fy}
+\nodeconnect{ey}{hy}
+\nodeconnect{dy}{gy}
+\end{tabular}
+\end{center}
+} %end footnote
+\begin{center}
+\begin{tabular}{l}
+$ f:\begin{avm} 
+PRED  ~~~~\mbox{`criminal'} 
+\\[1ex]
+MODS ~~~\{\begin{avm} 
+                 \mbox{`alleged'}
+            \end{avm}, 
+           \begin{avm} 
+                  \mbox{`from London'}
+          \end{avm} \}\\
+\end{avm}$
+\end{tabular}
+\end{center}
+Assuming the following meaning constructors\footnote{
+In fact, we would want to derive the constructor for ``{\em from
+London}'' from two lexical premises as follows:
+\begin{center}
+\begin{prooftree}
+\mbox{london}:g 
+\hspace*{3em}
+\lambda y\lambda P\lambda x.\; P(x)\wedge \mbox{from}(y,x):g\linimp f\linimp f
+\justifies
+\lambda P \lambda x.\; \mbox{from}(\mbox{london},x)\wedge
+P(x):f\linimp f
+\end{prooftree}
+\end{center}
+}
+\begin{center}
+\begin{tabular}{lll}
+$\lambda x.\; \mbox{criminal}(x)$ &:& $f$\\
+$\lambda P.\; \mbox{alleged}(P)$ &:& $f\linimp f$\\
+$\lambda P \lambda x.\; \mbox{from}(lon,x)\wedge P(x)$ &:& $f\linimp f$
+\end{tabular}
+\end{center}
+there are two distinct (normal form) derivations
+\begin{center}
+\begin{prooftree}
+   \lambda P \lambda x.\; \mbox{from}(lon,x)\wedge P(x): f\linimp f
+   \hspace*{1.5em}
+   \[ \mbox{alleged}: f\linimp f
+     \hspace*{1.5em}
+       \mbox{criminal}:f
+     \justifies
+       \mbox{alleged}(\mbox{criminal}):f
+     \using \linimp E
+    \]
+   \justifies
+     \lambda x.\;
+     \mbox{from}(lon,x)\wedge\mbox{alleged}(\mbox{criminal})(x) : f
+   \using \linimp E
+\end{prooftree}
+
+\bigskip
+\bigskip
+\bigskip
+
+\begin{prooftree}
+   \mbox{alleged}: f\linimp f
+   \hspace*{1.5em}
+   \[ \lambda P \lambda x.\; \mbox{from}(lon,x)\wedge P(x) : f\linimp f
+     \hspace*{1.5em}
+       \mbox{criminal}:f
+     \justifies
+       \lambda x.\; \mbox{from}(l,x)\wedge \mbox{criminal}(x):f
+     \using \linimp E
+    \]
+   \justifies
+     \mbox{alleged}(\lambda x.\; \mbox{from}(lon,x)\wedge
+       \mbox{criminal}(x)) : f
+   \using \linimp E
+\end{prooftree}
+\end{center}
+In the first derivation, $x$ is from London and alleged to be 
+criminal.  In the second derivation, $x$ is not only alleged to be
+criminal, but also alleged to be from London.  The two derivations
+arise as the result of different ways of permuting the $f\linimp f$
+types to derive an $f$ from an $f$.
+
+\subsection{Quantified NPs in Glue Semantics}
+
+Quantifier scope ambiguities are just an instance of the kind of
+modifier scope ambiguity illustrated above.  However, quantified noun
+phrases have a slightly more complex type than the nominal modifier
+{\it alleged} and {\it from London}.
+
+Let us consider the sentence ``{\it Everyone saw someone}.'' Assume
+the following f-structure and lexical premises:
+\begin{center}
+\begin{tabular}{l}
+\node{fn}{$f_t$}$:\begin{avm} 
+PRED  ~~~~\mbox{`saw'} 
+\\[1ex]
+SUBJ ~~~$\node{gn}{$g_e$}$:\begin{avm} 
+                    PRED ~~\mbox{`everyone'} \\
+            \end{avm}
+\\[1ex]
+OBJ ~~~~$\node{hn}{$h_e$}$:\begin{avm} 
+                    PRED ~~\mbox{`someone'} \\
+          \end{avm} \\
+\end{avm}$
+\end{tabular}
+\end{center}
+\begin{itemize}
+\item $\lf{everyone}: \forall S_t.\; (g_e\linimp S_t) \linimp S_t$
+\item $\lf{someone}: \forall T_t.\; (h_e\linimp T_t) \linimp T_t$
+\item $\lambda y,x. \lf{see}(x,y): h_e\linimp(g_e\linimp f_t)$
+\end{itemize}
+Note that we have shown the semantic resources sorted according to
+whether they are sort $e$ or sort $t$. The variables $S_t$ and
+$T_t$ range  over constants or sort $t$.  In this example there is
+only one such constant, $f_t$.  We can therefore use the $\forallE$
+rule to eliminate the quantifiers (leaving the meaning terms
+unchanged), to derive a simplified set of premises (with sorts no
+longer explicitly marked):
+\begin{quote}
+ $\lf{everyone}: (g\linimp f) \linimp f$\\
+$\lf{someone}: (h\linimp f) \linimp f$\\
+$\lambda y,x. \lf{see}(x,y): h\linimp(g\linimp f)$\\
+\end{quote}
+There are two derivations of $f$ from these premises, shown first
+without the meaning terms.
+\begin{center}
+\begin{prooftree}
+\[
+ \[
+   \[[h]^1 \hspace*{1em} h\linimp(g\linimp f)
+        \justifies g\linimp f \using \linimpE\]
+     (g\linimp f)\linimp f
+       \justifies f \using \linimpE
+ \]
+ \justifies
+ h\linimp f \using \linimpIi{1}
+\]
+(h\linimp f)\linimp f
+\justifies f \using \linimpE
+\end{prooftree}
+\end{center}
+
+
+\begin{center}
+\begin{prooftree}
+\[
+ \[
+  \[
+   \[ [g]^2
+     \[[h]^1 \hspace*{1em} h\linimp(g\linimp f)
+          \justifies g\linimp f \using \linimpE
+      \]
+      \justifies f\using \linimpE
+    \]
+    \justifies h\linimp f \using \linimpIi{1}
+  \]
+  (h\linimp f)\linimp f
+  \justifies f\using \linimpE
+ \]
+ \justifies g\linimp f\using \linimpIi{2}
+\]
+(g\linimp f)\linimp f
+\justifies f\using \linimpE
+\end{prooftree}
+\end{center}
+
+Including the meaning terms, we get the following for the
+first derivation (internal lambda
+reductions performed to increase readability).
+\begin{center}
+\tiny
+\begin{prooftree}
+\[
+ \[
+   \[[Y:h]^1 \hspace*{1em} \lambda y,x.\lf{see}(x,y):h\linimp(g\linimp f)
+        \justifies \lambda x.\lf{see}(x,Y):g\linimp f \using \linimpE\]
+     \lf{everyone}:(g\linimp f)\linimp f
+       \justifies \lf{everyone}(\lambda x.\lf{see}(x,Y)):f \using \linimpE
+ \]
+ \justifies
+ \lambda Y.\lf{everyone}(\lambda x.\lf{see}(x,Y)):h\linimp f \using \linimpIi{1}
+\]
+\lf{someone}:(h\linimp f)\linimp f
+\justifies \lf{someone}(\lambda Y.\lf{everyone}(\lambda x.\lf{see}(x,Y))):f \using \linimpE
+\end{prooftree}
+\end{center}
+The reader can verify that the second derivation yields
+\[\lf{everyone}(\lambda X.\lf{someone}(\lambda Y.\lf{see}(X,Y)))\]
+as a meaning term (after $\alpha\beta$-conversion).
+
+
+Having seen some derivations, let us try to give the intuitions behind
+this treatment of quantified NPs.  The sorts on the
+type $(g_e\linimp S_t)\linimp S_t$  reflect the familiar
+Montagovian type $((e,t),t)$ for quantifiers, which takes a one
+place predicate into a truth value.  
+
+In syntactic terms, the type
+$(g_e\linimp S_t)\linimp S_t$ says that the quantifier is looking for
+a constituent $S$ of sort $t$ which depends on the  
+noun phrase $g$.  The dependency may be because $S$ directly 
+subcategorizes for
+$g$ (i.e. $g$ is a required argument of $S$).  Or the dependency may 
+arise indirectly because $S$ is constructed using some constituent that 
+in turn subcategorizes for $g$.  Having found a constituent $S$ with
+an undischarged dependency on
+$g$ (i.e. $g_e\linimp S_t$), the noun phrase discharges the constituent
+to discharge the dependency; it consumes $g_e\linimp S_t$ to give a
+modified version of the constituent $S_t$.
+
+More semantically, the dependency on $g$ introduces a variable (corresponding
+to an assumption in the derivation) at the point where $g$ is subcategorized
+for.  The variable is bound by the quantifier (discharged in the derivation)
+at $S$.
+
+The fact that $S$ is a variable means that a quantified noun phrase may 
+potentially take scope over any constituent of sort $t$.  However the
+dependency on $g$ limits the number of constituents that can in fact 
+form the scope of the quantifier.  The limitations rule out precisely
+those scoping possibilities that would lead to either unbound variables or
+vacuous quantification in the semantic representations.  That is, the
+range of possible glue derivations is sound and complete with respect
+to producing all possible quantifier scopings that do not involve
+unbound variables or vacuous quantification, as shown in \mycite{DalLamPerSar}.
+
+As an example of how unwanted scopings are prevented, we can consider a stock
+example from the literature on quantifier scope: ``{\it Every representative
+of a company saw a sample}.''  As pointed out in \mycite{HobbsShieber}, rather
+than at least 6 scopings as the free permutation of the three quantifiers
+would suggest, this sentence only has five scopings.  Permutations
+ruled out because of unbound variables (shown underlined) are
+\begin{itemize}
+\item $\forall r. \lf{rep-of}(r,\underline{c}): 
+   \exists c. \lf{company}(c): \exists s. \lf{sample}(s): \lf{see}(r,s)$
+\item $\forall r. \lf{rep-of}(r,\underline{c}): 
+   \exists s. \lf{sample}(s): \exists c. \lf{company}(c):  \lf{see}(r,s)$
+\end{itemize}
+Permissible scopings are
+\begin{itemize}
+\item $\forall r. [\exists c. \lf{company}(c):\lf{rep-of}(r,c)]: 
+    \exists s. \lf{sample}(s): \lf{see}(r,s)$
+\item $\exists s. \lf{sample}(s):
+   \forall r. [\exists c. \lf{company}(c):\lf{rep-of}(r,c)]: 
+     \lf{see}(r,s)$
+\item $\exists c. \lf{company}(c): \forall r. \lf{rep-of}(r,c): 
+    \exists s. \lf{sample}(s): \lf{see}(r,s)$
+\item $\exists s. \lf{sample}(s): 
+  \exists c. \lf{company}(c): \forall r. \lf{rep-of}(r,c): 
+    \lf{see}(r,s)$
+\item $\exists c. \lf{company}(c): \exists s. \lf{sample}(s): 
+   \forall r. \lf{rep-of}(r,c): 
+    \lf{see}(r,s)$
+\end{itemize}
+
+To show how unwanted scopings are ruled out, consider the four partial
+glue derivations from lexical premises:
+\begin{center}
+\begin{tabular}{lll}
+1. & see(r,s): & 
+\begin{prooftree}
+[r_e]^1 \hspace*{1em} [s_e]^2 \hspace*{1em} r_e\linimp s_e\linimp f_t \justifies f_t
+\end{prooftree}\\[6ex]
+2. & a-sample(s): &
+$(s_e\linimp X_t)\linimp X_t$\\[6ex]
+3. & a-rep(r)-of(c): &
+\begin{prooftree}
+ \[[c_e]^3 \hspace*{1em} c_e\linimp ppn_t \justifies pp_t\]
+ ppn_t\linimp (r_e\linimp Y_t) \linimp Y_t
+ \justifies (r_e\linimp Y_t) \linimp Y_t
+\end{prooftree}\\[6ex]
+4. &  a-company(c): &
+$(c_e \linimp Z_t)\linimp Z_t$\\
+
+\end{tabular}
+\end{center}
+Note that there are two sort $t$ constituents: the whole sentence $f_t$,
+and the prepositionally modified noun,  ``reprentative(r)-of(c)'', here
+identified as $ppn_t$.  This means that the variables $X_t$, $Y_t$ and
+$Z_t$ could all potentially be instantiated to either $f_t$ or $ppn_t$.
+
+But for $X_t$ and $Y_t$ the only workable instantiation is $f_t$. This
+is because $ppn_t$ cannot be made to have a dependency on $r_e$ or $c_e$.
+Only $f_t$ has this dependency, as shown by the assumptions of
+$[r_e]^1$ and $[s_e]^2$ in partial derivation 1.
+
+For $Z_t$, one workable instantiation is $ppn_t$ since this constituent
+directly depends on $c_e$.  That is, the NP ``{\it a company}'' can
+take the nominal predication ``{\it representative of \_}'' as its scope.
+But it is also possible to instantiate $Z_t$ to $f_t$, so that 
+``{\it a company}'' takes the whole sentence as its scope.  To see why,
+note that we can combine the partial derivations 1 and 3 as follows
+\begin{center}
+\begin{prooftree}
+\[
+ \[
+ \[
+  [r_e]^1 \hspace*{1em} [s_e]^2 \hspace*{1em} 
+   r_e\linimp s_e\linimp f_t \justifies f_t
+ \]
+ \justifies r_e\linimp f_t \using \linimpIi{1}
+\]
+\[\[[c_e]^3 \hspace*{1em} c_e\linimp ppn_t \justifies pp_t\]
+   ppn_t\linimp (r_e\linimp Y_t) \linimp Y_t
+   \justifies (r_e\linimp Y_t) \linimp Y_t
+\]
+\justifies f_t \using Y=f
+\]
+\justifies c_e\linimp f_t \using \linimpIi{3}
+\end{prooftree}
+\end{center} 
+That is, by scoping ``{\it every representative of \_}'' over the sentence
+$f_t$, a new dependency on $c_e$ is acquired by $f_t$.  This means that
+``{\it a company}'' can then take scope over $f_t$.  
+
+The important point
+is  that
+``{\it a company}'' {\bf must} take wide scope over 
+``{\it every representative of \_}'', if both scope over the entire
+sentence $f$. For otherwise the necessary
+dependency of $f$ on $c$ won't be introduced.  The two scopings that
+are bad because of unbound variables are exactly the ones that reverse
+this required scoping.
+
+\subsubsection{Summary}
+
+The treatment of quantified noun phrases in glue semantics is something
+that many people find initially hard to grasp; we hope that the preceding
+discussion aids rather than prevents understanding.  One of the
+very significant advantages of the glue treatment of quantifier scope
+ambiguity, and more generally of modifier scope ambiguity, is the following.
+It does not require additional complex formal machinery, such as Cooper 
+storage \cite{Cooper}, to generate alternative scopings.  Alternative
+scopings emerge directly from the basic mechanisms for semantic 
+interpretation, without further stipulation.
+  Moreover, it is not only quantifier scope ambiguities that are handled
+in this way.  Other modifier scope ambiguities, like the ``{\it alleged
+criminal from London}'' example, or the scoping of negation and
+modals, are covered.
+
+To be sure, the lack of additional scoping machinery is also an advantage 
+shared
+by categorial grammar and its semantics.  However, the much tighter
+correspondence between syntactic and semantic derivations in categorial
+grammar means that the sometimes inexact alignment between surface
+syntactic order and semantic scope can be problematic.  This leads to,
+for example, the addition of an extra `scope' connective to the Lambek
+calculus \mycite{Moortgat}, or the further exploitation of multi-model
+or labelled deductive refinements orinally added to deal with certain
+word order phenomena (see next chapter).  {\bf [More discussion on this:
+here or later?]}
+
+
+\section{Structure Sharing Between Derivations}
+
+\subsection{Ambiguity Managment}
+
+In this section we discuss a very significant computational issue raised
+by multiple derivations and ambiguity.  We start with another favoured
+example of semanticists
+\begin{quote}
+{\it Most politician can fool some of the people all of the time, a few
+politicians can fool all of the people some of the time, but no politicians
+can fool all of the people all of the time.}
+\end{quote}
+This sentence is not unduly difficult to understand, but if one calculates
+the number of alternate quantifier and modifier scopings, the number
+of interpretations is astronomical. The precise number depends on
+particular assumptions about the semantic representation --- e.g. does
+it include quantification over events, etc.  As an upper bound, assume
+12 scope taking modifiers, all of which can permute freely only over the
+entire sentence.  This leads to $12!$ or around 500 million readings.
+
+This degree of ambiguity needs careful management, and 
+is a major issue in computational linguistics.  Three broad approaches
+to ambiguity management can be discerned:
+
+\paragraph{Pruning}
+Prune unlikely subderivations as early as possible to prevent the search
+space exploding.  This is fine so long as one can measure likelihood
+on a purely local basis, so that one does not run into problems with
+local minima.  Otherwise, there is a danger that a locally unlikely 
+sub-derivation could form part of the most likely overall derivation. 
+Pruning can lead to incompleteness: the correct / most likely derivation
+is never found. 
+
+\paragraph{Underspecification}
+In semantics, underspecification often amounts to finding a spanning
+set of partial derivations, in much the way that was done for the
+``{\it Every representative of a company} example.  Since combinatorial
+explosion results from different ways of putting these partial derivations
+together, this final step in the derivation is not taken.  Typically a
+set of constraints is given limiting the number of ways the partial
+derivations can be assembled.  Resolution amounts to tightening the
+constraints until only one or a small number of full derivations remain
+possible
+
+\paragraph{Structure Sharing}
+Structure Sharing is widely used in the management of syntactic ambiguity.  
+The
+key observation is that even when there is massive ambiguity, there is
+a large common structure shared between the different derivations.  Rather
+then recompute this common structure every time, it should be computed
+just once and shared across the derivations.  In parsing, charts are often
+used to facilitate structure sharing.  For context free grammars, they
+allow an exponential number of analyses to be computed in cubic time.
+In theorem proving, memoization or tabular deduction are the analogues
+of charts.
+
+\bigskip
+
+This section discusses how structure sharing can be used in connection
+with glue derivations.  This is an area of active current research:
+a glue implementation operating in conjunction with Xerox's LFG grammar
+and parsing system (the XLE) is being run on sentences like the politicians
+example above.\footnote{Currently, the prolog implementation of the glue
+semantics generates all the readings for the politicians sentence in well 
+under
+half a second on a Sun Ultra 1.  However, this result has yet to be 
+properly confirmed: it has not yet been fully established that the algorithm
+is complete and really does produce {\em all} possible derivations.}  
+
+
+\subsection{Memoisation for Proof Nets}
+
+Morrill's memoisation technique for planar proof nets. 
+Applied to parsing categorial grammars. 
+Crucial use of labelling within inference system.
+Difficulty of
+finding locally correct sub-derivations without planarity
+restrictions. Unaware of any proposals for tabularisation of
+non-planar proof nets.
+
+\subsection{Chart-Based Techniques}
+
+Hepple describes a chart-based technique for deduction with the
+Horn clause fragment of implicational linear logic \mycite{Hepple}.
+This was originally developed for the purposes of categorial parsing,
+but applies directly to the task of glue derivation.
+
+A Horn clause is an implication of the form
+\[A_1 \linimp [A_2 \linimp \ldots (A_n \linimp B)]\]
+Thus both $A$ and $A\linimp (B\linimp C)$ are Horn clauses, but
+$(A\linimp B)\linimp C$ is not a Horn clause.
+
+
+\subsubsection{Sharing and Packing in Charts}
+
+When alternative derivations are possible from a given set of
+premises, the derivations will typically have certain sub-derivations
+in common.  The idea behind tabular methods is to record these
+common sub-derivations, so that they can be re-used in alternative
+wider derivations without having to be reconstructed from scratch each
+time.
+
+There are two basic forms of tabularization.  The first is
+{\em sharing}.   Imagine that you are searching for derivations
+of some conclusion $c$ from a collection of premises $\Gamma$.
+Suppose that you have found a sub-derivation,
+$\pi_1$, of $\phi$ from a sub-collection of premises $\Gamma_1$.
+Suppose there are also two or more sub-derivations of $c$ from $\phi$ plus the 
+remainder of the premises, $\Gamma - \Gamma_1$.
+Then the sub-derivation $\pi_1$ can be combined with all of these
+other subderivations to get a full derivation.  This is shown
+pictorially below:
+
+\underline{Sharing}
+\begin{center}
+\begin{tabular}{llcl}
+{\small
+\begin{tabular}{ccc}
+ & \node{a0}{$\Gamma_1$} &\\
+\node{a}{} & & \node{b}{}\\
+ & $\pi_1$ & \\[2ex]
+ & \node{c}{} &\\
+ & $\phi$ &
+\end{tabular}
+\nodeconnect[tl]{a}[tr]{b}
+\nodeconnect[tl]{a}[b]{c}
+\nodeconnect[tr]{b}[b]{c}
+}
+
+&
+{\small
+\begin{tabular}{ccccc}
+ & & $\Gamma - \Gamma_1$ & &\\
+\node{a1}{} & \node{a2}{} & \node{a01}{} & \node{a3}{} & \node{a4}{}\\[2ex]
+ & & \node{b1}{} & & \\
+ & & $\phi$ & & \\[2ex]
+ & & \node{c1}{} & &\\ 
+ & & $M_1:c$ & &
+\end{tabular}
+\nodeconnect[tl]{a1}[tr]{a2}
+\nodeconnect[tl]{a3}[tr]{a4}
+\nodeconnect[tl]{a1}[b]{c1}
+\nodeconnect[tr]{a4}[b]{c1}
+{\makedash{4pt}
+\nodeconnect[tr]{a2}[b]{b1}
+\nodeconnect[tl]{a3}[b]{b1}
+}}
+&
+\&
+&
+{\small
+\begin{tabular}{ccccc}
+ & & $\Gamma - \Gamma_1$ & &\\
+\node{a1}{} & \node{a2}{} & \node{a02}{} & \node{a3}{} & \node{a4}{}\\[2ex]
+ & & \node{b1}{} & & \\
+ & & $\phi$ & & \\[2ex]
+ & & \node{c1}{} & &\\ 
+ & & $M_2:c$ & &
+\end{tabular}
+\nodeconnect[tl]{a1}[tr]{a2}
+\nodeconnect[tl]{a3}[tr]{a4}
+\nodeconnect[tl]{a1}[b]{c1}
+\nodeconnect[tr]{a4}[b]{c1}
+{\makedash{4pt}
+\nodeconnect[tr]{a2}[b]{b1}
+\nodeconnect[tl]{a3}[b]{b1}
+}
+}
+{\makedash{4pt}
+\anodecurve[t]{a0}[b]{a01}{10pt}[-20pt]
+\anodecurve[t]{a0}[b]{a02}{10pt}[-50pt]
+}
+\end{tabular}
+\end{center}
+
+Sharing slots one sub-derivation into several larger
+derivations.  The flip side of structure sharing
+is {\em packing}.  Packing slots several similar (but distinct)
+sub-derivations into one larger derivation, producing alternate
+versions of the larger derivation.  Effectively the sub-derivations
+are packed together into an equivalence class --- wherever one of the
+sub-derivations can be slotted in, any of the others could also be
+slotted in. 
+
+Suppose that you find two distinct proofs of $\phi$ from a given
+sub-collection of premises, $\Gamma_1$.  Call these $\pi_1$ and
+$\pi_2$. Suppose that we also know that from $\Gamma - \Gamma_1$ and
+$\phi$ we can conclude $c$.  Then either $\pi_1$ or $\pi_2$ can be
+slotted in to produce a deriavtion of $c$ from $\Gamma$.
+
+\underline{Packing}
+\begin{center}
+\begin{tabular}{lcll}
+{\small
+\begin{tabular}{ccc}
+ & \node{a00}{$\Gamma_1$} &\\
+\node{a}{} & & \node{b}{}\\
+ & $\pi_1$ & \\[2ex]
+ & \node{c}{} &\\
+ & $M_1:\phi$ &
+\end{tabular}
+\nodeconnect[tl]{a}[tr]{b}
+\nodeconnect[tl]{a}[b]{c}
+\nodeconnect[tr]{b}[b]{c}
+}
+&
+\&
+&
+{\small
+\begin{tabular}{ccc}
+ & \node{a01}{$\Gamma_1$} &\\
+\node{a}{} & & \node{b}{}\\
+ & $\pi_2$ & \\[2ex]
+ & \node{c}{} &\\
+ & $M_2:\phi$ &
+\end{tabular}
+\nodeconnect[tl]{a}[tr]{b}
+\nodeconnect[tl]{a}[b]{c}
+\nodeconnect[tr]{b}[b]{c}
+}
+
+&
+{\small
+\begin{tabular}{ccccc}
+ & & $\Gamma - \Gamma_1$ & &\\
+\node{a1}{} & \node{a2}{} & \node{a02}{} & \node{a3}{} & \node{a4}{}\\[2ex]
+ & & \node{b1}{} & & \\
+ & & $\phi$ & & \\[2ex]
+ & & \node{c1}{} & &\\ 
+ & & $c$ & &
+\end{tabular}
+\nodeconnect[tl]{a1}[tr]{a2}
+\nodeconnect[tl]{a3}[tr]{a4}
+\nodeconnect[tl]{a1}[b]{c1}
+\nodeconnect[tr]{a4}[b]{c1}
+{\makedash{4pt}
+\nodeconnect[tr]{a2}[b]{b1}
+\nodeconnect[tl]{a3}[b]{b1}
+}}
+
+{\makedash{4pt}
+\anodecurve[t]{a01}[b]{a02}{10pt}[-20pt]
+\anodecurve[t]{a00}[b]{a02}{10pt}[-50pt]
+}
+\end{tabular}
+\end{center}
+
+Sharing and packing can bring about substantial efficiency
+gains.  For example, in parsing context free languages it allows one
+to uncover an exponential number of analyses in cubic time.  For
+derivations in Horn clause linear logic
+\mycite{Hepple:???}, it can find $n!$ derivations in $2^n$
+time.\footnote{The difference between context free parsing and linear
+logic proof is that in parsing words / premises have to kept together
+in contiguous spans.  But in the more general proof case, premises
+can be combined non-contiguously, so long as all premises are eventually
+used once and exactly once.}
+
+\subsubsection{Span Restrictions}
+In (!-free) linear logic, no premise can be used more than once.  
+This means that if we have recorded a sub-derivation of
+$\Gamma_1\vdash\phi$, we cannot slot it into another derivation
+$\Gamma_2,\phi\vdash\chi$ if $\Gamma_1$ and $\Gamma_2$ overlap.
+
+This means that for   sharing and packing, it is essential 
+to record which `span' (or sub-collection) of premises is used in a
+sub-derivation.  Whenever two sub-derivations are combined, their spans
+must be disjoint, and the span of the resulting derivation is the
+union of the two sub-spans.  When packing two sub-derivations
+together, it is essential they have identical spans.  
+
+(The same is true for charts in parsing.  Here, however, a
+span is just a contiguous sequence of words in the sentence to be
+parsed.  Disjointness of spans in parsing forces the following:
+two analyses of overlapping word sequences cannot be combined to
+form a single analysis of the combined sequence.)
+
+Span disjointness and disjoint union for premise
+spans can efficiently 
+be calculated by means of bit vectors.  Recorded subderivation
+has an associated bit vector, with bits set for each premises used
+in constructing the derivation.
+
+
+\subsubsection{Horn Clause Compilation}
+The chart technique above only works for Horn clauses.  However, the core
+glue fragment, though implicational, is not restricted to Horn clauses.
+For example, the instantiated type of a quantifier, $(n\linimp s)\linimp s$,
+is non-Horn.
+
+Hepple presents a technique for the compilation of non-Horn clauses
+into (dependent) Horn clauses.  Rather than present the details, we will
+illustrate the basic idea by means of an example.
+The method compiles the non-Horn formula  
+
+\smallskip 
+\hspace*{5em}$(a\linimp b)\linimp c$
+
+\smallskip\noindent
+into two (Horn) formulas
+
+\smallskip 
+\hspace*{5em}$a^i \mbox{\hspace*{2em} and \hspace*{2em}} b\{a^i\}\linimp c$
+
+\smallskip\noindent
+where $a^i$ is a (uniquely indexed) hypothesis excised from the
+non-Horn implication as a hypothesis; and $b\{a^i\}$ indicates 
+a formula $b$ whose derivation must make use of the excised hypothesis
+$a^i$. (Note that $a$ is {\bf not} a 
+ subformula of $b\{a^i\}$, in the way that $a$ is a
+subformula of $a\linimp b$: it is  merely an annotation on the
+formula $b$ placing conditions on the way it is derived).
+
+ To illustrate,  consider the inference
+$(a\linimp b)\linimp c, \; \; a\linimp b \; \vdash \; c$ with compiled
+Horn clauses.  Compilation of the premises yields $a^i, \; \;
+b\{a^i\}\linimp c$ and $a\linimp b$.  This allows a (Horn) derivation
+{\small \[\begin{prooftree}
+\[a^1 \hspace*{3em} a\linimp b \justifies b\]
+\hspace*{3em} b\{a^1\}\linimp c
+\justifies c
+\end{prooftree}\]}
+Note how the derivation of $b$ makes use of the hypothesis $a^i$, as required.
+
+The basic idea behind the compilation method is that the rule of implication
+introduction 
+\begin{center}
+\begin{prooftree}
+\[ [a]^i\resultsin b\] \justifies a\linimp b \using \linimpIi{i}
+\end{prooftree}
+\end{center}
+allows us to view and implication $a\linimp b$ and a derivation
+of $b$ with an undischarged hypothesis / assumption of $a$.  The compilation
+method drives this rule in reverse, excising a hypothesis of $a$ from
+an implication $a\linimp b$.  The indexing on the hypothesis is essential:
+we have to match the right hypothesis with the right implication.
+
+After compilation, the rule of implication elimination needs to be
+revised
+\begin{center}
+\begin{prooftree}
+\[[a]^i\ldots [d]^k\resultsin b\] \hspace*{2em} b\{a^i,\ldots,d^k\}\linimp c
+\justifies c 
+\end{prooftree}
+\end{center}
+This rule necessitates a certain amount of book-keeping.  Any formula
+needs to be marked with the set of undischarged excised hypotheses
+used to derive it --- its index set.  Showing these in braces before the formulas 
+we could rewrite
+the elimination rule as
+\begin{center}
+\begin{prooftree}
+ \{\phi\}B \hspace*{2em} \{\psi\}(B\{i,\ldots,k\}\linimp C
+\justifies \{\phi\uplus\psi - i,\ldots,k\}C 
+\end{prooftree}
+\end{center}
+
+{\bf [term assignment for rule: follow Hepple or Lamping \& Gupta: 
+which is easier to explain?]}
+ 
+\subsection{Skeletons and Modifiers}
+
+Modifiers are prevalent in natural language, both in syntax and semantics.
+Syntactically, an adjective like e.g. ``{\it alleged}''
+modifies a noun to produce another noun.  Semantically, it consumes
+a noun meaning and produces a modified version of it.  At an intuitive
+level, adjectives thus have a logical type $N\linimp N$, where $N$ is the
+type of a noun.  In glue semantics, logical identities of this form
+signal the presence of a modifier. 
+
+To a logician,
+interested only in establishing whether a particular conclusion
+follows from a set of premises, logical identities corresponding to
+modifiers are just noise;
+throwing them away whenever they
+are encountered simplifies the search for a proof without affecting
+the type of the conclusion.  To a semanticist, modifier identities are not
+noise.  Although they do not affect the type of the conclusion, they
+{\em do} affect the meaning term assigned to it.
+Moreover, all ambiguities that are purely semantic in origin arise from
+different ways of inserting modifier identities into underlying skeletal
+(modifier-free) derivations.
+
+\mycite{GuptaLamping98} describe a
+ skeleton-modifier approach to glue derivation 
+(i) initially perform a simple, `noise free' derivation
+of a skeleton structure
+by leaving modifiers to one side whenever they are encountered, and
+then (ii) reintroduce the noise by inserting modifiers into the
+skeleton.
+Under suitable cirmcumstances, the initial derivation can be found 
+deterministically and in linear time, with all the combinatoric
+blow-out being deferred to the second derivation stage.  
+
+As an example of an initial derivation, consider again ``{\em alleged
+criminal from London}'', with premises 1--4:
+\begin{quote}\small
+\begin{tabular}{llllcr}
+1. & $f\linimp f$ & alleged &$\Longrightarrow$ & $f\linimp f$ & (modifier)\\
+2. & $f$          & criminal&$\Longrightarrow$ & $f$ & (skeleton)\\
+3. & $g\linimp(f\linimp f)$ \hspace*{1em} & from&$\Longrightarrow$ & 
+                             \underline{$g$ \ \ \ \ $g\linimp f\linimp f$} &\\
+4. & $g$          & London & & $f\linimp f$ & (modifier)
+\end{tabular}
+\end{quote}
+Premise 1 is immediately held out as a modifier.
+Premises 3 and 4  derive another modifier,
+which gets held out, leaving premise 2 as the single remaining skeleton.
+Note that the result of combining premises 3 and 4 gives rise to a derivation
+tree with internal skeletal structure, whose conclusion is a modifier.
+A consequence of this skeletal structure inside modifiers is that modifiers
+can internally modify other modifiers.
+
+
+Before giving a more precise definition of skeleton and modifier, it is worth
+considering whether Gupta and Lamping skeleton-modifier style of derivation
+is likely to be computationally advantageous.
+
+\subsubsection{Problems with Charts}
+
+Where modifiers are
+present charts miss significant possibilities for structure sharing.
+This can best be illustrated by an example from parsing.  
+Consider ``{\em John said that Fred left yesterday}'',
+where either
+the saying or the leaving Verb Phrase can be modified by the 
+VP$\linimp$VP modifier ``{\em yesterday}''.  If we are able to pull
+out modifiers from skeletons, this choice has a very simple representation:
+\begin{center}
+\small
+\begin{tabular}{cccccccc}
+            & \node{a}{S} & & & & & & \\[2ex]
+\node{b}{NP} &   & \node{c}{VP$_1$} & & & & & \\[2ex]
+\node{d}{John} & \node{e}{V} & & \node{f}{SComp} & & & & \\[2ex]
+  & \node{g}{said} & \node{h}{Comp}& & \node{i}{S} & & & \\[2ex]
+  & & \node{h1}{that} & \node{j}{NP} & & \node{k}{VP$_2$} & 
+                &\node{l}{VP$\linimp$VP} \\[2ex]
+  & & & \node{m}{Bill} & & \node{n}{left} & \hspace*{2em} 
+         &\node{o}{yesterday}\\[2ex]
+\small\it
+\small\it p1 & \small\it p2 & \small\it p3 & \small\it p4 &  
+& \small\it p5 &  & \small\it p6 
+\end{tabular} 
+\nodeconnect{a}{b}
+\nodeconnect{a}{c}
+\nodeconnect{b}{d}
+\nodeconnect{c}{e}
+\nodeconnect{c}{f}
+\nodeconnect{e}{g}
+\nodeconnect{f}{h}
+\nodeconnect{h}{h1}
+\nodeconnect{f}{i}
+\nodeconnect{i}{j}
+\nodeconnect{i}{k}
+\nodeconnect{j}{m}
+\nodeconnect{k}{n}
+\nodeconnect{l}{o}
+{\makedash{4pt}
+\anodecurve[t]{l}[r]{k}{10pt}[50pt]
+\anodecurve[t]{l}[r]{c}{10pt}[50pt]
+}
+\end{center}
+Having obtained the skeleton parse tree, there is a simple two way
+choice about whether to insert the modifier high or low.  Either way,
+the skeleton structure is completely shared between the two analyses.
+
+But a chart-based approach precludes the sharing of this skeleton
+structure.  Suppose that the chart first of all constructs the
+unmodified VP$_1$ ``{\em said that Bill left}'' spanning string
+positions $p2$--$p5$. This will lead to the memoization of the
+following intermediate constuents (string spans marked):
+\begin{quote}
+\begin{tabular}{llll}
+VP:    & $p5$ \hspace*{5em} & NP:    &  $p4$\\
+S:     &  $p4-p5$           & Comp:  &  $p3$\\
+SComp: &  $p3-p5$           & V:     &  $p2$\\
+VP:    &  $p2-p5$           & &
+\end{tabular}
+\end{quote}
+VP$_1$ can then be combined with the modifier ``{\em yesterday}''.  
+
+Not much of the work in building up VP$_1$ can be re-used in the
+analysis that attaches the modifier low, to VP$_2$.
+  First VP$_2$ is combined with ``{\em yesterday}'', and a new
+VP with span $p5-p6$ is recorded.  Because the modified and
+unmodified versions of VP$_2$ have different string spans, we cannot
+re-use the S, and SComp constituents that we built before.  Instead we
+must re-do the work building up from VP$_2$ to VP$_1$ via the S and
+SComp constituents.  In doing so, the chart records the additional
+structures
+\begin{quote}
+VP: $p5-p6$, \hspace*{1.5em} S: $p4-p6$,\hspace*{1.5em} SComp: $p3-p6$,
+\hspace*{1.5em} VP: $p2-p6$
+\end{quote}
+To summarize, the need to ensure
+span consistency can cause the chart to build  shared
+skeleton structure multiple times. Localized differences in
+structure, namely the inclusion or not of a modifier at a particular
+point, lead to unnecessary global (span) distinctions being drawn.
+A skeleton-modifier approach to processing is
+appealing because  it exploits  kinds of structure
+sharing that chart-based approaches miss.  It becomes doubly
+appealing if  modifier insertion can employ further structure sharing.
+
+\subsubsection{Defining Skeleton and Modifier}
+
+At a first cut, a modifier is any formula equivalent to
+an identity $\phi\linimp\phi$.  For example, $f\linimp f$, 
+$(g\linimp f)\linimp(g\linimp f)$, and $g\linimp (g\linimp f)\linimp f$
+are all modifiers.  
+
+GL's more precise definition of modifier first identifies
+skeleton and modifier occurrences of atomic propositions in a given
+formula.  First convert the formula to negation normal by
+pushing negation inwards until it only applies to atoms.
+
+\noindent{\bf Definition}
+{\it If a formula in negation normal form contains one positive
+occurence of an atom $A$ and one negative occurrence $A^{\bot}$, and
+the connective between the two subexpressions in which they occur is
+$\invamp$, then they are modifier occurrences.  All other occurrences
+are skeletal.}
+
+
+\smallskip\noindent
+Modifier occurrences come in pairs: a negative occurrence consuming a 
+meaning, followed by a positive occurrence producing a modified
+meaning.  The separation of the two occurrences by $\invamp$ ensures
+that production follows consumption.
+
+\subsubsection{Separating Skeleton and Modifier: Horn Clause Compilation}
+
+A pure modifier is a formula that contains only modifier occurrences
+of atoms.  Many lexical premises 
+ are impure, and contain a mixture of skeleton and
+modifier; e.g. $g\linimp(f\linimp f)$
+and $(g\linimp f)\linimp f$. For the initial derivation stage to work,
+impure formulas need to be converted to a form ${\cal S}\linimp {\cal
+M}$, where ${\cal S}$ is pure skeleton, and ${\cal M}$ pure modifier.
+
+In some cases, a simple equivalence-preserving re-ordering of
+antecedents achieves this effect. For example,
+$f\linimp(g\linimp f) \equiv g\linimp(f\linimp f)$, and 
+$g\linimp((g\linimp f)\linimp (h\linimp f)) \equiv
+h\linimp (g\linimp((g\linimp f)\linimp  f))$. If an implication is
+in Horn form --- $a_1\linimp (a_2\linimp \ldots (a_j\linimp c)\ldots)$ --- the
+existence of such a re-ordering is guaranteed since only $c$ is
+positive, and a matching negative $c$ can be swapped with $a_j$.
+
+For some non-Horn formulas, no amount of rearrangement will place them
+in the form ${\cal S}\linimp {\cal M}$.  The simplest example of
+a formula like this is $(g\linimp f)\linimp f$.  GL use a partial
+application of Hepple's method of Horn clause compilation to deal with
+such cases.
+
+Applied to a formula like $(g\linimp f)\linimp f$, Horn clause
+compilation produces two formulas
+
+\smallskip
+\hspace*{5em}$(g\linimp f)\linimp f \;\;\;
+\Longrightarrow \;\;\; g^i \mbox{\hspace*{1em} and \hspace*{1em}}
+f\{g^i\}\linimp f$
+
+\smallskip\noindent
+where $g^i$ is pure skeleton and $f\{g^i\}\linimp f$ is pure modifier.
+More generally, it is important that the Horn clause compliation is only
+applied partially, since compilation of a pure non-Horn modifier can excise
+a modifier atom and render the formula impure.  Therefore rearrangement of
+antecedents and (recursive) Horn compilation is halted as soon as one obtains
+a pure modifier or a skeletal Horn implication into a pure modifier, even if
+the modifier is not Horn.
+
+Having converted all the lexical premises into either pure skeletal
+Horn clauses, or pure skeletal Horn implications into modifiers, the
+first stage of glue derivation takes place.  This matches positive
+and negative skeletal atoms, and holds  any derived modifiers out to 
+one side.
+
+\paragraph{Skeletal Uniqueness}
+
+
+Gupta and Lamping discuss a condition of skeletal uniqueness, whereby
+at most one positive and one negative skeletal occurrence of any atom
+is permitted within the entire lexical premise set.  Skeletal uniqueness
+ensures that the initial deduction separating skeletons from modifiers
+is deterministic
+and linear time.  Failure of uniqueness only affects the efficiency of the
+initial deduction process, and not its completeness. While skeletal uniqueness
+is mostly a linguistically natural restriction, it does fail for certain
+control constructions.  But in these cases, the efficiency of the
+initial deduction is still not unduly harmed.
+
+
+
+
+\subsubsection{Non-Deterministic Modifier Insertion}
+
+
+GL discuss a non-deterministic approach to modifier insertion, since their
+aim is to stop after the initial stage of skeleton-modifier deduction.
+The simplest case of modifier insertion is when a derivation tree
+contains a sub-tree deriving $\phi$, and the modifier to be inserted
+is (equivalent to) $\phi\linimp\phi$. The modifier can be adjoined
+ to the sub-derivation, giving a new derivation also concluding
+in $\phi$, e.g.
+\begin{center}\small
+\begin{tabular}{lll}
+\begin{prooftree}
+\Gamma_1\resultsin\phi
+\end{prooftree}
+\hspace*{3em}&
+\begin{prooftree}
+\Gamma_2\resultsin\phi\linimp\phi
+\end{prooftree}
+\hspace*{3em}&
+$\Longrightarrow$\hspace*{2em}
+\begin{prooftree}
+\[\Gamma_1\resultsin\phi\]
+\hspace*{3em}
+\[\Gamma_2\resultsin\phi\linimp\phi\]
+\justifies
+\phi
+\end{prooftree}
+\end{tabular}
+\end{center}
+The new derivation now has two occurrences of $\phi$.  Any further 
+$\phi\linimp\phi$ modifiers can be inserted at either; i.e. either
+within the scope of the first modifier, or outscoping it.
+
+However, modifiers of the form $\phi\linimp\phi$ 
+can sometimes be inserted into derivation trees, even if the tree
+contains no sub-derivation of $\phi$. 
+We can ($\beta$-) expand derivations as follows
+\begin{center} \small
+\begin{tabular}{ll}
+\begin{prooftree}
+\[\Gamma\resultsin \phi\]\resultsin \psi
+\end{prooftree}
+\hspace*{2em} $\Longrightarrow$ \hspace*{2em}
+&
+\begin{prooftree}
+\[\[[\phi]^i\resultsin\psi\]
+  \justifies \phi\linimp\psi \using \linimpI,i\]
+ \hspace*{2em} \[\Gamma\resultsin \phi\]
+ \justifies \psi \using \linimpE
+\end{prooftree}
+\end{tabular}
+\end{center}
+in order to build up new sub-derivations.  For example, we can build
+an insertion site for an $(h\linimp f)\linimp(h\linimp f)$ modifier
+in a tree with no such site as follows:
+\begin{center} \small
+\begin{tabular}{ll}
+\begin{prooftree}
+   \[ h\linimp(g\linimp f)
+     \hspace*{1.5em}
+       h
+     \justifies
+       g\linimp f
+    \]
+   \hspace*{1.5em}
+     g
+   \justifies
+     f
+\end{prooftree}
+\hspace*{1em} $\Longrightarrow$ \hspace*{1em}& 
+\begin{prooftree}
+\[
+  \[ \[ h\linimp(g\linimp f)
+     \hspace*{1.5em}
+       [h]^i
+     \justifies
+       g\linimp f
+    \]
+   \hspace*{1.5em}
+     g
+   \justifies
+     f\]
+  \justifies
+   h\linimp f \using \linimpI_i\]
+ \hspace*{1.5em} h
+  \justifies f \using \linimpE
+\end{prooftree}
+\end{tabular}
+\end{center}
+For more complex modifiers, repeated applications of this expansion
+step extracting different hypotheses may be needed\footnote{The
+ expansion introduces a ($\beta$) detour in the natural deduction
+proof, i.e. an introduction step immediately followed by an
+elimination. Inserting a modifier, or performing another expansion
+on the introduced implication,eliminates the detour.
+A more general expansion scheme to enable modifier insertion
+requires the introduction of $\eta$-detours (elimination followed by
+introduction) to break complex formulas into their component parts.
+However, the Horn form of the initial skeleton-modifier deduction
+ensures that all derivation trees are in $\eta$-long normal form; that
+is, every atomic proposition occurs as the conclusion of some
+sub-derivation. Hence $\eta$-expansion is not needed.}.
+
+\subsubsection{Packed Modifier Insertion}
+Work in progress
+
+\section{Discussion}
+
+\subsection{Comparison with Categorial Semantics}
+
+\subsection{Extending the Glue Fragment}
+
+Expressing scope constraints.
+
+Using linear logic to model context update and dynamics.
+
+F-structure paths as resources: dealing with reentrancy and resource
+re-use.

@@ -1,0 +1,1723 @@
+\chapter{Basic Linear Logic}\label{CH2}\label{Ch2}
+
+\section{Sequent Calculus}
+
+The sequent calculus systems for traditional (classical and intuitionistic)
+logic takes $\Gamma$ and $\Delta$ to be {\em sets} of formulas in
+sequents likes $\Gamma\vdash\Delta$.   What would happen if instead we
+took them to be multisets\footnote{Multisets  are unordered lists of elements,
+where a count is kept of the number of times each element occurs.} 
+of formulas?  
+
+\subsection{Contraction and Weakening}
+The first consequence of shifting to multisets 
+would be that the structural rules of contraction
+and weakening no longer hold. We would need to drop the following
+rules
+\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}
+\Gamma, \; A, \; A \; \vdash \; B
+\justifies
+\Gamma, \; A \;  \vdash \; B
+\using \Contr
+\end{prooftree}
+\hspace*{5em} &
+\begin{prooftree}
+\Gamma \; \vdash \; B
+\justifies
+\Gamma, \; A \;  \vdash \; B
+\using \Weak
+\end{prooftree}
+\end{tabular}
+\end{center}
+The rule of exchange
+\begin{center}
+\begin{prooftree}
+\Gamma, \; A, \; B \; \vdash \; C
+\justifies
+\Gamma, \; B, \; A\;  \vdash \; C
+\using {\small Exchange}
+\end{prooftree}
+\end{center}
+applies equally to sets and to multisets, however.
+
+What is the intuitive significance of contraction and weakening?
+Weakening opens the door for fake or irrelevant dependencies.
+Given a derivation of $\Gamma\vdash A$, we can weaken it to
+$\Gamma,B\vdash A$.  This muddies the waters as to whether 
+ $A$ really depends on $B$ or not --- it is only by looking at the
+preceding derivation that we can tell.  The sequent alone does not say.
+In the same vein, we saw how
+in Chapter~\ref{???} weakening corresponded to discharging a null assumption
+in natural deduction.  Relevance logic \mycite{???} abandoned weakening
+(while preserving contraction) in order to try and block derivations
+of ``irrelevant'' conclusions like
+\[ A \vdash B\imp A\]
+which gives the impression that there is some dependency of $A$ on $B$,
+when in fact there is no dependency at all.
+
+Contraction 
+allows us to use formulas without counting how many times we use them.
+Remembering that sequent rules should be read `upwards', contraction
+says that if we want to prove $\Gamma,A\vdash B$, we can do so by
+copying $A$ and proving $\Gamma,A,A\vdash B$.
+Girard describes contraction as the ``fingernail of infinity''.  He illustrates
+this with the use of an axiom like $\forall x. \lf{integer}{x} \imp \exists
+y. \lf{integer}(y) \lland y > x$, which says for any integer $x$ there is 
+larger integer $y$.  It is {\em repeated} use of this axiom, via contraction,
+that means it furnishes us with an infinite supply of integers.  As another
+aside,  
+without contraction first order-predicate calculus would be decidable.
+
+\subsection{Multiplicatives and Additives}
+
+\subsubsection{Additive and Multiplicative Conjunction}
+The loss of certain structural rules is not the only consequence
+of moving to multisets, however.
+Consider the traditional $\landR$ rule, for example
+\begin{center}
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em}\Gamma\vdash B
+\justifies \Gamma\vdash A\lland B \using \landR
+\end{prooftree}
+\end{center}
+Note how the upper $\Gamma$ contexts are identical.  Suppose instead
+we were to allow distinct upper contexts $\Gamma$ and $\Delta$
+\begin{center}
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em}\Delta\vdash B
+\justifies \Gamma,\Delta\vdash A\lland B \using \landR'
+\end{prooftree}
+\end{center}
+where the original rule is just the special case  $\Delta =\Gamma$.
+How would replacing the $\landR$ rule by $\landR'$ change 
+the system for traditional logic (where $\Gamma$ and $\Delta$ are sets
+of formulas)?
+
+The answer is that it 
+changes nothing.  The rules with identical and disjoint upper
+contexts are inter-derivable so long as we can use contraction and weakening:
+\begin{itemize}
+\item $\landR$ from $\landR'$
+\begin{center}
+\begin{prooftree}
+\[ \Gamma\vdash A \hspace*{2em} \Gamma\vdash B
+   \justifies \Gamma,\Gamma \vdash A\lland B \using \landR'\]
+\justifies \Gamma \vdash A\lland B \using \Contr
+\end{prooftree}
+\end{center}
+\item $\landR'$ from $\landR$
+\begin{center}
+\begin{prooftree}
+ \[ \Gamma\vdash A \justifies \Gamma,\Delta\vdash A \using \Weak\]
+ \hspace*{2em} 
+ \[ \Gamma\vdash B\justifies \Gamma,\Delta\vdash B \using \Weak\]
+\justifies \Gamma,\Delta \vdash A\lland B \land
+\end{prooftree}
+\end{center}
+\end{itemize}
+
+
+However, if we dispense with contraction and weakening, the two rules
+are no longer inter-derivable.  In fact, the two rules correspond to two
+different forms of conjunction, $\tensor$ and $\lwith$:
+\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em}\Delta\vdash B
+\justifies \Gamma,\Delta\vdash A\tensor B \using \tensorR
+\end{prooftree}
+\hspace*{5em} &
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em}\Gamma\vdash B
+\justifies \Gamma\vdash A\lwith B \using \withR
+\end{prooftree}
+\end{tabular}
+\end{center}
+
+We can play a similar trick with the left rule for conjunction.  The following
+two rules are equivalent given contraction and weakening
+\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}
+\Gamma,A\vdash C \justifies \Gamma,A\lland B \vdash C \using \landL
+\end{prooftree}
+\hspace*{5em}
+&
+\begin{prooftree}
+\Gamma,A,B\vdash C \justifies \Gamma,A\lland B \vdash C \using \landL'
+\end{prooftree}
+\end{tabular}
+\end{center}
+We can see these are equivalent as follows
+\begin{itemize}
+\item $\landL$ from $\landL'$
+\begin{center}
+\begin{prooftree}
+\[ \Gamma,A\vdash C \justifies \Gamma,A,B\vdash C
+      \using \Weak
+   \]
+   \justifies \Gamma,A\lland B,\vdash C \using \landL'
+\end{prooftree}
+\end{center}
+ 
+\item $\landL'$ from $\landL$
+\begin{center}
+\begin{prooftree}
+\[ \[ \Gamma,A,B\vdash C \justifies \Gamma,A\lland B,B\vdash C
+      \using \landL
+   \]
+   \justifies \Gamma,A\lland B,A\lland B\vdash C \using \landL\]
+\justifies \Gamma,A\lland B,\vdash C \using \Contr
+\end{prooftree}
+\end{center}
+\end{itemize}
+The question arises as to which rule rule should become the left rule
+for which of the two newly introduced connectives.  It turns out that if
+we make the wrong pairing, we can re-derive contraction and
+weakening, which would make the distinction between the connectives collapse.
+For example, consider combining the rule $\withR$ with the incorrect
+left rule:
+\begin{center}
+\begin{prooftree}
+\[ A\vdash A \hspace*{2em} A\vdash A
+   \justifies A\vdash A\lwith A \using \withR
+\]
+\hspace*{2em}
+\[ \Gamma,A,A\vdash B \justifies \Gamma,A\not\& A\vdash B
+   \using \not\withL
+\]
+\justifies \Gamma,A\vdash B \using cut
+\end{prooftree}
+\end{center}
+That is, from $\Gamma,A,A\vdash B$ we can obtain the contracted version
+$\Gamma,A\vdash B$.
+
+If we make the correct pairings of left and right rules,
+we get the following two left rules for the new forms
+of conjunction
+\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}
+\Gamma,A\vdash C \justifies \Gamma,A\lwith B \vdash C \using \withL
+\end{prooftree}
+\hspace*{5em}
+&
+\begin{prooftree}
+\Gamma,A,B\vdash C \justifies \Gamma,A\tensor B \vdash C \using \tensorL
+\end{prooftree}
+\end{tabular}
+\end{center}
+
+
+Tensor $\tensor$ is a {\em multiplicative} conjunction:  
+its (right) rule combines multiple contexts $\Gamma$ and
+With $\lwith$ is an {\em additive} conjunction:
+it deals with a single context $\Gamma$.  Troelstra sometimes
+calls the multiplicative connectives ``context free'' --- they apply
+independent of differences in context --- and the additive connectives
+``context sharing'' --- they only apply if contexts are shared.
+
+Given the left and right rules for the two conjunctions, we can give them
+an informal explanation as follows
+\begin{itemize}
+\item Multiplicative conjunction $\tensor$\\
+This allows you to combine premises / resources in a proof into one
+bundle.  The left rule says that if you have two premises $A$ and $B$
+you can bundle them together to form a single premise, $A\tensor B$.
+The right rule says if you have two proofs, one of $A$ from $\Gamma$ and
+one of $B$ from $\Delta$, you can combine the proofs and bundle
+together the results, $A\tensor B$
+\item Additive conjunction $\lwith$\\
+This allows alternatives from a given set of premises to be combined.
+The right rule says  that if there is a proof of $A$ from $\Gamma$, and
+also a proof of $B$ from $\Gamma$, these two alternatives can be conjoined
+to say that there is a proof of $A\lwith B$ from $\Gamma$.  This is to be
+read as saying you have a choice of proving  $A$ and of proving  $B$, but not
+both (since proving $A$ consumes premises that need to be used in proving
+$B$ and vice versa.  The left rule says that if you can prove $C$ from $\Gamma$
+and $A$, you can also prove it from $\Gamma$ and $A\lwith B$.  The $A\lwith B$
+again says that you have the choice of using $A$ and of using $B$ to make
+the derivation work, though in fact you have to choose $A$.
+
+Despite being a conjunction $\lwith$ behaves in many ways more like a 
+(meta-level) disjunction.  $A\lwith B$ indicates a free (or internal) choice:
+we can decide which of $A$ or $B$ to use.  Sometimes only one of the
+alternatives will give us what we need, but we are at least free to choose what
+works.  This is similar to classical disjunction: given $A$ we can weaken
+this to $A\llor B$; but if we then want to single out one of the disjuncts,
+the only reliable one to choose is $A$.   This internal or free choice
+differs from the external or forced choice offered by $\lplus$ 
+(the multiplicative disjunction).  $A\lplus B$ says that $A$ and $B$ are
+alternatives, but we have no power over which one is selected; the choice
+is made externally.  
+\end{itemize}
+
+\subsubsection{Additive and Multiplicative Disjunction}
+Moving to multisets also allows us to distinguish between multiplicative
+and additive versions of disjunction.
+Additive implication, plus $\lplus$ has the following left and right rules
+\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}
+\Gamma,A \vdash C \hspace*{2em} \Gamma,B \vdash C
+\justifies \Gamma,A\lplus B \vdash C \using \plusL
+\end{prooftree}
+\hspace*{5em} &
+\begin{prooftree}
+\Gamma\vdash A 
+\justifies \Gamma\vdash A\lplus B \using \plusR
+\end{prooftree}
+\end{tabular}
+\end{center}
+We can read this as follows
+\begin{itemize}
+\item Additive disjunction $\lplus$\\
+The left rule says that if both $\Gamma$ and $A$, and $\Gamma$ and $B$
+prove $C$, then $\Gamma$ and some random choice of either $A$ or $B$
+will prove $C$.  This random, or external choice of $A$ or $B$ is safe,
+as we know that they both lead to the same conclusion; so it doesn't matter
+which one is picked for us.  The right rule says that if $\Gamma$ proves
+$A$, then $\Gamma$ proves $A$ or $B$.  Like the traditional rule for 
+disjunction, this step means that we lose track of whether the disjunction
+is proved by virtue of either $A$ or $B$ being proved.  It hides this 
+information.  Any further inferences from $A\lplus B$ had thus better be
+truly insensitive to which of $A$ or $B$ is the `real' disjunct.
+\end{itemize}
+
+The multiplicative disjunction $\parr$ is {\em not} a connective of 
+intuitionistic linear logic, since its right rule
+only makes sense with multiple conclusion sequents.\footnote{Though
+there are multiple conclusion formulations of intuitionistic linear 
+logic that do admit $\parr$ as a connective \mycite{Paiva}.}  Recall from
+chapter~\ref{CH???} that intuitionistic logic requires single conclusion
+sequents.  Multiplicative disjunction has the following left and right rules
+\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}
+\Gamma_1,A \vdash \Delta_1 \hspace*{2em} \Gamma_2,B \vdash \Delta_2
+\justifies \Gamma_1,\Gamma_2,A\parr B \vdash \Delta_1,\Delta_2  \using \parL
+\end{prooftree}
+\hspace*{5em} &
+\begin{prooftree}
+\Gamma\vdash A,B,\Delta 
+\justifies \Gamma\vdash A\parr B,\Delta \using \parR
+\end{prooftree}
+\end{tabular}
+\end{center}
+As with conjunction, in the presence of contration and weakening the
+distinction between the two connectives collapses.  Weakening makes
+the $\parL$ rule derivable from $plusL$, and contraction allows the
+reverse derivation.  Weakening (on the right) makes $\plusR$ derivable
+frin $\parR$, and contraction on the right allows the reverse derivation.
+We can try to understand multiplicative disjunction as follows
+\begin{itemize}
+\item Multiplicative Disjunction $\parr$\\
+The right rule says that if $\Gamma$ proves either $A$ or $B$, it proves
+$A\parr B$.  That is, commas on the right hand sequents are implicit
+multiplicative disjunctions, in just the way that commas on the left of
+sequents are implicit multiplicative conjunctions.  If $A\parr B$ holds,
+then if it is not the case that $A$ holds we can be sure that $B$ holds, and
+vice versa.
+\end{itemize}
+
+\subsection{Negation}
+
+Negation is not stricly speaking a connective in linear logic.
+All atomic formulas come in a positive form, $A$, and a negative
+form, $A^{\bot}$.  When negation is applied a complex formula, a series
+of equivalences enable one to push the negation inwards until it only
+applies to atomic formulas.  These equivalences include
+\begin{center}
+\begin{tabular}{lllllll}
+$(A\tensor B)^{\bot}$ & = & $A^{\bot} \parr B^{\bot}$ &  \hspace*{5em} &
+$(A\parr B)^{\bot}$ & = & $A^{\bot} \tensor B^{\bot}$\\
+
+$(A\lwith B)^{\bot}$ & = & $A^{\bot} \lplus B^{\bot}$  & &
+$(A\lplus B)^{\bot}$ & = & $A^{\bot} \lwith B^{\bot}$\\
+
+$(!A)^{\bot}$ & = & $?A^{\bot}$ & &
+$(?A)^{\bot}$ & = & $!A^{\bot}$\\
+&&& $A^{\bot\bot} = A$ &&& 
+\end{tabular}
+\end{center}
+(see below for explanation of the exponentials ! and ?).
+A formula like $(A\tensor B^{\bot})^{\bot}$ (where $A$ and $B$ are
+atomic) is just an alternative notation for $A^{\bot}\parr B$.
+
+The rules for negation allow one to move formulas to move across the
+turnstile, flipping their polarities as they go:
+\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}
+\Gamma\vdash A,\Delta \justifies \Gamma,A^{\bot}\vdash \Delta \using \botL 
+\end{prooftree}
+\hspace*{5em}
+\begin{prooftree}
+\Gamma,A\vdash \Delta \justifies \Gamma\vdash A^{\bot},\Delta \using \botR 
+\end{prooftree}
+\end{tabular}
+\end{center}
+Note that when applied to the identity axiom $A\vdash A$, $\botR$ yields 
+the sequent
+\[\vdash A^{\bot},A\]
+This can be read as saying that out of nothing one can create a paired consumer
+and producer of $A$, which like matter and anti-matter annihilate one another
+when they meet.  
+
+Perhaps a more useful metaphor is to think in terms of {\em action} and
+{\em reaction}.  Conservation of `momentum' ensures that to every action
+$A$ there is an equal and opposite reaction, $A^{\bot}$.  We can also
+think of an action of type $A$ as being an answer / output / consumer,
+and a reaction of type $A^{\bot}$ as being a question / input / producer.
+In a sequent $\Gamma\vdash \Delta$, formulas on the left (in
+$\Gamma$) are inputs, and formulas on the right (in $\Delta$) outputs.
+This is borne out if we use the negation rules to move all of $\Gamma$ to the
+right: each formula $A$ in $\Gamma$ gets negated to $A^{\bot}$.
+
+In fact, Girard often uses one-sided sequents in presenting linear logic.
+The one-sided sequent 
+(where if $\Gamma = A_1,\ldots,A_n$, then $\Gamma^{\bot} = 
+A_1^{\bot},\ldots,A_n^{\bot}$)
+\[\vdash \Gamma^{\bot},\Delta\]
+ is equivalent to the two sided sequent
+\[\Gamma\vdash\Delta\]
+
+\subsection{The Exponentials}
+Linear logic drops the structual rules of weakening and contraction.
+However a logic without these rules is very weak. Linear logic allows
+for a controlled way of re-introducing contraction and weakening on
+specific formulas by means of the exponentials (or modalities) ! and ?.
+The ``of course'' exponential, !, allows contraction
+and weakening on the left hand side of sequents.   
+The ``why not'' exponential, ?, allows contraction and weakening on the 
+right of sequents.
+
+We can read $!A$ as meaning roughly that the resource $A$ can be duplicated
+(reproduced) as often or as little as we like.  Its dual, $?A$, means 
+roughly that $A$ can be consumed as often or as little as we like.
+
+Another way of thinking about the exponentials is as follows.  Atomic
+propositions in linear logic are a little like signals on a wire: they
+are created (as input) and immediately consumed (as output).  
+If we take a transient signal like
+$A$, then $!A$ corresponds to {\em storing} the signal in some form of memory.
+$?A$ corresponds to {\em reading} from memory.
+
+The sequent rules for the exponentials are
+(where if $\Gamma = A_1,\ldots,A_n$, $!\Gamma = !A_1,\ldots,!A_n$, and
+likewise for $?\Gamma$)
+\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}
+\Gamma\vdash\Delta \justifies \Gamma, !A\vdash\Delta \using \WeakL
+\end{prooftree}
+\hspace*{8em} &
+\begin{prooftree}
+\Gamma\vdash\Delta \justifies \Gamma\vdash ?A,\Delta \using \WeakR
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\Gamma,!A,!A\vdash\Delta \justifies \Gamma, !A\vdash\Delta \using \ContrL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash ?A,?A,\Delta \justifies \Gamma\vdash ?A,\Delta \using \ContrR
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\Gamma,A\vdash\Delta \justifies \Gamma, !A\vdash\Delta \using \DerlL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash A,\Delta \justifies \Gamma\vdash ?A,\Delta \using \DerlR
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+!\Gamma,A\vdash ?\Delta \justifies !\Gamma, ?A\vdash ?\Delta \using \PromL
+\end{prooftree}
+&
+\begin{prooftree}
+!\Gamma\vdash A,?\Delta \justifies !\Gamma\vdash !A,?\Delta \using \PromR
+\end{prooftree}
+\end{tabular}
+\end{center}
+Promotion corresponds to storing things in memory.  Read $\PromR$ as saying
+that if duplicable inputs $!\Gamma$ give rise to a transient output $A$
+(or the repeatedly consumable $?\Delta$), we can duplicate $\Gamma$ some
+more to as many copies of $A$ as we want.  So it is safe to store $A$
+in memory.   We can rearrange $\PromL$ (using the negation rules) to
+\begin{center}
+\begin{prooftree}
+!\Gamma\vdash A^{\bot}, ?\Delta \justifies 
+!\Gamma, \vdash !(A^{\bot}),?\Delta \using \PromL
+\end{prooftree}
+\end{center}
+which says that if duplicable $!\Gamma$ gives a transient input $A^{\bot}$,
+we can duplicate this input as much as we want; i.e. it can be stored.
+
+
+Weakening corresponds to erasing from memory.  If $\Delta$ follows from
+$\Gamma$, it continues to follows from $\Gamma$ plus whatever else we choose
+to ignore / erase from memory.  Contraction corresponds to copying from 
+memory.  
+Dereliction corresponds to reading from memory.
+
+
+
+The exponentials are sometimes known as
+modals.  This is because the rules defining them are similar in form
+to the modal $\Box$ and $\Diamond$ operators of S4 modal logic.  Also
+not that there inter-derivability under negation
+\[!A = (?A^{\bot})^{\bot}\]
+is similar to 
+\[\Box A = \neg\Diamond(\neg A)\]
+
+
+
+
+\subsection{Implication}
+(Multiplicative) implication can be defined classically as
+\[A\linimp B =_{df} A^{\bot}\parr B\]
+(c.f. the traditional classical definition $A\imp B =_{df} \neg A \llor B)$.
+However, par is only a classical connective: it requires
+multiple conclusion sequents.  Therefore,
+this definition will not do for intuitionistic versions of linear logic.
+Fortunately, we can take implication as primitive, and employ the rules
+\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em} \Delta,B\vdash C
+\justifies \Gamma,\Delta,A\linimp B\vdash C \using \linimpL
+\end{prooftree}
+\hspace*{5em} &
+\begin{prooftree}
+\Gamma,A\vdash B 
+\justifies \Gamma\vdash A\linimp B \using \linimpR
+\end{prooftree}
+\end{tabular}
+\end{center}
+It is also possible to define an additive form of implication, but we will
+not go into this --- see \mycite{Troelstra:lnll}, ch4.  It turns out not to be
+very interesting.
+
+\subsection{The Identities}  In traditional classical logic, the constants
+verum and falsum ($\top$ and $\bot$) are identities, in much the same
+way that 1 and 0 are in arithmetic.  The identities map conjunction and
+disjunction onto themselves
+\begin{itemize}
+\item $A\lland \top \equiv A$ (cf $N \times 1 = N$)
+\item $A\llor \bot \equiv A$ (cf $N+0 = N$)
+\end{itemize}
+But now we have two forms of conjunction and disjunction, so we need two
+forms of identity.
+\begin{itemize}
+\item Multiplicative identities: $\lone$ and $\bot$:
+
+$(A\tensor\lone)\equiv A$\\
+      $(A\parr\bot)\equiv A$
+
+$\lone^{\bot} = \bot$ \hspace*{3em}   $\bot^{\bot} = \lone$
+
+\item Additive identities: $\top$ and $\lzero$:
+
+$(A\lwith\top)\equiv A$\\
+$(A\lplus\lzero) \equiv A$
+
+$\top^{\bot} = \lzero$ \hspace*{3em}   $\lzero^{\bot} = \top$
+\end{itemize}
+The rules for the identities are as follows
+\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}
+\justifies \Gamma,\lzero\vdash \Delta \using \zeroL
+\end{prooftree}
+\hspace*{5em}&
+\begin{prooftree}
+\justifies \Gamma\vdash \top,\Delta \using \topR
+\end{prooftree}\\[4ex]
+
+\begin{prooftree}
+\justifies \bot\vdash \using \botL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash \Delta \justifies \Gamma\vdash \bot,\Delta \using \botR
+\end{prooftree}\\[4ex]
+
+\begin{prooftree}
+\Gamma\vdash \Delta\justifies \Gamma,\lone\vdash \Delta \using \oneL
+\end{prooftree}
+&
+\begin{prooftree}
+\vdash \lone \using \oneR
+\end{prooftree}
+\end{tabular}
+\end{center}
+Intuitively, we can think of the identities as follows
+\begin{itemize}
+\item Unit: $\lone$\\
+The trivial resource that can
+be produced from nothing.  Another way of putting this is that if
+a collection of resources produces $\lone$ (and nothing else), then we
+can consume / throw away that collection of resources
+\item Top: $\top$\\
+Top consumes all resources
+\item Imposibility: $\lzero$\\
+The impossible resource, or something that will produce any resource (in the
+same way that $\top$ consumes all resources).
+\item Bottom: $\bot$\\
+This is the resource that can be consumed by nothing.  It represents
+resources (premises) left over and unused in a derivation.
+\end{itemize}
+
+\subsection{Intuitionistic and Classical Linear Logic}
+
+As with traditional logic, intuitionistic linear logic is obtained by
+restricting ourselves to single conclusion sequents.  This is tantamount
+to ruling out any possibility of contraction and weakening on the
+left. Classical linear logic employs multiple conclusion sequents.
+Figures~\ref{figSCILL} and~\ref{figSCCLL} show the
+sequent systems for intuitionistic and classical linear logic.
+
+
+\begin{figure}
+\begin{center}
+\fbox{
+\begin{tabular}{cc}
+\begin{prooftree}
+\justifies A\vdash A \using axiom
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em} A,\Delta\vdash B
+\justifies \Gamma,\Delta\vdash B \using cut
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em} \Delta,B\vdash c
+\justifies \Gamma,\Delta,A\linimp B\vdash C \using \linimpL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma,A\vdash B \justifies \Gamma\vdash A\linimp B \using \linimpR
+\end{prooftree}\\[6ex]
+
+
+\begin{prooftree}
+\Gamma,A,B\vdash C \justifies \Gamma,A\tensor B\vdash C \using \tensorL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em} \Delta\vdash B 
+\justifies \Gamma,\Delta\vdash A\tensor B \using \tensorR
+\end{prooftree}\\[6ex]
+
+
+\begin{prooftree}
+\Gamma,A\vdash C \justifies \Gamma,A\lwith B\vdash C \using \withL_1
+\end{prooftree}
+\begin{prooftree}
+\Gamma,B\vdash C \justifies \Gamma,A\lwith B\vdash C \using \withL_2
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em} \Gamma\vdash B 
+\justifies \Gamma\vdash A\lwith B \using \withR
+\end{prooftree}\\[6ex]
+
+
+\begin{prooftree}
+\Gamma,A\vdash C \hspace*{2em} \Gamma,B\vdash C
+\justifies \Gamma,A\lplus B \vdash C \using \plusL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash A \justifies \Gamma\vdash A\lplus B \using \plusR_1
+\end{prooftree}
+\begin{prooftree}
+\Gamma\vdash B \justifies \Gamma\vdash A\lplus B \using \plusR_2
+\end{prooftree}\\[6ex]
+
+
+\begin{prooftree}
+\Gamma\vdash B \justifies \Gamma,!A\vdash B \using \WeakL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma,!A,!A\vdash B \justifies \Gamma,!A\vdash B \using \ContrL
+\end{prooftree}\\[6ex]
+
+
+\begin{prooftree}
+\Gamma,A\vdash B \justifies \Gamma,!A\vdash B \using \DerlL
+\end{prooftree}
+&
+\begin{prooftree}
+!\Gamma\vdash A \justifies !\Gamma\vdash !A \using \PromL
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\Gamma\vdash A \justifies \Gamma,\lone\vdash A \using \oneL
+\end{prooftree}
+&
+\begin{prooftree}
+\justifies \vdash \lone \using \oneR
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\justifies \Gamma,\lzero \vdash A \using \zeroL
+\end{prooftree}
+&
+\begin{prooftree}
+\justifies \Gamma\vdash \top \using \topR
+\end{prooftree}\\[2ex]
+\end{tabular}
+}
+\end{center}
+\caption{Sequent Calculus: Intuitionistic Linear Logic
+         \label{figSCILL}}
+\end{figure}
+
+%---------------------------
+
+\begin{figure}
+\begin{center}
+\fbox{
+\begin{tabular}{cc}
+\begin{prooftree}
+\justifies A\vdash A \using axiom
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma_1\vdash A,\Delta_1 \hspace*{2em} A,\Gamma_2\vdash \Delta_2
+\justifies \Gamma_1,\Gamma_2\vdash\Delta_1,\Delta_2 \using cut
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\Gamma_1\vdash A,\Delta_1 \hspace*{2em} \Gamma_2,B\vdash \Delta_2
+\justifies \Gamma_1,\Gamma_2,A\linimp B\vdash \Delta_1,\Delta_2 \using \linimpL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma,A\vdash B,\Delta \justifies \Gamma\vdash A\linimp B,\Delta
+\using \linimpR
+\end{prooftree}\\[6ex]
+
+
+\begin{prooftree}
+\Gamma,A,B\vdash \Delta \justifies \Gamma,A\tensor B\vdash \Delta \using \tensorL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma_1\vdash A,\Delta_1 \hspace*{2em} \Gamma_2\vdash B,\Delta_2 
+\justifies \Gamma_1,\Gamma_2,\vdash A\tensor B,\Delta_1,\Delta_2
+ \using \tensorR
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\Gamma_1,A\vdash \Delta_1 \hspace*{1em} \Gamma_2,B\vdash \Delta_2
+\justifies \Gamma_1,\Gamma_2,A\parr B\vdash \Delta_1,\Delta_2 \using \parL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash A,B,\Delta
+\justifies \Gamma\vdash A\parr B,\Delta
+ \using \parR
+\end{prooftree}\\[6ex]
+
+
+\begin{prooftree}
+\Gamma,A\vdash \Delta \justifies \Gamma,A\lwith B\vdash \Delta \using \withL_1
+\end{prooftree}
+\begin{prooftree}
+\Gamma,B\vdash \Delta \justifies \Gamma,A\lwith B\vdash \Delta \using \withL_2
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash A,\Delta \hspace*{2em} \Gamma\vdash B ,\Delta
+\justifies \Gamma\vdash A\lwith B ,\Delta \using \withR
+\end{prooftree}\\[6ex]
+
+
+\begin{prooftree}
+\Gamma,A\vdash \Delta \hspace*{2em} \Gamma,B\vdash \Delta
+\justifies \Gamma,A\lplus B \vdash \Delta \using \plusL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash A,\Delta \justifies \Gamma\vdash A\lplus B,\Delta \using \plusR_1
+\end{prooftree}
+\begin{prooftree}
+\Gamma\vdash B,\Delta \justifies \Gamma\vdash A\lplus B,\Delta \using \plusR_2
+\end{prooftree}\\[6ex]
+
+
+\begin{prooftree}
+\Gamma\vdash \Delta \justifies \Gamma,!A\vdash \Delta \using \WeakL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash \Delta \justifies \Gamma\vdash ?A,\Delta \using \WeakR
+\end{prooftree}\\[4ex]
+
+\begin{prooftree}
+\Gamma,!A,!A\vdash \Delta \justifies \Gamma,!A\vdash \Delta \using \ContrL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma,\vdash ?A,?A,\Delta \justifies \Gamma\vdash ?A,\Delta \using \ContrR
+\end{prooftree}\\[4ex]
+
+
+\begin{prooftree}
+\Gamma,A\vdash \Delta\justifies \Gamma,!A\vdash \Delta \using \DerlL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash A,\Delta\justifies \Gamma\vdash ?A,\Delta \using \DerlR
+\end{prooftree}\\[4ex]
+
+\begin{prooftree}
+!\Gamma,A\vdash ?\Delta \justifies !\Gamma,?A\vdash ?\Delta \using \PromL
+\end{prooftree}
+&
+\begin{prooftree}
+!\Gamma\vdash A,?\Delta \justifies !\Gamma\vdash !A,?\Delta \using \PromR
+\end{prooftree}\\[4ex]
+
+\begin{prooftree}
+\Gamma\vdash \Delta \justifies \Gamma,\lone\vdash \Delta \using \oneL
+\end{prooftree}
+&
+\begin{prooftree}
+\justifies \vdash \lone \using \oneR
+\end{prooftree}\\[4ex]
+
+\begin{prooftree}
+\justifies \Gamma,\lzero \vdash \Delta \using \zeroL
+\end{prooftree}
+&
+\begin{prooftree}
+\justifies \Gamma\vdash \top,\Delta \using \topR
+\end{prooftree}\\[4ex]
+
+\begin{prooftree}
+\justifies \bot \vdash \using \botL
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash \Delta \justifies \Gamma,\vdash \bot,\Delta \using \botR
+\end{prooftree}\\[1ex]
+\end{tabular}
+}
+\end{center}
+\caption{Sequent Calculus: Classical Linear Logic
+         \label{figSCCLL}}
+\end{figure}
+
+
+
+Note that not all the connectives and constants used in classical
+linear logic are available for intuitionistic linear logic. 
+
+Note also that the cut rule can be eliminated for both
+classical and intuitionistic linear logic.
+
+
+\section{Constructivity in Linear Logic}
+
+Both classical and intuitionistic linear 
+logic are constructive.  This is unlike traditional logic, where
+the move to multiple conclusion sequents destroys constructivity.
+So why is it that a multiple conclusion sequent calculus for linear
+logic can still be constructive?
+
+  The brief answer is that it is
+uncontrolled contraction and weakening on the right that loses
+constructivity.  In the traditional case, single conclusion sequents
+rule out at a stroke the possibility of contraction and weakening on
+the right.  This leaves us with intuitionistic logic, which allows
+uncontrolled contraction and weakening on the left. But linear logic
+does not allow uncontrolled contraction and weakening on either the
+left or the right.  It is therefore unnecessary to control the
+application of these rules on the right by the sweeping means of
+single conclusion sequents.  We have the necessary degree of control
+to ensure constructivity, even with classical multiple conclusion
+sequents.
+
+Of course, this answer raises a further question.  Why does
+contraction and weakening on the right lead to non-constructivity?
+The remainder of this section attempts to answer this question,
+following the discussion in \mycite{GirLafTay:pat}.
+
+\subsubsection{Keeping Track of Proofs}
+
+The discussion of the non-constructive nature of traditional classical
+logic pointed the finger of blame at the natural deduction rule of
+{\it reductio ad absurdum}:
+\begin{center}
+\begin{prooftree}
+\[\neg A \resultsin \bot\] \justifies A \using RAA
+\end{prooftree}
+\end{center}
+The criticism was that any proof resulting in $\bot$ needs to be
+`thrown away' in case it infects anything that depends with it.  The
+rule of RAA not only throws away the proof of $\bot$, it also
+introduces a new, and unnconnected proof of $A$.  There is no way of
+keeping track of where exactly this new proof came from.
+
+In the sequent calculus formulation of classical logic, the notion of (not)
+`keeping track' of where proofs came from takes a somewhat different
+form.  There is nothing like the rule of RAA to blame.  Instead, in a
+sequent system contraction and weakening are the culprits.
+
+As mentioned at the beginning of this chapter, weakening (on the left)
+allows one to introduce fake dependencies: given that $\Gamma\vdash A$
+one can weaken this to $\Gamma,B\vdash A$, where it is not immediately
+obvious that $B$ contributes nothing to the derivation of $A$.
+Weakening on the right allows you to go from $\Gamma\vdash A$ to 
+$\Gamma\vdash A, B$ where it no longer obvious which of $A$ or $B$
+follows from $\Gamma$.
+
+Suppose we have two proofs of $B$
+\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}
+{\cal D}_1\resultsin \vdash B
+\end{prooftree}
+\hspace*{5em} &
+\begin{prooftree}
+{\cal D}_2\resultsin \vdash B
+\end{prooftree}
+\end{tabular}
+\end{center}
+By means of contraction and weakening on the right, plus cut, we can
+combine these two proofs as follows
+\begin{center}
+\begin{prooftree}
+\[
+ \[\[{\cal D}_1\resultsin \vdash B\] \justifies \vdash C,B \using \WeakR\]
+ \hspace*{2em}
+ \[\[{\cal D}_2\resultsin \vdash B\] \justifies C\vdash B \using \WeakL\]
+ \justifies \vdash B,B \using cut
+\]
+\justifies \vdash B \using \ContrR
+\end{prooftree}
+\end{center}
+To eliminate the cut by pushing it upwards, we have a choice of
+whether to view the cut as being on the $B$ or the $C$ formula in
+$\vdash B,C$.  Unfortunately, the choice leads to two very different
+cut-free proofs, namely:  
+\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}
+{\cal D}_1\resultsin \vdash B
+\end{prooftree}
+\hspace*{5em} &
+\begin{prooftree}
+{\cal D}_2\resultsin \vdash B
+\end{prooftree}
+\end{tabular}
+\end{center}
+What this means is that there is a single proof that can reduce, via 
+cut-elimination to either ${\cal D}_1$ or ${\cal D}_2$.  Which is to
+say, however different these proofs are, classical logic regards them
+as being the same proof.  Or put another way, classical logic
+says that all proofs of a particular type (e.g. $B$, $A\imp B$, etc)
+are identical.  This is sometimes expressed has saying that
+classical logic has no interesting denotational semantics (beyond
+the normal truth-conditional semantics that identifies all proofs
+of the same proposition).
+
+To sum up more informally.  Contraction and weakening on the left
+make it hard to tell which premises were used to derive a particular 
+conclusion.  But contraction and weakening on the right are worse:
+they make it hard to tell which conclusion came from the premises. 
+
+
+Classical linear logic is constructive, i.e. it allows us to keep
+track of where proofs come from, because it limits the application
+of contraction and weakening.  Traditional intuitionistic logic is
+constructive because it completely prohibits contraction and weakening
+on the right.
+
+ 
+\section{Natural Deduction}
+
+Up until now, we have considered linear logic as a development of
+sequent calculus.  Sequent calculus can be seen as a kind of
+meta-level description of how natural deduction proofs are carried
+out, which includes (extraneous) information about the order in which
+certain inference steps were carried out.  One might therefore expect
+a smooth transition to natural deduction formulations of linear logic.
+Such formulations can be given, but for Girard at any rate they are
+less satisfactory than the sequent formulations.
+
+\subsection{Tensor Fragment}
+
+If we confine our attention to the fragment of linear logic comprising
+only implication and tensor, plus !, we can formulate the natural deduction
+system shown in figure~\ref{figTLLND}.
+\begin{figure}
+\begin{center}
+\fbox{
+\begin{tabular}{cc}
+\begin{prooftree}
+\[[A]^i\resultsin B\] \justifies A\linimp B \using \linimpIi{i}
+\end{prooftree}
+ &
+\begin{prooftree}
+A \hspace*{2em} A\linimp B \justifies B \using \linimpE
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+A \hspace*{2em} B \justifies A\tensor B \using \tensorI
+\end{prooftree}
+&
+\begin{prooftree}
+A\tensor B \hspace*{2em}
+\[[A]^i[B]^j\resultsin C\] 
+\justifies C \using \tensorEij{i}{j}
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\justifies \lone \using \oneI
+\end{prooftree}
+&
+\begin{prooftree}
+A \hspace*{2em} \lone \justifies A \using \oneE
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+!A \hspace*{2em} B \justifies B \using \Weak
+\end{prooftree}
+&
+\begin{prooftree}
+!A \hspace*{2em} \[ [!A]^i[!A]^j \resultsin C\] \justifies C \using \Contr_{i,j}
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+!A \justifies A \using \Derl
+\end{prooftree}
+&
+\begin{prooftree}
+!A_1\ldots \;!A_n \[[!A_1^i\ldots \;!A_n^k]\resultsin B\]
+\justifies !B \using \Prom_{i\ldots k}
+\end{prooftree}\\[2ex]
+
+\end{tabular}
+}
+\end{center}
+\caption{Natural Deduction for Tensor-Implication Fragment
+\label{figTLLND}}
+\end{figure}
+
+\paragraph{Discharging Assumptions}  
+The restrictions on discharging
+assumptions are stricter for the linear system than the non-linear
+systems we have seen previously: exactly one occurrence of an
+assumption must be discharged.  Discharging zero occurrences
+corresponds to weakening, and more than one to contraction.
+
+\paragraph{Parasitic Rules}  The elimination rule for tensor is 
+parasitic in the same way that the disjnuction elimination rule was
+for traditional natural deduction.  This leads to additional commuting
+conversions when it comes to the normalization of linear natural
+deduction proofs.
+
+
+
+\paragraph{Exponentials}
+The promotion rule (or !-introduction) is not the version given in
+\mycite{Troelstra:lnll}, but the corrected one of \mycite{BBPH}.
+
+\subsection{Gentzen Style ND}
+The additive connectives need to share the same contexts (i.e. premises and
+assumptions.)  There is no natural way of representing this in the
+Prawitz style natural deduction scheme used for the implication tensor
+fragment.  Instead, a sequent style natural deduction system make the
+sharing or otherwise of contexts explicit.  The resulting system for
+intuitionistic linear logic is shown in
+figure~\ref{figGNDILL}
+
+\begin{figure}
+\begin{center}
+\fbox{
+\begin{tabular}{cc}
+\begin{prooftree}
+\Gamma,A\vdash B \justifies \Gamma\vdash A\linimp B \using \linimpI
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash A\linimp B \hspace*{2em} \Delta \vdash A
+\justifies \Gamma,\Delta\vdash B \using \linimpE
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em} \Delta \vdash B
+\justifies \Gamma,\Delta\vdash A\tensor B \using \tensorI
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash A\tensor B \hspace*{2em} \Delta A,B\vdash C
+\justifies \Gamma,\Delta\vdash C \using \tensorE
+\end{prooftree}\\[6ex]
+ 
+\begin{prooftree}
+\Gamma\vdash A \hspace*{2em} \Gamma \vdash B
+\justifies \Gamma \vdash A\lwith B \using \withI
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma \vdash A\lwith B \justifies \Gamma\vdash A \using \withE_1
+\end{prooftree}
+\begin{prooftree}
+\Gamma \vdash A\lwith B \justifies \Gamma\vdash B \using \withE_2
+\end{prooftree}\\[6ex]
+ 
+\begin{prooftree}
+\Gamma\vdash A \justifies \Gamma\vdash A\lplus B \using \plusI_1
+\end{prooftree}
+\begin{prooftree}
+\Gamma\vdash B \justifies \Gamma\vdash A\lplus B \using \plusI_2
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash A\lplus B \hspace*{2em} \Delta,A\vdash C 
+                       \hspace*{2em} \Delta,B\vdash C 
+\justifies \Gamma,\Delta \vdash C \using \plusE
+\end{prooftree}\\[6ex]
+ 
+\begin{prooftree}
+\justifies \vdash \lone \using \oneI
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash \lone \hspace*{2em} \Delta\vdash A
+\justifies \Gamma,\Delta\vdash A \using \oneE
+\end{prooftree}\\[6ex]
+ 
+\begin{prooftree}
+\justifies \Gamma\vdash \top \using \topI
+\end{prooftree}
+&
+\begin{prooftree}
+\justifies \Gamma,\lzero\vdash A \using \zeroE
+\end{prooftree}\\[6ex]
+
+&
+\begin{prooftree}
+\Gamma\vdash !A \hspace*{2em} \Delta,!A,!A\vdash B
+\justifies \Gamma,\Delta\vdash B \using \Contr (!_{{\cal E},c})
+\end{prooftree}\\[6ex]
+ 
+\begin{prooftree}
+\Gamma_1\vdash !A_1,\ldots,\Gamma_n\vdash !A_n \hspace*{2em}
+!A_1,\ldots,!A_n \vdash B
+\justifies \Gamma_1,\ldots,\Gamma_n\vdash !B
+\using !_{\cal I}
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash !B \justifies \Gamma\vdash B \using \Derl (!_{{\cal E},d})
+\end{prooftree}\\[6ex]
+
+&
+\begin{prooftree}
+\Gamma\vdash !A \hspace*{2em} \Delta\vdash B
+\justifies \Gamma,\Delta\vdash B \using \Weak (!_{{\cal E},w})
+\end{prooftree}\\[6ex]
+\multicolumn{2}{c}{
+\begin{prooftree} \justifies A\vdash A \using axiom \end{prooftree}}\\[1ex]
+\end{tabular}
+}
+\end{center}
+\caption{Sequent ND for Intuitionistic Linear Logic
+        \label{figGNDILL}}
+\end{figure}
+To obtain natural deduction for classical linear logic, we take the
+rules for intuitionistic linear logic, plus
+\begin{itemize}
+\item  Define negations as
+\[ A^{\bot} =_{df} A\linimp \bot\]
+(Note that $\bot$ is the unit  for $\parr$, so that 
+$A^{\bot}\parr\bot \equiv A^{\bot}$.  If we define 
+$A\linimp B =_{df} A^{\bot}\parr B$, we can then see that
+$A\linimp \bot \equiv A^{\bot}$.)
+\item Add the rule
+\begin{center}
+\begin{prooftree}
+\Gamma,A\linimp\bot\vdash\bot \justifies \Gamma\vdash A
+\end{prooftree}
+\end{center}
+\item Define\\
+ $A\parr B =_{df} (A^{\bot}\tensor B^{\bot})^{\bot}$\\
+ $?A =_{df} (!A^{\bot})^{\bot}$
+\end{itemize}
+
+\subsection{Normalization and Term Assignment}
+
+Proof normalization and the Curry-Howard isomorphism carry across
+from the natural deduction system for traditional intuitionistic
+logic to linear intuitionistic logic.\footnote{Though dealing with the
+exponentials is not entirely straightforward.}  As before,
+normalization corresponds to cut-elimination in the sequent system.
+One could thus inherit a term-assignment system for sequent
+formulations of linear logic from the natural deduction system.
+However, proof nets (next chapter) provide a more interesting and
+direct way assigning proof terms for sequent systems.
+
+
+\subsubsection{Normalization}
+
+We will not list all the reduction rules for linear natural deduction
+(in particular, reductions for the additive connectives are essentially
+the same as for non-linear conjunction and disjunction).
+For example, we have
+\begin{center}
+\begin{tabular}{lll}
+
+\begin{prooftree}
+\[ \[A\vdash A \resultsin \Gamma,A\vdash B\]
+   \justifies \Gamma\vdash A\linimp B \using \linimpI
+\]
+\hspace*{2em} \[{\cal D}_1\resultsin\Delta\vdash A\]
+\justifies \Gamma,\Delta\vdash B \using \linimpE
+\end{prooftree}
+& \hspace*{1em} $\Longrightarrow_{\beta}$ \hspace*{1em} &
+\begin{prooftree}
+\[{\cal D}_1\resultsin \Delta\vdash A\] \resultsin \Gamma,\Delta\vdash B
+\end{prooftree}\\[15ex]
+
+\begin{prooftree}
+\[
+ \[{\cal D}_1\resultsin \Gamma_1\vdash A\]
+ \[{\cal D}_2\resultsin \Gamma_2\vdash B\]
+ \justifies \Gamma_1,\Gamma_2\vdash A\tensor B \using \tensorI
+\]
+\[A\vdash A \hspace*{1em} B\vdash B \resultsin \Delta,A,
+B\vdash C\]
+\justifies \Gamma_1,\Gamma_2,\Delta \vdash C \using \tensorE
+\end{prooftree}
+& \hspace*{1em} $\Longrightarrow_{\beta}$ \hspace*{1em} &
+\begin{prooftree}
+\[{\cal D}_1\resultsin \Gamma_1\vdash A\]
+ \[{\cal D}_2\resultsin \Gamma_2\vdash B\]
+ \resultsin \Gamma_1,\Gamma_2,\Delta \vdash C
+\end{prooftree}\\[15ex]
+
+\begin{prooftree}
+\[ \Gamma_1\vdash !A_1,\ldots,\Gamma_n\vdash !A_n
+   \[!A_1\vdash !A_1,\ldots,!A_n\vdash !A_n \resultsin
+     !A_1,\ldots,!A_n\vdash B\]
+   \justifies \Gamma_1,\ldots,\Gamma_n\vdash !B \using\mbox{\small Prom}
+\]
+\justifies \Gamma_1,\ldots,\Gamma_n\vdash B \using\Derl
+\end{prooftree}
+& \hspace*{1em} $\Longrightarrow_{\beta}$ \hspace*{1em} &
+\begin{prooftree}
+\Gamma_1\vdash !A_1,\ldots,\Gamma_n\vdash !A_n
+\resultsin \Gamma_1,\ldots,\Gamma_n\vdash B
+\end{prooftree}
+\end{tabular}
+\end{center}
+(There are also reductions for a promotion followed by a contraction,
+and a promotion followed by a weakening.)
+Commuting conversions are also required for the parasitic rules like
+$\tensorE$, e.g.
+\begin{center}
+\begin{tabular}{lll}
+
+\begin{prooftree}
+\[
+   A\tensor B \hspace*{2em} \[[A][B]\resultsin C\]
+   \justifies C \using \tensorE
+\]
+\hspace*{2em}
+\[{\cal D}\resultsin \] 
+\justifies D \using r
+\end{prooftree}
+& \hspace*{1em} $\Longrightarrow_{c}$ \hspace*{1em} &
+\begin{prooftree}
+ A\tensor B \hspace*{2em} 
+ \[\[[A][B]\resultsin C\]\hspace*{2em}  \[{\cal D}\resultsin\]
+   \justifies D \using r
+ \]
+   \justifies D \using \tensorE
+\end{prooftree}
+\end{tabular}
+\end{center}
+
+\subsubsection{Term Assignment}
+
+Figure~\ref{figILLTA} shows the term assignment for the
+intuitionistic linear logic.
+\begin{figure}
+\begin{center}
+\fbox{
+\begin{tabular}{cc}
+\begin{prooftree}
+\Gamma,x:A\vdash f:B \justifies 
+\Gamma\vdash \lambda x.f:A\linimp B \using \linimpI
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash f:A\linimp B \hspace*{2em} \Delta \vdash a:A
+\justifies \Gamma,\Delta\vdash f(a):B \using \linimpE
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\Gamma\vdash a:A \hspace*{2em} \Delta \vdash b:B
+\justifies \Gamma,\Delta\vdash a\times b:A\tensor B \using \tensorI
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash a:A\tensor B \hspace*{2em} \Delta x:A,y:B\vdash f:C
+\justifies \Gamma,\Delta\vdash 
+\lett a \bee x\times y \inn f:C \using \tensorE
+\end{prooftree}\\[6ex]
+ 
+\begin{prooftree}
+\Gamma\vdash a:A \hspace*{2em} \Gamma \vdash b:B
+\justifies \Gamma \vdash \opair{a,b}:A\lwith B \using \withI
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma \vdash p:A\lwith B \justifies \Gamma\vdash \fst(p):A \using \withE_1
+\end{prooftree}
+\begin{prooftree}
+\Gamma \vdash p:A\lwith B \justifies \Gamma\vdash \snd(p):B \using \withE_2
+\end{prooftree}\\[6ex]
+ 
+\begin{prooftree}
+\Gamma\vdash a:A \justifies \Gamma\vdash \inl(a):A\lplus B \using \plusI_1
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash b:B \justifies \Gamma\vdash \inr(b):A\lplus B \using \plusI_2
+\end{prooftree}\\[4ex]
+\multicolumn{2}{c}{
+\begin{prooftree}
+\Gamma\vdash m:A\lplus B \hspace*{2em} \Delta,x:A\vdash p:C 
+                       \hspace*{2em} \Delta,y:B\vdash q:C 
+\justifies \Gamma,\Delta \vdash 
+[\case m\;\;(\inl(x)\;p)\;\;(\inr(y)\;q)]:C \using \plusE
+\end{prooftree}}\\[6ex]
+ 
+\begin{prooftree}
+\justifies \vdash *:\lone \using \oneI
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash i:\lone \hspace*{2em} \Delta\vdash f:A
+\justifies \Gamma,\Delta\vdash \lett i \bee * in f:A \using \oneE
+\end{prooftree}\\[6ex]
+ 
+\begin{prooftree}
+\justifies \Gamma\vdash \mbox{\bf t}:\top \using \topI
+\end{prooftree}
+&
+\begin{prooftree}
+\justifies \Gamma,x:\lzero\vdash \aabort{x}:A \using \zeroE
+\end{prooftree}\\[6ex]
+ 
+\multicolumn{2}{c}{
+\begin{prooftree}
+\Gamma_1\vdash a_1:!A_1,\ldots,\Gamma_n\vdash a_n:!A_n \hspace*{2em}
+!x_1:A_1,\ldots,x_n:!A_n \vdash f:B
+\justifies \Gamma_1,\ldots,\Gamma_n\vdash 
+\promote a_1\ldots a_n \ffor x_1\ldots x \inn f:!B
+\using \Prom
+\end{prooftree}}\\[6ex]
+
+\begin{prooftree}
+\Gamma\vdash a:!A \hspace*{2em} \Delta\vdash f:B
+\justifies \Gamma,\Delta\vdash \discard a \inn f:B \using \Weak 
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash a:!A \justifies \Gamma\vdash \derelict(a):A \using \Derl 
+\end{prooftree}\\[6ex]
+
+\multicolumn{2}{c}{
+\begin{prooftree}
+\Gamma\vdash a:!A \hspace*{2em} \Delta,x:!A,y:!A\vdash f:B
+\justifies \Gamma,\Delta\vdash \ccopy a \aas x,y \in f:B \using \Contr (!_{{\cal E},c})
+\end{prooftree}}\\[6ex]
+
+
+\multicolumn{2}{c}{
+\begin{prooftree} \justifies x:A\vdash x:A \using axiom \end{prooftree}}\\[1ex]
+\end{tabular}
+}
+\end{center}
+\caption{Term Assignment for Intuitionistic Linear Logic
+         \label{figILLTA}}
+\end{figure}
+The assignment introduces some new term constructors.  The additive
+connectives make use of the constructors familiar from intuitionistic
+logic.
+
+\paragraph{$\lett$ and $\otimes$}  Introduction of $A\tensor B$ gives
+rise to a tensor pairing of proof terms,  $a\times b$, where $a$ and $b$ are
+the proof terms of $A$ and $B$.  However, this is not an ordinary 
+pairing:  we are not allowed to project down onto the individual
+elements $a$ and $b$.  This is unlike the additive pairing
+$\opair{a,b}$, where $\fst(\opair{a,b}) = a$ and $\snd(\opair{a,b}) =
+b$.  Instead, elimination makes use of a $\lett$ constructor that can
+do pairwise substitution of elements in tensor pairs
+\[\lett a\times b \bee u\times v \inn f \; \Longrightarrow_{\beta} \;
+f[a/u,b/v]\]
+
+\paragraph{Linear Abstraction}
+In the absence of weakening and contraction, all lambda terms are
+linear.  That is, in the expression $\lambda x.f$, the lambda will
+bind exactly one occurrence of $x$.  The following is a linear
+lambda term: $\lambda x.p(x)$.  The following two are not $\lambda
+x.y$, $\lambda x.p(x,x)$.
+
+\paragraph{Identities}  Two constants, $*$ and {\bf t} are introduced
+as proof terms for the identities $\lone$ and $\top$.  
+
+\paragraph{Exponentials} The term constructors for the exponential !
+are intended to have mnemonic names.  Contraction gives rise to
+copying variables, weakening to discarding them.  A derelicition
+of a variable corresponds to taking it out of storage, and promotion
+moves stored variables from one place to another.
+
+
+
+\subsubsection{Terms for Classical Linear Logic}
+
+Since classical linear logic is constructive, one can construct
+term assignments for it, as well as for intuitionistic linear logic
+(see \mycite{Bierman,Abramsky}).  However, the existence of proof nets
+has in part deflected effort from this enterprise.
+
+\section{Quantifiers in Linear Logic}
+
+The universal and existential quantifiers in linear logic are given the
+same proof rules as in traditional logic.\footnote{There has been some
+work on more intrinsically linear quantifiers, but we will not go into
+this here.}  For the sequent calculus:
+\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}
+\Gamma,A[x/t]\vdash\Delta \justifies \Gamma,\forall x.A \vdash\Delta
+\using \forallL
+\end{prooftree}
+\hspace*{5em} &
+\begin{prooftree}
+\Gamma\vdash A[x/y],\Delta \justifies \Gamma\vdash \forall x.A, \Delta
+\using \forallR
+\end{prooftree}\\[4ex]
+
+\begin{prooftree}
+\Gamma,A[x/y]\vdash\Delta \justifies \Gamma,\exists x.A \vdash\Delta
+\using \existsL
+\end{prooftree}
+ &
+\begin{prooftree}
+\Gamma\vdash A[x/t],\Delta \justifies \Gamma\vdash \exists x.A, \Delta
+\using \existsR
+\end{prooftree}
+\end{tabular}
+\end{center}
+(where $y$ must not occur free in $\Gamma$ or $\Delta$).  
+
+For
+natural deduction:
+\begin{center}
+\begin{tabular}{ll}
+\begin{prooftree}
+\Gamma\vdash A[x/y] \justifies \Gamma\vdash\forall x.A 
+\using \forallI
+\end{prooftree}
+\hspace*{5em} &
+\begin{prooftree}
+\Gamma\vdash \forall x.A \justifies \Gamma\vdash A[x/t]
+\using \forallE
+\end{prooftree}\\[4ex]
+
+\begin{prooftree}
+\Gamma\vdash A[x/t] \justifies \Gamma\vdash\exists x.A 
+\using \existsI
+\end{prooftree}
+&
+\begin{prooftree}
+\Gamma\vdash \exists x.A \hspace*{2em} \Delta,A[x/y]\vdash C
+\justifies \Gamma,\Delta \vdash C
+\using \existsE
+\end{prooftree}
+\end{tabular}
+\end{center}
+(where $t$ free for $x$, $y$ free for $x$ and not free in $A$).
+
+However, even though the rules of inference are the familiar
+ones, the meaning of the quantifiers is subtly changed in the absence
+of contraction.  A formula like $\forall x. \phi(x)$ is not to be read as
+saying that {\em all} $x$s are $\phi$.  In order for this to hold, we would
+need to use contraction to repeatedly copy the universal statement and apply
+it to every $x$.  Instead the formula is to be read as saying that {\em any}
+one $x$ will be $\phi$, but only the one.  
+
+The difference between ``any'' and
+``all'' is brought out by thinking of what it means when you tell a child
+they can ``pick any cake they like.''  This normally means that they are
+at liberty to choose any one cake, not that that they can pick all the cakes.
+
+
+\section{Axiomatic System}
+
+For the sake of reference, the axiomatic (or Hilbert style)
+presentation of linear logic is shown in figure~\ref{figAXLL}.
+\begin{figure}
+\begin{center}
+\fbox{
+\begin{tabular}{ll}
+\multicolumn{2}{l}{\it Axioms}\\
+1. &  $A\linimp A$\\
+2. & $(A\linimp B)\linimp ((B\linimp C)\linimp (A\linimp C))$\\
+3. & $(A\linimp (B\linimp C)) \linimp (B\linimp (A\linimp C))$\\
+4. & $A\linimp (B\linimp A\tensor B)$\\
+5. & $(A\linimp (B\linimp C)) \linimp ((A\tensor B)\linimp C)$\\
+6. & $\lone$\\
+7. & $\lone \linimp (A\linimp A)$\\
+8. & $(A\lwith B) \linimp A$,  \hspace*{2em} $(A\lwith B) \linimp B$\\
+9. & $((A\linimp B) \lwith (B\linimp C)) \linimp (A\linimp (B\lwith C))$\\
+10. & $A\linimp (A\lplus B)$, \hspace*{2em} $B\linimp (A\lplus B)$\\
+11. & $((A\linimp C) \lplus (B\linimp C))\linimp ((A\lplus B) \linimp C)$\\
+12. & $A\linimp \top$\\
+13. & $\lzero \linimp A$\\
+14. & $B\linimp (!A\linimp B)$\\
+15. & $(!A \linimp (!A\linimp B)) \linimp (!A\linimp !B)$\\
+16. & $!(A\linimp B) \linimp (!A \linimp !B)$\\
+17. & $!A\linimp A$\\
+18. & $!A\linimp !!A$\\
+CLL. & $((A\linimp\bot)\linimp\bot)\linimp A$\\[2ex]
+\multicolumn{2}{l}{\it Rules}\\
+$\linimp$ & $A, A\linimp B \Rightarrow B$\\
+$\tensor$ & $A,B \Rightarrow A\tensor B$\\
+! & $A \Rightarrow !A$\\[2ex]
+
+\multicolumn{2}{l}{\it Comments}\\
+& Axiom CLL for classical linear logic only\\
+& $A^{\bot} =_{df} A\linimp \bot$\\
+& Other connectives defined via negation\\[1ex]
+\end{tabular}
+}
+\end{center}
+\caption{Hilbert System for Linear Logic \label{figAXLL}}
+\end{figure}
+
+\section{Encoding Traditional Logic}
+
+Since the exponentials allow controlled reintroduction of contraction and
+weakening, it is possible to represent traditional intuitionistic and
+classical logic inside linear logic.
+
+\subsection{Intuitionistic Logic}
+Given a formula $A$ of intuitionistic propositional, its encoding in
+linear logic, $A^i$ is defined as follows
+\begin{center}
+\begin{tabular}{rcl}
+$A^i$ & = & $A$ \ \ \ (atomic $A$)\\
+$(A\lland B)^i$ & = & $A^i \lwith B^i$\\
+$(A\llor B)^i$ & = & $A^i \lplus B^i$\\
+$(A\imp B)^i$ & = & $!A^i \linimp B^i$\\
+$(\neg A)^i$ & = & $!A^i \linimp \lzero$\\
+$\bot^i$ & = & $\lzero$\\
+$A_1,\ldots,A_n\vdash B$ & = & $!A_1^i,\ldots,\;!A_n^i\vdash B^i$
+\end{tabular}
+\end{center}
+
+\subsection{Classical Logic}
+
+
+\section{Semantics / Applications}
+
+ 
+For people who are familiar with standard set-based model theory
+(e.g. Tarskian truth-value semantics for classical propositional and
+predicate logic, Kripke semantics for modal and intuitionistic logics,
+etc), there is little in the way of intuitively comprehensible
+formal semantics for linear logic. This is not to say that there
+is no semantics for linear logic; on the contrary, there are numerous
+proposals on the market. But they require some
+mathematical sophistication to be appreciated.  
+
+  In this section, we briefly
+sketch some of the approaches to the semantics of linear logic.
+The aim is not technical, but to try and harden intuitions about
+what linear logic means.   Semantics can be valuable
+in finding applications for a logic, and so in some cases we will
+merely give an informal semantics, indicating how linear logic may
+be applied in a particular area.
+
+\subsection{Internal-External Semantics}
+
+Perhaps the most intuitive semantics proposed for linear logic is
+due to \mycite{Mitchell}.  It is founded on the metaphor that proofs
+are consumers.  Proofs make use of a global resource, shared between
+an internal and an external environment.  The internal environment
+represents the global resource that has not so far been used /
+allocated.  The external environment represents the global resource
+that has bee used.  A conservation principle demands that the global
+resource remains the same size, regardless of how it is spread across
+the internal and external environments.
+
+We use a pair $(m,n)$ to represent the global resource, $m+n$, spread
+across the internal environment $m$ and the external environment $n$.
+An initial distribution is one where none of the global resource has
+been allocated to the external environment, i.e. $(m+n,0)$.
+
+An initial forcing relation $\models_0$ is a relation between
+internal-external pairs and atomic propositions.  Essentially
+$(m,n) \models_0 A$
+means that satifying the atomic proposition $A$ requires amount $n$ of
+resource to be consumed.  We recursively define a satisfiability
+relation $\models$ as follows
+\begin{itemize}
+\item Atomic formulas\\
+$(m,n) \models A$ iff $(m,n) \models_0 A$
+\item Tensor $\tensor$\\
+$(m,n) \models \phi\tensor\psi$ if $\exists \; n_1, n_2$ s.t. $n =
+n_1+n_2$:\\
+$(m+n_2,n_1)\models\phi$ and $(m+n_1,n_2)\models\psi$ 
+
+That is, the resource $n$ allocated in satisfying $\phi\tensor\psi$
+can be split into two parts. One part, $n_1$ is needed to satisfy
+$\phi$, and the other $n_2$ to satisfy $\psi$.  Combining these two
+parts, $n_1+n_2=n$ is enough to satisfy $\phi\tensor\psi$.
+
+\item Par $\parr$\\
+$(m,n) \models \phi\parr\psi$ if $\forall \; m_1, m_2$ s.t. $m =
+m_1+m_2$:\\
+$(m_1,n+m_2)\models\phi$ or $(m_2,n+m_1)\models\psi$ 
+
+No matter how much of the internal environment is allocated to the
+external environment (i.e. consumed) it will be enought to satisfy at
+least one of either $\phi$ or $\psi$.  The resource already allocated,
+$n$, represents a lower bound on the amount of resource needed to
+satisfy either $\phi$ or $\psi$.
+
+\item Negation\\
+$(m,n) \models \phi^{\bot}$ if $(n,m)\not\models\phi$
+
+Your remaining unallocated resource is insufficient to satisfy $\phi$
+
+\item Implication $\linimp$
+$(m,n) \models \phi\linimp\psi$ if $\forall \; m_1, m_2$ s.t. $m =
+m_1+m_2$:\\
+$(n+m_2,m_1)\not\models\phi$ or $(m_2,n+m_1)\models\psi$ 
+
+Implication is equivalent to $\phi^{\bot}\parr\psi$. If 
+$(m,n) \models \phi\linimp\psi$, for any allocation of the remaining
+internal resource, either (1) it it ($m_1$) is insufficient (on its own) to
+satisfy $\phi$, or (2) when it ($m_2$) is combined with the currently
+allocated resource $n$ it is sufficient to satisfy $\psi$.
+
+\item With $\lwith$\\
+$(m,n) \models \phi\lwith\psi$ if\\
+$(m,n) \models \phi$ and $(m,n) \models \psi$
+
+The allocated resource is enough to satisfy $\phi$ and also enough to
+satisfy $\psi$, but not both at once
+
+\item Plus $\lplus$\\
+$(m,n) \models \phi\lplus\psi$ if\\
+$(m,n) \models \phi$ or $(m,n) \models \psi$
+
+The allocated resource satisfies one of $\phi$ or $\psi$, but we do
+not specify which.
+
+\item Unit $\lone$\\
+$(m,n) \models \lone$ if $n=0$
+
+Unit is satisfied without the consumption of any resources
+
+\item Bottom $\bot$\\
+$(m,n) \models \bot$ if $m\not = 0$
+
+Bottom is satisfied whenever you still have some unallocated resource.
+This represents a kind of failure, in that derivations are expected to
+consume/allocate all of the global resource.  However, it is not a
+devasting form of failure like impossibility ($\lzero$), from which
+anything follows.
+
+\item Top $\top$\\
+$(m,n) \models \top$ always
+
+Top is always satisfied: it can soak up any unallocated resources.
+This additive identity is most similar to {\it verum}/true in traditional logic
+
+\item Impossibility $\lzero$\\
+$(m,n) \not\models \lzero$
+
+Impossibility is never satisfied: c.f. {\it falsum} in traditional
+logic
+
+\item Of course !\\
+$(m,n) \models !\phi$ if $n=0$ and $(m,n) \models \phi$
+
+This is equivalent to defining $!\phi =_{df} (\lone\lwith\phi)$.  That
+is, $\phi$ can be satisfied without consuming any resources.
+
+\item Why not ?\\
+$(m,n) \models ?\phi$ if $m\not =0$ or $(m,n) \models \phi$
+
+This is equivalent to defining $?\phi =_{df} (\bot\lplus\phi)$.  Either
+$\phi$ is satisfied, or there is some remaining unallocated resource.
+\end{itemize}
+ 
+To illustrate this semantics, Mitchell discusses the (infamous) example of
+buying cigarettes.  The formula $ \$ 1\linimp C$ says that if I spend
+a dollar ($ \$ 1$), I can obtain a packet of cigarettes ($C$).  Let
+$(m,n)\models_0 \$ k$ if $n=k$ (i.e. if I have spent $k$ dollars, and thus
+moved from the internal to the external environment.  And for goods $G$,
+let $(m,n)\models_0 G$ if the cost of $G$ is $ \$n$.  It is then possible
+to show that
+\begin{center}
+$(m,0)\models \$ 1\linimp C$ if $(m-1,1) \models C$
+\end{center}
+That is, transfering one dollar to the external environment in exchange for
+the cigarettes $C$.  It can also be shown that
+\begin{center}
+$(m,0)\models (\$ 1\tensor \$ 1) \linimp (C\tensor C$ 
+if $(m-2,2) \models C\tensor C$
+\end{center}
+
+Mitchell goes on to point out that the semantics sketched above is incomplete
+for linear logic: the model makes $A\lwith(B\lplus C)$ equivalent to
+$(A\lplus B) \lwith (A\lplus C)$, which is not a theorem of linear logic.
+This arises because the additives are defined as classical $\lland$ 
+and $\llor$.  In order to correct this, Mitchell offers a refinement of the
+model using quantales.  We will not go into this here.  Hopefully the
+incomplete semantics is enought to shed some intuitive 
+light on the linear logic connectives.
+
+\subsection{Semantics of State}
+
+%\subsection{Kripke Semantics?}
+
+\subsection{Coherence Spaces}
+
+
+
+\section{Fragments of Linear Logic}
+
+Table from \mycite{Lincoln}
+
+\begin{center}
+\begin{tabular}{|l|l|}\hline
+Fragment   & Complextity\\ \hline
+$\tensor$ $\parr$ $\lwith$ $\lplus$ ! ? & Undecidable\\
+$\tensor$ $\parr$ $\lwith$ $\lplus$ & PSPACE complete\\
+$\tensor$ $\parr$ ! ? & Unknown (check!)\\
+$\tensor$ $\parr$ & NP complete\\\hline
+\end{tabular}
+\end{center}
+Note that classical propositional logic is NP-complete
+

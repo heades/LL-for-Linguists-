@@ -1,0 +1,205 @@
+\documentclass[titlepage,landscape]{slides}
+%\usepackage{proof}
+\usepackage{tree-dvips}
+\usepackage{latexsym}
+\usepackage{prooftree}
+%\pagestyle{plain}
+
+\voffset=-0.8in
+\addtolength{\textwidth}{0.8in}
+\addtolength{\textheight}{1.1in}
+
+\begin{document}
+
+
+%centered, underlined heading for slides
+\newcommand\head[1]{\begin{center}\em #1\end{center}\vskip4pt\hrule height2pt}
+
+%slides with heading, and contents centered
+\newenvironment{hslide}[1]{\begin{slide}{}\head{#1}\vfill}{\vfill\end{slide}}
+
+%itemize with less space before and between items
+\newenvironment{items}{\begin{list}{$\bullet$}{\itemsep=0pt\topsep=0pt}}%
+                      {\end{list}}
+
+\newenvironment{descs}{\begin{list}{}{\itemsep=0pt\topsep=0pt}}%
+                      {\end{list}}
+
+% All the following is to do an inverse ampersand
+\def\invamp{\hbox{\PLyy=70pt\draw :::;DMV_gqppyyyyyooooxxxnnwvlutkjaWNE=5-./9%
+9:::CCCC:::99/..--544=EENWWaajjjkktttttttNNNVVVVVVVV\end \hskip6pt}}
+\newcount\PLv\newcount\PLw\newcount\PLx\newcount\PLy\newdimen\PLyy\newdimen\PLX
+\newbox\PLdot \setbox\PLdot\hbox{{\tiny.}} \def\scl{.07} % resettable scale
+\def\PLot#1{\PLx`#1\advance\PLx-42\PLy\PLx\PLv\PLx\divide\PLy9\PLw\PLy\multiply
+\PLw9\advance\PLx-\PLw\advance\PLx-4\PLy-\PLy\advance\PLy4\PLX=\the\PLx pt
+\advance\PLyy\the\PLy pt\wd\PLdot=\scl\PLX\raise\scl\PLyy\copy\PLdot}
+\def\draw#1{\ifx#1\end\let\next=\relax\else\PLot#1\let\next=\draw\fi\next}
+
+%\newcommand{\parr}{\;\invamp\;}
+\newcommand{\parr}{\;\#\;}
+
+\newcommand{\linimp}{\;\mbox{$-\hspace*{-.4ex}\circ$}\;}
+\newcommand{\rlinimp}{\;\mbox{$\circ\hspace*{-.4ex}-$}\;}
+\newcommand{\rlinimpE}{\mbox{\small$\circ\hspace*{-.4ex}-_{\cal E}$}}
+\newcommand{\rlinimpI}{\mbox{\small$\circ\hspace*{-.4ex}-_{\cal I}$}}
+\newcommand{\linimpE}{\mbox{\small$-\hspace*{-.4ex}\circ_{\cal E}$}}
+\newcommand{\linimpI}{\mbox{\small$-\hspace*{-.4ex}\circ_{\cal I}$}}
+\newcommand{\linimpIE}{\mbox{\small$-\hspace*{-.4ex}\circ_{{\cal I}{\cal E}}$}}
+\newcommand{\linimpIi}[1]{\mbox{\small$-\hspace*{-.4ex}\circ_{{\cal I},#1}$}}
+\newcommand{\imp}{\rightarrow}
+\newcommand{\lland}{\wedge}
+\newcommand{\landI}{\mbox{\small$\wedge_{\cal I}$}}
+\newcommand{\landE}{\mbox{\small$\wedge_{\cal E}$}}
+\newcommand{\landL}{\mbox{\small$\wedge_{\cal L}$}}
+\newcommand{\landR}{\mbox{\small$\wedge_{\cal R}$}}
+\newcommand{\llor}{\vee}
+\newcommand{\lorI}{\mbox{\small$\vee_{\cal I}$}}
+\newcommand{\lorE}{\mbox{\small$\vee_{\cal E}$}}
+\newcommand{\lorL}{\mbox{\small$\vee_{\cal L}$}}
+\newcommand{\lorR}{\mbox{\small$\vee_{\cal R}$}}
+\newcommand{\lorEij}[2]{\mbox{\small$\vee_{{\cal E}#1,#2}$}}
+\newcommand{\impE}{\mbox{\small$\rightarrow_{\cal E}$}}
+\newcommand{\impI}{\mbox{\small$\rightarrow_{\cal I}$}}
+\newcommand{\impL}{\mbox{\small$\rightarrow_{\cal L}$}}
+\newcommand{\impR}{\mbox{\small$\rightarrow_{\cal R}$}}
+\newcommand{\impIi}[1]{\mbox{\small$\rightarrow_{{\cal I},#1}$}}
+\newcommand{\negI}{\mbox{\small$\neg_{\cal I}$}}
+\newcommand{\negL}{\mbox{\small$\neg_{\cal L}$}}
+\newcommand{\negR}{\mbox{\small$\neg_{\cal R}$}}
+\newcommand{\botL}{\mbox{\small$\bot_{\cal L}$}}
+\newcommand{\botR}{\mbox{\small$\bot_{\cal R}$}}
+\newcommand{\negIi}[1]{\mbox{\small$\neg_{{\cal I},#1}$}}
+\newcommand{\negE}{\mbox{\small$\neg_{\cal E}$}}
+\newcommand{\botE}{\mbox{\small$\bot_{\cal E}$}}
+\newcommand{\topI}{\mbox{\small$\top_{\cal I}$}}
+\newcommand{\forallI}{\mbox{\small$\forall_{\cal I}$}}
+\newcommand{\forallE}{\mbox{\small$\forall_{\cal E}$}}
+\newcommand{\forallL}{\mbox{\small$\forall_{\cal L}$}}
+\newcommand{\forallR}{\mbox{\small$\forall_{\cal R}$}}
+\newcommand{\existsI}{\mbox{\small$\exists_{\cal I}$}}
+\newcommand{\existsE}{\mbox{\small$\exists_{\cal E}$}}
+\newcommand{\existsL}{\mbox{\small$\exists_{\cal L}$}}
+\newcommand{\existsR}{\mbox{\small$\exists_{\cal R}$}}
+\newcommand{\existsEi}[1]{\mbox{\small$\exists_{{\cal E},#1}$}}
+\newcommand{\ContrL}{\mbox{\small\it Contraction$_{\cal L}$}}
+\newcommand{\Contr}{\mbox{\small\it Contraction}}
+\newcommand{\ContrR}{\mbox{\small\it Contraction$_{\cal R}$}}
+\newcommand{\Weak}{\mbox{\small\it Weakening}}
+\newcommand{\WeakL}{\mbox{\small\it Weakening$_{\cal L}$}}
+\newcommand{\WeakR}{\mbox{\small\it Weakening$_{\cal R}$}}
+\newcommand{\Exch}{\mbox{\small\it Exchange}}
+\newcommand{\ExchL}{\mbox{\small\it Exchange$_{\cal L}$}}
+\newcommand{\ExchR}{\mbox{\small\it Exchange$_{\cal R}$}}
+\newcommand{\Derl}{\mbox{\small\it Dereliction}}
+\newcommand{\DerlL}{\mbox{\small\it Dereliction$_{\cal L}$}}
+\newcommand{\DerlR}{\mbox{\small\it Dereliction$_{\cal R}$}}
+\newcommand{\Prom}{\mbox{\small\it Promotion}}
+\newcommand{\PromL}{\mbox{\small\it Promotion$_{\cal L}$}}
+\newcommand{\PromR}{\mbox{\small\it Promotion$_{\cal R}$}}
+\newcommand{\opair}[1]{\langle #1 \rangle}
+\newcommand{\angb}[1]{$\langle$#1$\rangle$}
+\newcommand{\generic}{\mbox{\it generic}}
+\newcommand{\fst}{\mbox{\sf fst}}
+\newcommand{\snd}{\mbox{\sf snd}}
+\newcommand{\inl}{\mbox{\sf inl}}
+\newcommand{\inr}{\mbox{\sf inr}}
+\newcommand{\case}{\mbox{\sf case}\;}
+\newcommand{\lett}{\mbox{\sf let}\;}
+\newcommand{\bee}{\;\mbox{\sf be}\;}
+\newcommand{\inn}{\;\mbox{\sf in}\;}
+\newcommand{\aas}{\;\mbox{\sf as}\;}
+\newcommand{\ffor}{\;\mbox{\sf for}\;}
+\newcommand{\ccopy}{\mbox{\sf copy}\;}
+\newcommand{\discard}{\mbox{\sf discard}\;}
+\newcommand{\promote}{\mbox{\sf promote}\;}
+\newcommand{\derelict}{\mbox{\sf derelict}}
+\newcommand{\aabort}[1]{{\mbox{\sf abort}_{#1}}}
+
+%\newcommand{\tensor}{\;\otimes\;}
+%\newcommand{\lplus}{\;\oplus\;}
+%\newcommand{\lwith}{\;\&\;}
+%\newcommand{\with}{\;\&\;}
+\newcommand{\tensor}{\otimes}
+\newcommand{\lplus}{\oplus}
+\newcommand{\lwith}{\&}
+\newcommand{\with}{\&}
+
+\newcommand{\lone}{\mbox{\bf 1}}
+\newcommand{\lzero}{\mbox{\bf 0}}
+
+\newcommand{\tensorL}{\mbox{\small$\otimes_{\cal L}$}}
+\newcommand{\tensorR}{\mbox{\small$\otimes_{\cal R}$}}
+\newcommand{\tensorE}{\mbox{\small$\otimes_{\cal E}$}}
+\newcommand{\tensorEij}[2]{\mbox{\small$\otimes_{{\cal E},#1,#2}$}}
+\newcommand{\tensorI}{\mbox{\small$\otimes_{\cal I}$}}
+\newcommand{\withL}{\mbox{\small\&$_{\cal L}$}}
+\newcommand{\withR}{\mbox{\small\&$_{\cal R}$}}
+\newcommand{\withI}{\mbox{\small\&$_{\cal I}$}}
+\newcommand{\withE}{\mbox{\small\&$_{\cal E}$}}
+\newcommand{\plusL}{\mbox{\small$\oplus_{\cal L}$}}
+\newcommand{\plusR}{\mbox{\small$\oplus_{\cal R}$}}
+\newcommand{\plusI}{\mbox{\small$\oplus_{\cal I}$}}
+\newcommand{\plusE}{\mbox{\small$\oplus_{\cal E}$}}
+\newcommand{\parL}{\mbox{\small$\#_{\cal L}$}}
+\newcommand{\parR}{\mbox{\small$\#_{\cal R}$}}
+\newcommand{\linimpL}{\mbox{\small$-\hspace*{-.4ex}\circ_{\cal L}$}}
+\newcommand{\linimpR}{\mbox{\small$-\hspace*{-.4ex}\circ_{\cal R}$}}
+\newcommand{\oneL}{\mbox{\small$\lone_{\cal L}$}}
+\newcommand{\oneR}{\mbox{\small$\lone_{\cal R}$}}
+\newcommand{\oneI}{\mbox{\small$\lone_{\cal I}$}}
+\newcommand{\oneE}{\mbox{\small$\lone_{\cal E}$}}
+\newcommand{\zeroL}{\mbox{\small$\lzero_{\cal L}$}}
+\newcommand{\zeroE}{\mbox{\small$\lzero_{\cal E}$}}
+\newcommand{\topR}{\mbox{\small$\top_{\cal R}$}}
+
+\newcommand{\mycite}[1]{[#1]}
+
+\newcommand{\dispbox}[2]{\begin{center}\fbox{\parbox{#1}{#2}}\end{center}}
+\newcommand{\dbox}[1]{\begin{center}\fbox{\parbox{\textwidth}{#1}}\end{center}}
+
+\newcommand{\means}{\leadsto}
+\newcommand{\meanse}{\leadsto_{e}}
+\newcommand{\meanst}{\leadsto_{t}}
+\newcommand{\ConsAfter}{\succ}
+\newcommand{\context}{\hookrightarrow}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\deno} [1]{[\![#1]\!]}
+\newcommand{\idx} [1]{\langle #1 \rangle}
+
+%%%%%%%%%%%% feature-value-matrix TFS.sty %%%%%%%%%
+
+
+\fboxsep = 1pt     % Space between the frame and the text 
+                   % in \framebox and \fbox commands
+
+\newcommand{\tor}{\mbox{\small$\lor$}}
+\newcommand{\tand}{\land}
+\newcommand{\tcomp}{\setminus}
+
+\newenvironment{expr}[1]%
+{\begin{array}[t]{@{}l@{}}%
+#1}%
+{\end{array}}
+
+\newenvironment{avm}[1]%
+{\left[\begin{array}{@{}l@{\;}l@{\;}}%
+#1}%
+{\end{array}\hspace*{-2pt}\right]}
+
+\newcommand{\comment}[1]{\mbox{\scriptsize\it #1}}
+\newcommand{\kw}[1]{\mbox{\footnotesize\tt #1}}
+\newcommand{\tag}[1]{\fbox{\footnotesize #1}\,}
+\newcommand{\lbsc}[1]{\mbox{\scriptsize\sc #1}}
+\newcommand{\tp}[1]{\mbox{\footnotesize\sf #1}}
+\newcommand{\lf}[1]{\mbox{\sf #1}}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\input{talkws}
+
+\end{document}

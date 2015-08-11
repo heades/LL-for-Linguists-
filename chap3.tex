@@ -1,0 +1,953 @@
+\chapter{Proof Nets}
+
+Proof nets are a new way of representing sequent calculus proofs.
+Recall that sequent proofs can be seen as linearizations,  or
+sequentializations, of natural deduction proofs.  This linearization
+means that irrelevant differences in the order in which certain proof
+rules are applied can lead to spurious distinctions being drawn between
+sequent proofs.  For example, on p.~\pageref{???} we saw how two distinct,
+cut-free sequent proofs mapped onto the same natural deduction proof.
+The two sequent proofs only differed in the relative order in which
+two proof steps were applied.  These sequential differences were
+`parallelized' out in the natural deduction proof.
+
+For those familiar with formal language
+theory, the following analogy might help.  One can define various forms
+of derivation for context free grammars: leftmost derivations (where the
+leftmost non-terminal is always expanded); rightmost derivations (where
+the rightmost non-terminal is always expanded); top-down derivations; 
+bottom-up derivations; etc.  All these different (sequential) derivation
+regimes give rise to different orders of grammar rule application.
+Parse trees abstract away from these inessential ordering differences to
+get to the underlying structure that all these different derivation schemes
+assign to a string of words.  They essentially parallelize those rule 
+applications whose relative orders are immaterial.
+Thus one might draw a rough parallel between
+(a) sequent proofs and (rightmost / leftmost / top-down / bottom-up)
+derivations, and (b) natural deduction proofs and parse trees.
+
+
+Proof nets provide an alternative means of parallelizing inessential 
+differences in sequent proofs.   Given that natural deduction proofs in
+some ways already do this, one might wonder why an alternative method
+is required.  The answer lies in certain flaws in natural deduction
+that were pointed out at the end of Chapter~\ref{Ch2}:
+\begin{itemize}
+\item For (traditional) classical logic, the symmetric pairing of
+introduction and elimination rules for connectives is lost, thanks
+to the {\it reductio ad absurdum rule}.  By contrast, the sequent
+formulation of classical logic is beautifully symmetric.
+\item Rules like disjunction elimination (and tensor-elimination in linear
+logic) introduce parasitic formulas in natural deduction formulations.
+These necessitate the introduction of quite complex commuting conversions
+in order to make proof normalization work.  Sequent formulations
+do not introduce parasitic formulas.
+\item The rules discharging assumptions in natural deduction have a global
+nature.  They need to refer to the whole structure of the foregoing proof
+to locate the assumption being discharged.  In sequent calculus, this 
+information is held locally within the sequent.
+\end{itemize}
+This suggests that sequent calculus would be a much better way of
+representing proofs than natural deduction, were it not for the fact that
+it introduces inessential distinctions between proofs.\footnote{The view
+that sequent calculus is `better' is not universally shared.  It certainly
+motivates the development of proof nets.  But there are plenty of researchers
+in linear logic who are not actively engaged with proof nets, and who
+prefer natural deduction formulation.  Against the sequent calculus, one
+can for example note that it is asymmetric for intuitionistic logic in a
+way that natural deduction is not.  If symmetry is an important property,
+the argument cuts both ways.}
+
+Proof nets have been developed primarily for linear logic, and even then,
+only for fragments of the logic --- the additive connectives pose various
+problems.  There is a hope that proof net methods can be applied
+more generally to other logics (e.g. traditional  intuitionistic
+logic). But in this chapter, we will focus only on the most basic cases for
+linear logic.
+
+\section{Towards Proof Nets}
+
+\subsection{Two Examples}
+There is a sense in which a linear logic derivation is just an attempt
+to match up consumers and producers of atomic (propositional) resources.
+Suppose for example that we wished to prove
+\[A,\;A\linimp B \vdash B\]
+Note that the negation rule allows us to move each of the premises
+on the left of the turnstile to the right, negating them as we go. Thus
+we get
+\[\vdash A^{\bot},\;(A\linimp B)^{\bot},\;B\]
+Pushing negations inwards, this is the same as
+\[\vdash A^{\bot},\;A\otimes B^{\bot},\;B\]
+We can connect the positive and negative atomic literals up as follows
+\begin{ex} \label{pnet1}
+\[
+\begin{array}{ccccc}
+\node{an1}{$A^\bot$}, \hspace*{1ex}
+& \node{a1}{$A$}&\otimes&\node{bn1}{$B^\bot$},\hspace*{1ex} &
+\node{b1}{$B$}
+\end{array}
+\barnodeconnect[2ex]{an1}{a1}
+\barnodeconnect[2ex]{bn1}{b1}
+\]
+\end{ex}
+The $A$ and the $A^\bot$ connect,  and the $B$ and the $B^\bot$ connect,
+cancelling
+one another out. This indicates that we have successfully matched producers,
+or inputs, ($A^\bot$, $B^\bot$), with consumers or outputs ($A$, $B$).
+
+We should straight away point out that not all ways of connecting positive
+and negative atoms result in the successful matching of consumers and 
+producers.  Consider for example the invalid sequent 
+$A,B\not\vdash A\invamp B$.
+Turning this into a one-sided sequent, pushing negation in, and connecting
+literals gives rise to
+\begin{ex}\label{pnet2}
+\[
+\begin{array}{ccccc}
+\node{an2}{$A^\bot$}, \hspace*{1ex}
+& \node{a2}{$A$}&\invamp&\node{bn2}{$B$},\hspace*{1ex} &
+\node{b2}{$B^\bot$}
+\end{array}
+\barnodeconnect[2ex]{an2}{a2}
+\barnodeconnect[2ex]{bn2}{b2}
+\]
+\end{ex}
+This is {\em not} a valid way of connecting up positive and negative atoms.
+
+Both (\ref{pnet1}) and (\ref{pnet2}) are {\em proof structures}.  However,
+only (\ref{pnet1}) is a {\em proof net}; i.e. a proof structure corresponding
+to a valid derivation.
+
+
+The main difference between the two proof structures is in the connective,
+$\tensor$ or $\invamp$.  One would, after all, expect conjunction and
+disjunction to connect up in different ways.  Crudely put, conjunction
+($\otimes$) brings together the results of two different derivations. 
+Disjunction ($\invamp$) characterises the result of a single derivation.
+The conjunctive structure is OK, as the the $A$ and $B^\bot$ atoms connect
+up to different (one step, axiomatic) derivations.  The disjunctive structure
+fails, for exactly the same reasons.
+
+The differences between $\tensor$and$\parr$become clearer if we consider
+the one-sided sequent formulation of linear logic.
+ 
+\subsection{One-Sided Sequent Calculus}
+
+The definition of $A\linimp B$ as $A^\bot \parr B$ in classical linear logic,
+and the ability of negation to move all formulas to the right of sequents
+permits a very compact formulation of classical linear logic, using one-sided
+sequents.  This is shown in figure~\ref{figCLL1S}.
+\begin{figure}
+\begin{center}
+\fbox{
+\begin{tabular}{cc}
+\begin{prooftree}
+\justifies \vdash A^\bot, A \using axiom
+\end{prooftree}
+&
+\begin{prooftree}
+\vdash\Gamma,A \hspace*{2em} \vdash A^\bot,\Delta
+\justifies \Gamma,\Delta \using cut
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\vdash\Gamma,A \hspace*{2em} \vdash \Delta,B
+\justifies \vdash \Gamma,\Delta,A\tensor B \using \otimes
+\end{prooftree}
+&
+\begin{prooftree}
+\vdash \Gamma,A,B \justifies \vdash \Gamma,A\parr B \using \invamp
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\vdash\Gamma,A \hspace*{2em} \vdash \Gamma,B
+\justifies \vdash \Gamma, A\lwith B \using \&
+\end{prooftree}
+\hspace*{5em}&
+\begin{tabular}{ll}
+\begin{prooftree}
+\vdash\Gamma,A \justifies \vdash\Gamma,A\lplus B \using \oplus_1
+\end{prooftree}
+&
+\begin{prooftree}
+\vdash\Gamma,B \justifies \vdash\Gamma,A\lplus B \using \oplus_2
+\end{prooftree}
+\end{tabular}\\[6ex]
+
+\multicolumn{2}{c}{
+\begin{tabular}{lll}
+\begin{prooftree}
+\vdash \Gamma \justifies \vdash \Gamma,\bot
+\end{prooftree} \hspace*{5em}
+&
+\begin{prooftree}
+\justifies \lone
+\end{prooftree} \hspace*{5em}
+&
+\begin{prooftree}
+\justifies \Gamma,\top
+\end{prooftree}
+\end{tabular}}\\[6ex]
+
+\begin{prooftree}
+\vdash \Gamma \justifies \vdash\Gamma,?A \using \Weak
+\end{prooftree}
+&
+\begin{prooftree}
+\vdash \Gamma,?A,?A \justifies \vdash\Gamma,?A \using \Contr
+\end{prooftree}\\[6ex]
+
+\begin{prooftree}
+\vdash \Gamma,A \justifies \vdash\Gamma,?A \using \Derl
+\end{prooftree}
+&
+\begin{prooftree}
+\vdash ?\Gamma,A \justifies \vdash?\Gamma,!A \using \Prom
+\end{prooftree}\\[2ex]
+\end{tabular}
+}
+\end{center}
+\caption{One-Sided Sequents for Classical Linear Logic \label{figCLL1S}}
+\end{figure}
+Consider the rule for par:
+\begin{center}
+\begin{prooftree}
+\vdash \Gamma,A,B \justifies \vdash \Gamma,A\parr B \using \invamp
+\end{prooftree}
+\end{center}
+Note how (i) the disjunction comes from just one context, $\Gamma$, and
+(ii) $\Gamma$ appear above and below the line.  We might thus rewrite the
+rule as
+\begin{center}
+$\Gamma$\\
+\begin{prooftree}
+\[\resultsin A\] \hspace*{2em} \[\resultsin B\] \justifies A\parr B
+\end{prooftree}
+\end{center}
+which both makes the surplus context $\Gamma$ implicit, but also marks the
+fact that the context is common to both disjuncts.
+
+Now consider the rule for tensor
+\begin{center}
+\begin{prooftree}
+\vdash\Gamma,A \hspace*{2em} \vdash \Delta,B
+\justifies \vdash \Gamma,\Delta,A\tensor B \using \otimes
+\end{prooftree}
+\end{center}
+Here the surplus contexts $\Gamma$ and $\Delta$ appear both above and
+below the line, but note that they are disjoint.  Surpressing the surplus
+contexts, we might rewrite the rule as
+\begin{center}
+\begin{prooftree}
+\[\Gamma\resultsin A\] \hspace*{2em} \[ \Delta \resultsin B\]
+\justifies A\tensor B 
+\end{prooftree}
+\end{center}
+Here the $\Gamma$ and $\Delta$ express disjointness conditions on how
+the literals in $A$ and $B$.
+
+We can also rewrite the axiom rule as
+\begin{center}
+\begin{tabular}{ll}
+\node{ax1}{$A^\bot$} \hspace*{3em} \node{ax2}{$A$} 
+\end{tabular}
+\barnodeconnect[1ex]{ax1}{ax2}
+\end{center}
+
+Perhaps a better way of expressing jointness/disjointness conditions
+on contexts, while surpressing reference to them altogether, is to
+draw trees with `hard' and `soft' links:
+\begin{center}
+\begin{tabular}{ccccccc}
+\node{a3}{$A$}& &\node{b3}{$B$} & \hspace*{5em} & \node{a4}{$A$}& &\node{b4}{$B$}\\[2ex]
+ & \node{p3}{$A\parr B$}& & & & \node{t4}{$A\tensor B$} &
+\end{tabular}
+{\makedash{4pt}
+\nodeconnect{a3}{p3}
+\nodeconnect{b3}{p3}
+}
+\nodeconnect{a4}{t4}
+\nodeconnect{b4}{t4}
+\end{center}
+The soft links, represented by dashed lines, indicate shared contexts.
+The hard links, represented by solid lines, indicate disjoint contexts
+The axiom rule stays as it is (i.e. with a hard link).  The notion of
+hard and soft links makes it easier to understand the notion of a switch
+graph.
+
+\subsection{Switch Graphs}
+
+Soft (or par, $\invamp$) links point to shared derivations.  Therefore, if we
+break one of the soft links from a par, the other link should still be able
+to get us to the derivation.  On the other hand, hard links point to disjoint
+derivations.  If we follow one link from a tensor, there should not be a cycle 
+(other than through an unbroken soft link) that gets us back to the other link
+of the tensor.  
+
+This idea is formalized using switch graphs.
+\begin{itemize} 
+\item
+Given a proof structure $\Pi$, a switch graph associated with $\Pi$ is
+any sub-graph obtained from $\Pi$ by taking each par node and deleting
+one of its soft links while leaving the other one intact.
+\item
+ A proof structure $\Pi$ is a proof net iff every switch
+graph of $\Pi$ is a tree.
+\end{itemize}
+Deleting one of every pair of soft par links should break all the cycles in
+the proof structure that arise from pars stemming from the same derivation.
+The remaining tensor links should point to separate derivations, and so should
+not introduce any cycles 
+Let us illustrate this with some examples.  
+
+Consider the valid
+sequent $A\tensor B \vdash A\tensor B$.  As a one sided sequent, this
+becomes $\vdash (A\tensor B)^\bot, A\tensor B$.  Pushing negations inwards,
+this becomes $\vdash A^\bot\parr B^\bot, A\tensor B$.  Connecting atoms we 
+get the proof structure
+\begin{center}
+\begin{tabular}{ccccccc}
+\node{a5}{$A$}& &\node{b5}{$B$} & \hspace*{5em} & 
+\node{a6}{$A^\bot$}& &\node{b6}{$B^\bot$}\\[2ex]
+ & \node{t5}{$A\tensor B$}& & & & \node{p6}{$A^\bot \parr B^\bot$} &
+\end{tabular}
+\nodeconnect{a5}{t5}
+\nodeconnect{b5}{t5}
+{\makedash{4pt}
+\nodeconnect{a6}{p6}
+\nodeconnect{b6}{p6}
+}
+\barnodeconnect[2ex]{a5}{a6}
+\barnodeconnect[1ex]{b5}{b6}
+\end{center}
+This structure has just one par node.  We can break either one of its
+soft links, and get a tree:
+\begin{center}
+\begin{tabular}{ll}
+\begin{tabular}{ccc}
+                     &  & \node{p7}{$A^\bot \parr B^\bot$}\\[2ex]
+\node{a71}{$A^\bot$} &  & \node{b71}{$B^\bot$}             \\[2ex]
+\node{a72}{$A$}      &  & \node{b72}{$B$}                  \\[2ex]
+& \node{t7}{$A\tensor B$} &
+\end{tabular}
+{\makedash{4pt}
+\nodeconnect{p7}{b71}
+}
+\nodeconnect{b71}{b72}
+\nodeconnect{a71}{a72}
+\nodeconnect{b72}{t7}
+\nodeconnect{a72}{t7}
+
+\hspace*{4em} &
+\begin{tabular}{ccc}
+\node{p8}{$A^\bot \parr B^\bot$} & &                       \\[2ex]
+\node{a81}{$A^\bot$} &  & \node{b81}{$B^\bot$}             \\[2ex]
+\node{a82}{$A$}      &  & \node{b82}{$B$}                  \\[2ex]
+& \node{t8}{$A\tensor B$} &
+\end{tabular}
+{\makedash{4pt}
+\nodeconnect{p8}{a81}
+}
+\nodeconnect{b81}{b82}
+\nodeconnect{a81}{a82}
+\nodeconnect{b82}{t8}
+\nodeconnect{a82}{t8}
+\end{tabular}
+\end{center}
+
+
+Now consider an invalid sequent $A\tensor B \vdash A\parr B$.  This gives rise to
+the proof structure
+\begin{center}
+\begin{tabular}{ccccccc}
+\node{a9}{$A$}& &\node{b9}{$B$} & \hspace*{5em} & 
+\node{a10}{$A^\bot$}& &\node{b10}{$B^\bot$}\\[2ex]
+ & \node{t9}{$A\tensor B$}& & & & \node{t10}{$A^\bot \tensor B^\bot$} &
+\end{tabular}
+\nodeconnect{a9}{t9}
+\nodeconnect{b9}{t9}
+\nodeconnect{a10}{t10}
+\nodeconnect{b10}{t10}
+\barnodeconnect[2ex]{a9}{a10}
+\barnodeconnect[1ex]{b9}{b10}
+\end{center}
+This structure does not contains any soft links to be broken.  It is also not a tree,
+as it has a cycle  --- $A$; $A^\bot$; $A^\bot \tensor B^\bot$; $B^\bot$; $B$;
+$A\tensor B$; $A$.  It is therefore not a proof net.
+
+\subsection{Constructing Proof Structures}
+Let us informally describe how to prove a sequent using proof nets.  We will
+take as an example the slightly more complex sequent
+\[A\tensor B, C \vdash (A\tensor B)\tensor C\]
+We proceed as follows
+\begin{itemize}
+\item Move all the formulas on the left of the sequent to the right, negating
+them as the cross the turnstile.  This gives a one-sided sequent.
+
+For our example, this gives
+\[\vdash (A\tensor B)^\bot, C^\bot, (A\tensor B)\tensor C\]
+
+\item Move negation inwards according to the following identities (note that 
+implications get converted to pars):
+\begin{quote}
+$(A\tensor B)^\bot = A^\bot \parr B^\bot$\\
+$(A\parr B)^\bot = A^\bot \parr B^\bot$\\
+$A^{\bot\bot} = A$
+
+$A\linimp B = A^\bot\parr B$\\
+$(A\linimp B)^\bot = A\parr B^\bot$
+\end{quote}
+This gives a one-sided sequent in neagtion normal form.
+
+For our example, this gives
+\[\vdash (A^\bot \parr B^\bot), C^\bot, (A\tensor B)\tensor C\]
+
+\item  Recursively convert the individual formula into trees according to the 
+following rules
+\begin{enumerate}
+\item $\tau(A) = A$, \ \ $\tau(A^\bot) = A^\bot$\\
+      for atomic $A$
+\item $\tau(A\tensor B) =$
+\begin{tabular}{ccc}
+\node{atau1}{$\tau(A)$} & & \node{btau1}{$\tau(B)$}\\[2ex]
+ & \node{abtau1}{$A\tensor B$} &
+\end{tabular}
+\nodeconnect{atau1}{abtau1}
+\nodeconnect{btau1}{abtau1}
+
+\item $\tau(A\parr B) =$
+\begin{tabular}{ccc}
+\node{atau2}{$\tau(A)$} & & \node{btau2}{$\tau(B)$}\\[2ex]
+ & \node{abtau2}{$A\parr B$} &
+\end{tabular}
+{\makedash{4pt}
+\nodeconnect{atau2}{abtau2}
+\nodeconnect{btau2}{abtau2}
+}
+\end{enumerate}
+This gives a {\em proof frame}.
+
+In our example, this gives rise to the proof frame:
+\begin{center}
+\begin{tabular}{llllrl}
+   & &  \node{ea1}{$A$} & \node{eb1}{$B$} & &\\[2ex]
+\node{ean1}{$A^\bot$} & \node{ebn1}{$B^\bot$} &  
+\multicolumn{2}{c}{\node{atb1}{$A\tensor B$}} & \node{ec1}{$C$} & \\[2ex]
+\multicolumn{2}{c}{\node{apb1}{$A^\bot\parr B^\bot$}}
+\hspace*{2em} &
+\multicolumn{3}{c}{\node{eabc1}{$(A\tensor B)\tensor C$}} 
+& \hspace*{2em} 
+\node{ecn1}{$C^\bot$}
+\end{tabular}
+{\makedash{4pt}
+\nodeconnect{ean1}{apb1}
+\nodeconnect{ebn1}{apb1}
+}
+\nodeconnect{ea1}{atb1}
+\nodeconnect{eb1}{atb1}
+\nodeconnect{atb1}{eabc1}
+\nodeconnect{ec1}{eabc1}
+\end{center}
+
+  
+\item Connect up positive and negative instances of the same atomic literal.
+This gives a {\em proof structure}.
+
+These atoms will always occur at the leaves of formula trees.\\
+If there are unbalanced numbers of positive and negative atoms, the sequent
+is invalid.  (But a balanced number does not imply validity).\\  
+If there
+is more than one positive and negative pair for a given atom, there will be
+more than one way of connecting atoms.  Not all connections, if any, will lead
+to valid proof nets.
+
+In our example, we have only one way of linking atoms, and so only one proof 
+structure:
+\begin{center}
+\begin{tabular}{llllrl}
+   & &  \node{ea2}{$A$} & \node{eb2}{$B$} & &\\[2ex]
+\node{ean2}{$A^\bot$} & \node{ebn2}{$B^\bot$} &  
+\multicolumn{2}{c}{\node{atb2}{$A\tensor B$}} & \node{ec2}{$C$} & \\[2ex]
+\multicolumn{2}{c}{\node{apb2}{$A^\bot\parr B^\bot$}}
+\hspace*{2em} &
+\multicolumn{3}{c}{\node{eabc2}{$(A\tensor B)\tensor C$}} 
+& \hspace*{2em} 
+\node{ecn2}{$C^\bot$}
+\end{tabular}
+{\makedash{4pt}
+\nodeconnect{ean2}{apb2}
+\nodeconnect{ebn2}{apb2}
+}
+\nodeconnect{ea2}{atb2}
+\nodeconnect{eb2}{atb2}
+\nodeconnect{atb2}{eabc2}
+\nodeconnect{ec2}{eabc2}
+
+\barnodeconnect[2ex]{ea2}{ean2}
+\barnodeconnect[1ex]{eb2}{ebn2}
+\barnodeconnect[1ex]{ec2}{ecn2}
+\end{center}
+ 
+
+\item Determine if at least one of the proof structures obtained is a proof net.
+Efficient ways of doing this will be discussed in the next section.
+
+In our example, note that both switch graphs obtainable from the proof structure
+are trees (acyclic).  Thus we have a proof net.
+\begin{center}
+\begin{tabular}{ccc}
+\node{eapb3}{$A^\bot\parr B^\bot$} & &\\[2ex]
+\node{ean3}{$A^\bot$} & \node{ebn3}{$B^\bot$} & \\[2ex]
+\node{ea3}{$A$} & \node{eb3}{$B$} & \node{ecn3}{$C^\bot$}\\[2ex]
+\multicolumn{2}{c}{\node{eatb3}{$A\tensor B$}} & \node{ec3}{$C$}\\[2ex]
+\multicolumn{3}{c}{\node{eabc3}{$(A\tensor B)\tensor C$}}
+\end{tabular}
+{\makedash{4pt}
+\nodeconnect{eapb3}{ean3}
+}
+\nodeconnect{ean3}{ea3}
+\nodeconnect{ebn3}{eb3}
+\nodeconnect{ecn3}{ec3}
+\nodeconnect{ea3}{eatb3}
+\nodeconnect{eb3}{eatb3}
+\nodeconnect{eatb3}{eabc3}
+\nodeconnect{ec3}{eabc3}
+\end{center}
+
+\end{itemize}
+
+
+
+\subsection{From Sequent Proofs to Proof Nets}
+We now indicate how to turn a (one-sided) sequent proof into a proof net.
+For this, we need to define premise (entry) and conclusion (exit) nodes for 
+proof structures. Exploiting the
+vertical direction in which we have been drawing proof structures on the page, 
+we can do this informally as follows.
+\begin{itemize}
+\item Any node that has no arc entering it from above is a {\em premise (entry) node}
+\item Any node that has no arc leaving it from below is an {\em conclusin (exit) node}
+\end{itemize}
+For example, in the  (partial) proof structure
+\begin{center}
+\begin{tabular}{lrl}
+\node{eea1}{$A$} & \node{eeb1}{$B$} & \hspace*{1em}\node{eenb1}{$B^\bot$}\\[2ex]
+\multicolumn{2}{c}{\node{eeab1}{$A\tensor B$}} & 
+\end{tabular}
+
+\nodeconnect{eea1}{eeab1}
+\nodeconnect{eeb1}{eeab1}
+\barnodeconnect[1ex]{eeb1}{eenb1}
+
+\end{center}
+the $A$ node is an entry node (it has no arcs coming in to the top of it), and
+$A\tensor B$ and $B^\bot$ are exit nodes (they have no arcs leaving from beneath
+them).
+
+
+The rules for converting a one-sided sequent proof $\Pi$ to a proof net 
+${\cal N}(\Pi)$ are as follows, and operate recursively
+\begin{enumerate}
+\item If $\Pi$ is an axiom, $\vdash A,A^\bot$, then ${\cal N}(\Pi)$ is the net
+comprising the single axiom link
+\begin{center}
+\begin{tabular}{ll}
+\node{ca1}{$A$} \hspace*{2em} & \node{can1}{$A^\bot$}
+\end{tabular}
+\barnodeconnect[1ex]{ca1}{can1}
+\end{center}
+
+\item If $\Pi$ is of the form
+\begin{center}
+\begin{prooftree}
+\[\Pi_1\resultsin \vdash \Gamma,A,B\]
+\justifies \vdash \Gamma,A\parr B \using \parr
+\end{prooftree}
+\end{center}
+(where $\Pi_1$ is the derivation leading to this last step in $\Pi$), then 
+${\cal N}(\Pi)$ is
+\begin{center}
+\begin{tabular}{lr}
+\multicolumn{2}{c}{\node{ccp2}{${\cal N}(\Pi_1)$}}\\
+\node{ccaep2}{$A_x$} & \node{ccbep2}{$B_x$}\\[3ex]
+\node{cap2}{$A$} & \node{cbp2}{$B$}\\[2ex]
+\multicolumn{2}{c}{\node{cabp2}{$A\parr B$}}
+\end{tabular}
+\nodeconnect{ccaep2}{cap2}
+\nodeconnect{ccbep2}{cbp2}
+{\makedash{4pt}
+\nodeconnect{cap2}{cabp2}
+\nodeconnect{cbp2}{cabp2}
+}
+\end{center}
+where $A_x$ and $B_x$ are the $A$ and $B$ exit nodes of the proof net for the
+sub-derivation $\Pi_1$
+
+(This means that the entry nodes of ${\cal N}(\Pi)$ are the entry nodes of
+${\cal N}(\Pi_1)$; its exist nodes are those of ${\cal N}(\Pi_1)$ minus
+$A_x$ and $B_x$, plus $A\tensor B$.)
+
+\item If $\Pi$ is of the form
+\begin{center}
+\begin{prooftree}
+\[\Pi_1\resultsin \vdash \Gamma,A\] \hspace*{2em}
+\[\Pi_2\resultsin \vdash \Delta,B\]
+\justifies \vdash \Gamma,\Delta,A\tensor B \using \tensor
+\end{prooftree}
+\end{center}
+ then 
+${\cal N}(\Pi)$ is
+\begin{center}
+\begin{tabular}{lr}
+\node{ccp13}{${\cal N}(\Pi_1)$} & \node{ccp23}{${\cal N}(\Pi_2)$}\\
+\node{ccaep3}{$A_x$} & \node{ccbep3}{$B_x$}\\[3ex]
+\node{cap3}{$A$} & \node{cbp3}{$B$}\\[2ex]
+\multicolumn{2}{c}{\node{cabp3}{$A\tensor B$}}
+\end{tabular}
+\nodeconnect{ccaep3}{cap3}
+\nodeconnect{ccbep3}{cbp3}
+\nodeconnect{cap3}{cabp3}
+\nodeconnect{cbp3}{cabp3}
+\end{center}
+where $A_x$ and $B_x$ are the $A$ and $B$ exit nodes of ${\cal N}(\Pi_1)$
+and ${\cal N}(\Pi_2)$ respectively.
+\end{enumerate}
+
+We can illustrate this conversion with a one-sided proof of
+$C,A\tensor B\vdash (A\tensor B)\tensor C$.  One such proof is
+\begin{center}
+\begin{prooftree}
+\[
+  \[\vdash A,A^\bot \hspace*{2em} \vdash B,B^\bot
+    \justifies \vdash A\tensor B,A^\bot,B^\bot \using \tensor
+  \]
+  \justifies \vdash A\tensor B, A^\bot \parr B^\bot \using \parr
+\]
+\hspace*{2em} \vdash C,C^\bot 
+\justifies (A\tensor B)\tensor C, A^\bot \parr B^\bot, C^\bot \using \tensor
+\end{prooftree}
+\end{center}
+Conversion to a proof net proceeds as follows, working downwards from the axioms:
+\begin{center} TO COMPLETE \end{center}
+This yields exactly the proof net from the previous subsection.
+
+A crucial point to note is that there is a second one sided proof, differing
+only in the order of rule application:
+\begin{center}
+\begin{prooftree}
+\[
+  \[\vdash A,A^\bot \hspace*{2em} \vdash B,B^\bot
+    \justifies \vdash A\tensor B,A^\bot,B^\bot \using \tensor
+  \]
+  \hspace*{2em} \vdash C,C^\bot
+  \justifies (A\tensor B)\tensor C, A^\bot, B^\bot, C^\bot,  \using \tensor
+\] 
+\justifies (A\tensor B)\tensor C, A^\bot \parr B^\bot, C^\bot \using \parr
+\end{prooftree}
+\end{center}
+This alternate proof maps onto exactly the same proof net. 
+
+
+The way that the above two sequent proofs can map onto the same proof net
+illustrates the parallelizing nature of proof nets.  Proof search for
+the sequent calculus is sequentially driven by the recursive nesting of the 
+connectives in the formulas of the sequent.  Proof nets unfold this recursive 
+structure. The atomic leaves of the formulas are laid out for potential parallel
+access. Proof search with proof nets amounts to finding alternative ways of
+connecting up atoms, and this is only minimally constrained by the recursive
+structure of the formulas. 
+
+
+\section{Classical Proof Nets}
+
+We now gives a more formal definition of proof nets for classical multiplicative
+linear logic, CMLL (without identities or exponentials).
+
+\paragraph{Links} The links that can be used in a proof structure / proof
+net for CMLL are:
+\begin{itemize}
+\item Axiom link
+\begin{center}
+\begin{tabular}{lr}
+\node{laa}{$A$} \hspace*{2em}& \node{lana}{$A^\bot$}
+\end{tabular}
+\barnodeconnect[1ex]{laa}{lana}
+\end{center}
+Premise (entry) nodes: none\\
+Conclusion (exit) nodes: $A$, $A^\bot$
+
+\item Tensor link
+\begin{center}
+\begin{tabular}{lcr}
+\node{lta}{$A$} & & \node{ltb}{$B$}\\[2ex]
+ & \node{ltab}{$A\tensor B$} &\\[2ex]
+ & \node{ltabo}{} &
+\end{tabular}
+\nodeconnect{lta}{ltab}
+\nodeconnect{ltb}{ltab}
+\nodeconnect{ltab}{ltabo}
+\end{center}
+Premise (entry) nodes: $A$, $B$\\
+Conclusion (exit) nodes: $A\tensor B$
+
+\item Par link
+\begin{center}
+\begin{tabular}{lcr}
+\node{lpa}{$A$} & & \node{lpb}{$B$}\\[2ex]
+ & \node{lpab}{$A\parr B$} &\\[2ex]
+ & \node{lpabo}{} &
+\end{tabular}
+{\makedash{4pt}
+\nodeconnect{lpa}{lpab}
+\nodeconnect{lpb}{lpab}
+}
+\nodeconnect{lpab}{lpabo}
+\end{center}
+Premise (entry) nodes: $A$, $B$\\
+Conclusion (exit) nodes: $A\parr B$
+
+\item Cut link
+\begin{center}
+\begin{tabular}{lr}
+\node{lca}{$A$} \hspace*{2em}& \node{lcna}{$A^\bot$}
+\end{tabular}
+\barnodeconnect[-1ex]{lca}{lcna}
+\end{center}
+Premise (entry) nodes: $A$, $A^\bot$\\
+Conclusion (exit) nodes: none
+\end{itemize}
+We will say more about cut links later. 
+
+
+
+\paragraph{Proof Structures}  A proof structure is a graph made up of links
+such that
+\begin{enumerate}
+\item Each premises of each link is connected to exactly one conclusion of some
+link
+\item Any conclusion of any link is connected to at most one premise of some link
+\end{enumerate}
+ 
+
+\paragraph{Proof Nets}  A switch graph (or switching) of a proof structure is
+a graph obtained by omitting one of two soft edges of of every par-link.
+A proof structure is a proof net if every switching is a tree.
+
+
+\subsection{Checking Correctness}
+The coorectness criterion for proof nets in terms of switching is also known 
+as the Danos-Regnier criterion.  Girdard originally used a more complex (but 
+equivalent) criterion known as the long trip condition.   Essentially, this says
+that any trip (cycle) from a node back to itself must pass through at least
+one par node.  A wide variety of further alternative correctness criteria
+have been proposed
+\begin{itemize}
+\item Long trip
+\item Switching (Danos-Regnier)
+\item Acyclic-connected
+\item Hereditary  secessiveness
+\item Graph parsing
+\item Deadlock freeness
+\end{itemize}
+
+We will briefly review a quadratic way of checking the Danos-Regnier connection,
+due to Gallier.  The naive algorithm exponentially constructs every switching
+and checks it for cycles.  The Gallier algorithm (for cut free structures) is
+\begin{enumerate}
+\item Base case: \\
+If the graph comprises a single axiom link, it is a proof net
+\item Recursive 1:\\
+Delete all the bottom level par nodes (i.e. those whose conclusion nodes are
+not connected to anything), leaving their premise nodes in place.  This
+has the effect of deleting all the bottom level soft edges.
+We then run the algorithm on the resulting (possibly unconnected) sub-graphs
+\item Recursive 2:\\
+If there are no bottom level par nodes, we find a bottom level tensor node to
+delete.  Deleting the node (i.e. removing the tensor link, but leaving its
+premises in place), must split the graph into two unconnected graphs $G1$ and $G2$.
+We then run the algorithm on $G1$ and $G2$.
+
+If removing the link results instead in a single connected (i.e. cyclic) graph,
+we must instead choose another tensor link to remove.  That is, removing
+a tensor is a non-deterministic step.  If no tensor is such that its removal
+splits the graph, fail.
+\end{enumerate}
+
+\if false
+\subsection{Alternative Definition of Proof Net}
+We briefly present an altrenative definition of proof nets for CMLL.
+The definition is practically not very useful in that it only allows us to
+construct proof nets by following the rules of sequent calculus.  That is,
+(a) it does not allow us to build intermediate proof structures, and check
+alternate axiom linkings for correctnes, but (b) constructs a net sequentially
+by following the sequent calculus.  The definition is given here simply because
+it might help in understanding what proof nets are about.
+\begin{enumerate}
+\item An axiom link is a proof net
+\begin{center}
+\begin{tabular}{lllll}
+$\vdash$&\node{saa1}{$A$} & \hspace*{2em} & $\vdash$&\node{sana1}{$A^\bot$} \\
+        &\node{saao1}{}   &               &         &\node{sanao1}{}
+\end{tabular}
+\nodeconnect{saa1}{saao1}
+\nodeconnect[b]{sana1}[t]{sanao1}
+\barnodeconnect[1ex]{saa1}{sana1}
+\end{center}
+
+
+\item Two nets connected via one conclusion of each and a cut link is a proof net
+\begin{center}
+\begin{tabular}{lllllllllll}
+$\vdash$ & \node{sc1}{} & $\Gamma,$ & \node{sc1}{} & \node{sca1}{$A$} &\hspace*{2em} &
+$\vdash$ & \node{scna1}{$A^\bot,$} & \node{sc3}{} & $\Delta$ & \node{sc4}{}\\[2ex]
+ & \node{sc5}{} & \ldots & \node{sc6}{} & & & & & \node{sc7}{} & \ldots & \node{sc8}{} 
+\end{tabular}
+\nodeconnect{sc1}{sc5}
+\nodeconnect{sc2}{sc6}
+\nodeconnect{sc3}{sc7}
+\nodeconnect{sc4}{sc8}
+\barnodeconnect[-1ex]{sca1}{scna1}
+\end{center}
+
+\item Two nets connected via one conclusion of each and a tensor link is a net
+\begin{center}
+\begin{tabular}{lllllllllll}
+$\vdash$ & \node{st1}{} & $\Gamma,$ & \node{st1}{} & \node{sta1}{$A$} & &
+$\vdash$ & \node{stb1}{$B,$} & \node{st3}{} & $\Delta$ & \node{st4}{}\\[2ex]
+ & & & & & \node{stab1}{$A\tensor B$} & & & & & \\[2ex]
+ & \node{st5}{} & \ldots & \node{st6}{} & & \node{stabo1}{}
+ & & \node{st7}{}  & & \ldots & \node{st8}{} 
+\end{tabular}
+\nodeconnect{st1}[b]{st5}
+\nodeconnect{st2}[b]{st6}
+\nodeconnect{st3}[b]{st7}
+\nodeconnect{st4}[b]{st8}
+\nodeconnect{sta1}{stab1}
+\nodeconnect{stb1}{stab1}
+\nodeconnect{stab1}[b]{stabo1}
+
+\end{center}
+
+\item One net, with two of its conclusions connected by a par link is a proof net
+\begin{center}
+\begin{tabular}{lllllll}
+$\vdash$ & \node{sp1}{} & $\Gamma,$ & \node{sp2}{} & \node{spa1}{$A,$} & & \node{spb1}{$B$}\\[2ex]
+ & & \ldots & & & \node{spab1}{$A\parr B$} &\\[1ex]
+ & \node{sp3}{} & & \node{sp4}{} & & \node{spabo1}{} &
+\end{tabular}
+\nodeconnect{sp1}[b]{sp3}
+\nodeconnect{sp2}[b]{sp4}
+\nodeconnect{spab1}[b]{spabo1}
+{\makedash{4pt}
+\nodeconnect{spa1}{spab1}
+\nodeconnect{spb1}{spab1}
+}
+\end{center}
+
+
+\end{enumerate}
+\fi
+
+\section{Cut Elimination and Proof Nets}
+Mirroring the cut-elimination property of linear logic, cut links in
+proof nets can be eliminated.  What is more, they can be eliminated directly
+and locally using the following reductions
+\begin{center}
+\begin{tabular}{lcr}
+\begin{tabular}{lll}
+\node{ce1a1}{$A$} & \node{ce1na2}{$A^\bot$} & \node{ce1a3}{$A$}
+\end{tabular}
+\barnodeconnect[1ex]{ce1a1}{ce1na2}
+\barnodeconnect[-1ex]{ce1na2}{ce1a3}
+\hspace*{1em} &
+becomes &
+\begin{tabular}{c}
+\node{ce1ao4}{}\\
+\node{ce1a5}{$A$}\\
+\node{ce1ao6}{}
+\end{tabular}
+\nodeconnect[t]{ce1ao4}[t]{ce1a5}
+\nodeconnect{ce1a5}{ce1ao6}
+\end{tabular}
+\end{center}
+
+\bigskip
+
+\begin{center}
+\begin{tabular}{lclllcl}
+\node{ce2a1}{$A$} & & \node{ce2b1}{$B$} & \hspace*{2em} &
+\node{ce2nb1}{$B^\bot$} & & \node{ce2na1}{$A^\bot$}\\[2ex]
+ & \node{ce2atb}{$A\tensor B$} & & & & \node{ce2apb}{$A^\bot\parr B^\bot$}
+\end{tabular}
+\nodeconnect{ce2a1}{ce2atb}
+\nodeconnect{ce2b1}{ce2atb}
+{\makedash{4pt}
+\nodeconnect{ce2na1}{ce2apb}
+\nodeconnect{ce2nb1}{ce2apb}
+}
+\barnodeconnect[-1ex]{ce2atb}{ce2apb}
+
+\bigskip
+
+becomes 
+
+\bigskip
+
+\begin{tabular}{llll}
+\node{ce3a}{$A$} & \node{ce3b}{$B$} & \node{ce3nb}{$B^\bot$} & \node{ce3na}{$A^\bot$}
+\end{tabular}
+\barnodeconnect[-2ex]{ce3a}{ce3na}
+\barnodeconnect[-1ex]{ce3b}{ce3nb}
+
+\end{center}
+{\bf [NOTE: rewrite to cover other symmetric cases]}
+
+
+
+
+\section{Non-Commutative Proof Nets}
+
+Non-commutative linear logic (useful for categorial grammar) is obtained by
+dropping the rule of exchange.  For proof nets, non-commuativity corresponds
+to a {\em planarity} condition
+\begin{itemize}
+\item In a {\em planar} proof net, axiom links must not cross one another
+\end{itemize}
+In order to ensure planarity, we must be careful about the left-right order of
+formulas when pushing negation inwards.  Pushing negation in over either
+tensor or par flips the order of the conjuncts / disjuncts.  Thus
+\begin{center}
+\begin{tabular}{rll}
+$(A\tensor B)^\bot$ & = & $B^\bot \parr A^\bot$\\
+$(A\parr B)^\bot$ & = & $B^\bot \tensor A^\bot$
+\end{tabular}
+\end{center}
+Similarly, the individual formula trees in the proof frame must be set out
+in the order in which they occur.
+
+Non-commutative proof nets have been applied to parsing categorial grammars.
+Morrill describes a scheme for tabularizing non-commutative nets (see
+chapter~\ref{???}).
+
+
+\section{Intuitionistic Proof Nets}
+Most linguistic applications of linear logic are in fact applications of
+intuitionistic linear logic.  Intuitionistic in the technical sense that we
+are only interested in establishing a single conclusion (e.g. that a sentence
+is well-formed, or has a meaning).
+
+\subsection{Implication-Only ILL Nets}
+
+\subsection{Essential Nets}
+Extension to intuitionistic implication-tensor fragment
+
+
+
+\section{Term Assignments for Intuitionistic Proof Nets}
+
+\subsection{Implication-Only ILL Nets}
+
+\subsection{ILL Nets}
+{\bf [Check what happens when we introduce tensor.]}
+
+\section{Exponentials and Other Links}
